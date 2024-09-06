@@ -4,7 +4,6 @@ const ejs = require("ejs");
 const app = express();
 
 const PORT_NUMBER = 8000;
-const PATH = "/33881073/Danny"
 
 app.use(express.static("node_modules/bootstrap/dist/css"));
 
@@ -28,8 +27,8 @@ app.get("/backlog", function(req, res){
     res.render("product_backlog.html");
 });
 
-app.get("/", function(req, res){
-    res.render("index.html");
+app.get("/board", function(req, res){
+    res.render("sprint_board.html");
 });
 
 app.get("/", function(req, res){
