@@ -23,3 +23,15 @@ app.listen(PORT_NUMBER, function () {
 app.get("/", function(req, res){
     res.render("index.html");
 });
+
+app.get("/backlog", function(req, res){
+    res.render("product_backlog.html");
+});
+
+app.get("/", function(req, res){
+    res.render("index.html");
+});
+
+app.get("/", function(req, res){
+    res.render("index.html");
+});
