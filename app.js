@@ -8,8 +8,7 @@ const PORT_NUMBER = 8000;
 app.use(express.static("node_modules/bootstrap/dist/css"));
 
 // Serving static files
-app.use(express.static('images'));
-app.use(express.static('css'));
+app.use(express.static('styles'));
 app.use(express.json())
 app.use(express.urlencoded({ extended: true })); // Middleware for forms
 app.engine("html", ejs.renderFile); // Set view engine to ejs

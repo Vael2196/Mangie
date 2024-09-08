@@ -1,0 +1,4 @@
+#sidebar ul li:hover{
+    transition: 1s;
+    background-color: #0d6efd;
+}
