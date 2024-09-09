@@ -27,7 +27,7 @@ app.get("/backlog", function(req, res){
 });
 
 app.get("/board", function(req, res){
-    res.render("sprint_board.html");
+    res.render("sprint_board_list_view.html");
 });
 
 app.get("/", function(req, res){
