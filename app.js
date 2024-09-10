@@ -32,6 +32,14 @@ app.get("/board", function(req, res){
     res.render("sprint_board.html");
 });
 
+app.get("/task_view", function(req, res){
+    res.render("detailed_task_view.html");
+});
+
+app.get("/sprint_list", function(req, res){
+    res.render("sprint_board_list_view.html");
+});
+
 app.get("/", function(req, res){
     res.render("index.html");
 });
