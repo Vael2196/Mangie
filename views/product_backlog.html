@@ -4,18 +4,28 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href = "bootstrap.min.css" rel="stylesheet" />
+    <link href="styles.css" rel="stylesheet" />
     <title>Document</title>
 </head>
-<body style = "height: 100vh;">
-    <div class="d-flex flex-column h-100 p-3 bg-secondary" style="height: 100; width: 15%;">
-        <div class = "mb-5 text-white">
-            <h1>Project Name</h1>
+<body>
+    <div id = "sidebar" class = "flex flex-column h-100 py-3 bg-dark text-white" style = "height: 100vh; width: 15vw; font-size: 1.5rem;">
+        <div class = "mb-5">
+            <h1 class = "px-3"><a class = "nav-link" href = "/">Mangie</a></h1>
         </div>
-        <a class="btn btn-success p-2 mb-1" href="/">Home</a>
-        <a class="btn btn-primary p-2 mb-1" href="/board">Sprint Board</a>
+        <ul class = "nav nav-pills flex flex-column mb-auto">
+            <li><a class = "nav-link link-light" href = "/backlog">Product backlog</a></li>
+            <li><a class = "nav-link link-light" href = "/board">Sprint Board</a></li>
+        </ul>
     </div>
-
-    <h1>We are going to make this cool cool thing guys</h1>
+    <!-- adding a row at the top of the website -->
+    <div class = "d-flex flex-column h-100" style = "width: 85vw;">
+        <div class = "d-flex justify-content-between px-3 py-3 bg-secondary">
+            <h1>Sprint Board</h1>
+            <h1>PFP</h1>
+        </div>
+    </div>
+        
+    <!-- <h1>We are going to make this cool cool thing guys</h1> -->
     
 </body>
 </html>
