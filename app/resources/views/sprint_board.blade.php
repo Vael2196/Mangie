@@ -1,0 +1,108 @@
+@extends('layouts.app')
+
+<body>
+    <div id = "sidebar" class = "flex flex-column h-100 py-3 bg-dark text-white" style = "height: 100vh; width: 15vw; font-size: 1.5rem;">
+        <div class = "mb-5">
+            <h1 class = "px-3"><a class = "nav-link" href = "/">Mangie</a></h1>
+        </div>
+        <ul class = "nav nav-pills flex flex-column mb-auto">
+            <li><a class = "nav-link link-light" href = "/backlog">Product backlog</a></li>
+            <li><a class = "nav-link link-light" href = "/board">Sprint Board</a></li>
+        </ul>
+    </div>
+
+    <div class = "d-flex flex-column h-100" style = "width: 85vw;">
+        <div class = "d-flex justify-content-between px-3 py-3 bg-secondary">
+            <h1>Sprint Board</h1>
+            <button class = "btn"><i class="fa-solid fa-user fa-3x"></i></button>
+        </div>
+        <div class = "px-3 py-3 h-100">
+            <!-- Info about sprint -->
+            <div class = "d-flex justify-content-between">
+                <div class = "d-flex flex-wrap w-50">
+                    <h3 class = "w-100">This is a sprint NAME</h3>
+                    <p>Our sprint goal is to complete a sprint because that is our goal and the goal of this is to fill the word count</p>
+                </div>
+                <h5>Date and Time LEFT</h5>
+                <div><a class = "btn btn-primary">Complete Sprint</a></div>
+            </div>
+
+            <!-- Sprint Table -->
+            <div class = "px-5 h-75">
+                <div class = "d-flex w-100">
+                    <p class = "me-2">Members:</p>
+                    <p class = "rounded-circle me-2 px-2 bg-primary text-white fw-bold">A</p>
+                    <p class = "rounded-circle me-2 px-2 bg-success text-white fw-bold">P</p>
+                    <p class = "rounded-circle me-2 px-2 bg-warning text-white fw-bold">D</p>
+                </div>
+                <div class = "d-flex w-100 h-100">
+                    <div class = "d-flex flex-column w-25 border border-1 border-dark px-2 py-2 rounded-4 h-100 me-3">
+                        <h1 class = "mb-5">To Do:</h1>
+                        <div class = "p-3 rounded-3 border border-1 border-dark mb-3">
+                            <div class = "d-flex justify-content-between mb-2">
+                                <h6>This is the title of an epic</h6>
+                                <button class = "btn d-flex"><i class="fa-solid fa-ellipsis"></i></button>
+                            </div>
+                            <div class = "d-flex justify-content-end align-items-end w-100">
+                                <div class = "d-flex">
+                                    <p class = "me-2">Assigned:</p>
+                                    <p class = "rounded-circle me-2 px-2 bg-warning text-white fw-bold">D</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class = "p-3 rounded-3 border border-1 border-dark mb-3">
+                            <div class = "d-flex justify-content-between mb-2">
+                                <h6>This is the title of an epic</h6>
+                                <button class = "btn d-flex"><i class="fa-solid fa-ellipsis"></i></button>
+                            </div>
+                            <div class = "d-flex justify-content-end align-items-end w-100">
+                                <div class = "d-flex">
+                                    <p class = "me-2">Assigned:</p>
+                                    <p class = "rounded-circle me-2 px-2 bg-warning text-white fw-bold">D</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+    
+                    <div class = "d-flex flex-column w-25 border border-1 border-dark px-2 py-2 rounded-4 h-100 me-3">
+                        <h1 class = "mb-5">In Progress:</h1>
+
+                        <div class = "p-3 rounded-3 border border-1 border-dark mb-3">
+                            <div class = "d-flex justify-content-between mb-2">
+                                <h6>This is the title of an epic</h6>
+                                <button class = "btn d-flex"><i class="fa-solid fa-ellipsis"></i></button>
+                            </div>
+                            <div class = "d-flex justify-content-end align-items-end w-100">
+                                <div class = "d-flex">
+                                    <p class = "me-2">Assigned:</p>
+                                    <p class = "rounded-circle me-2 px-2 bg-warning text-white fw-bold">D</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+    
+                    <div class = "d-flex flex-column w-25 border border-1 border-dark px-2 py-2 rounded-4 h-100 me-3">
+                        <h1 class = "mb-5">Done:</h1>
+
+                        <div class = "p-3 rounded-3 border border-1 border-dark mb-3">
+                            <div class = "d-flex justify-content-between mb-2">
+                                <h6>This is the title of an epic</h6>
+                                <button class = "btn d-flex"><i class="fa-solid fa-ellipsis"></i></button>
+                            </div>
+                            <div class = "d-flex justify-content-end align-items-end w-100">
+                                <div class = "d-flex">
+                                    <p class = "me-2">Assigned:</p>
+                                    <p class = "rounded-circle me-2 px-2 bg-warning text-white fw-bold">D</p>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>    
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,28 @@
+@extends('layouts.app')
+
+<body>
+    <div id = "sidebar" class = "flex flex-column h-100 py-3 bg-dark text-white" style = "height: 100vh; width: 15vw; font-size: 1.5rem;">
+        <div class = "mb-5">
+            <h1 class = "px-3"><a class = "nav-link" href = "/">Mangie</a></h1>
+        </div>
+        <ul class = "nav nav-pills flex flex-column mb-auto">
+            <li><a class = "nav-link link-light" href = "/backlog">Product backlog</a></li>
+            <li><a class = "nav-link link-light" href = "/board">Sprint Board</a></li>
+            <li><a class = "nav-link link-light" href = "/sprint_list">Sprint List</a></li>
+            <li><a class = "nav-link link-light" href = "/task_view">Task view</a></li>
+        </ul>
+    </div>
+
+    <div class = "flex flex-column p-3 rounded-3" style = "width: 85vw;">
+        <h1 class = "mb-5">Active Sprint Boards</h1>
+        <div class = "card">
+            <div class = "card-body">
+                <h1 class = "card-title">This is a sprint</h1>
+                <p class = "card-text">iudgfousihuos</p>
+                <a href="#" class="btn btn-primary">Go to Sprint ></a>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,16 @@
+body {
+    display: flex;
+    height: 100vh;
+}
+
+#sidebar ul li:hover{
+    transition: 1s;
+    background-color: #0d6efd;
+}
+
+#blurredBackground{
+    pointer-events: none;
+    -webkit-filter: blur(5px);
+    filter: blur(5px);
+    z-index: 2;
+}

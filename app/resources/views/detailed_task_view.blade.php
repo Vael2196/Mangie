@@ -1,0 +1,225 @@
+@extends('layouts.app')
+
+<body>
+    <div id = "sidebar" class = "flex flex-column h-100 py-3 bg-dark text-white" style = "height: 100vh; width: 15vw; font-size: 1.5rem;">
+        <div class = "mb-5">
+            <h1 class = "px-3"><a class = "nav-link" href = "/">Mangie</a></h1>
+        </div>
+        <ul class = "nav nav-pills flex flex-column mb-auto">
+            <li><a class = "nav-link link-light" href = "/backlog">Product backlog</a></li>
+            <li><a class = "nav-link link-light" href = "/board">Sprint Board</a></li>
+        </ul>
+    </div>
+
+    <!-- <h1>We are going to make this cool thing guys</h1>
+    <a class="btn btn-success" href="/">Home</a> -->
+    <div id = "blurredBackground" class = "d-flex flex-column h-100" style = "width: 85vw;">
+        <div class = "d-flex justify-content-between px-3 py-3 bg-secondary">
+            <h1>Sprint Board</h1>
+            <h1>PFP</h1>
+        </div>
+        <div class = "px-3 py-3 h-100">
+            <!-- Info about sprint -->
+            <div class = "d-flex justify-content-between">
+                <div class = "d-flex flex-wrap w-50">
+                    <h3 class = "w-100">This is a sprint NAME</h3>
+                    <p>Our sprint goal is to complete a sprint because that is our goal and the goal of this is to fill the word count</p>
+                </div>
+                <h5>Date and Time LEFT</h5>
+                <div><a class = "btn btn-primary">Complete Sprint</a></div>
+            </div>
+
+            <!-- Sprint Table -->
+            <div class = "px-5 h-75">
+                <p class = "w-100">Members</p>
+                <div class = "d-flex w-100 h-100">
+                    <div class = "d-flex flex-column w-25 border border-2 border-dark px-3 py-2 rounded-4 h-100 me-3">
+                        <h1 class = "mb-5">To Do:</h1>
+                        <div class = "p-3 rounded-3 border border-2 border-dark mb-3">
+                            <div class = "d-flex justify-content-between mb-2">
+                                <p>This is the title of an epic</p>
+                                <a class = "btn btn-primary">...</a>
+                            </div>
+                            <div class = "d-flex justify-content-end w-100">
+                                <div>
+                                    <p>Assigned: No one</p>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div class = "p-3 rounded-3 border border-2 border-dark mb-3">
+                            <div class = "d-flex justify-content-between mb-2">
+                                <p>This is the title of an epic</p>
+                                <a class = "btn btn-primary">...</a>
+                            </div>
+                            <div class = "d-flex justify-content-end w-100">
+                                <div>
+                                    <p>Assigned: No one</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+    
+                    <div class = "d-flex flex-column w-25 border border-2 border-dark px-3 py-2 rounded-4 h-100 me-3">
+                        <h1 class = "mb-5">In Progress:</h1>
+                        <div class = "p-3 rounded-3 border border-2 border-dark mb-3">
+                            <div class = "d-flex justify-content-between mb-2">
+                                <p>This is the title of an epic</p>
+                                <a class = "btn btn-primary">...</a>
+                            </div>
+                            <div class = "d-flex justify-content-end w-100">
+                                <div>
+                                    <p>Assigned: No one</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+    
+                    <div class = "d-flex flex-column w-25 border border-2 border-dark px-3 py-2 rounded-4 h-100 me-3">
+                        <h1 class = "mb-5">Done:</h1>
+                        <div class = "p-3 rounded-3 border border-2 border-dark mb-3">
+                            <div class = "d-flex justify-content-between mb-2">
+                                <p>This is the title of an epic</p>
+                                <a class = "btn btn-primary">...</a>
+                            </div>
+                            <div class = "d-flex justify-content-end w-100">
+                                <div>
+                                    <p>Assigned: No one</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>    
+            </div>
+        </div>
+    </div>
+
+    <!-- Task view (Layered on)-->
+    <div class = "position-absolute top-0 end-0 h-100 p-5 d-flex justify-content-center align-items-center z-3" style = "width: 85%">
+        <div class = "rounded-3 p-5 bg-secondary w-75 h-75 text-white d-flex justify-content-center fw-light">
+            <div class = "d-flex flex-column w-50 h-100">
+                <!-- Task info -->
+                <div>
+                    <h1>NAME</h1>
+                    <h3 class = "fw-light">Description</h3>
+                    <p>This is a description and its purpose it to describe the task and the reason for this is to fill up the word count and make a buffer layer so that the text can be sized correctly</p>
+                </div>
+
+                <p>__________________________________________________________</p>
+
+                <!-- Task activity -->
+                <div>
+                    <h3 class = "mb-4 fw-light">Activity</h3> 
+
+                    <!-- Tab icons -->
+                    <div class = "d-flex justify-content-between w-100">
+                        <div class = "d-flex w-75">
+                            <h5 class = "py-1" >Show:</h5>
+                            <div class = "d-flex w-100 justify-content-center">
+                                <p class = "btn btn-outline-light btn-sm me-3">ALL</p>
+                                <p class = "btn btn-outline-light btn-sm me-3">Comments</p>
+                                <p class = "btn btn-outline-light btn-sm me-3">History</p>
+                            </div>
+                        </div>
+
+                        <div class = "d-flex">
+                            <p>Newest First</p>
+                            <p>^</p>
+                        </div>
+                    </div>
+
+                    <!-- To DO -->
+                    <div class = "d-flex justify-content-between mb-4">
+                        <p><span>XXXXXXXXX</span> changed the status</p>
+                        <p>(09/09/2024)</p>
+                    </div>
+
+                    <div>
+                        <h5>To DO: </h5>
+                        <p>This is a description and its purpose it to describe the task and the reason for this is to fill up the word count and make a buffer layer so that the text can be sized correctly</p>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Task details -->
+            <div class = "d-flex flex-column w-50 h-100 align-items-end">
+                <div class="dropdown mb-4">
+                    <button class="btn btn-outline-light dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Select
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="#">Action</a></li>
+                        <li><a class="dropdown-item" href="#">Another action</a></li>
+                        <li><a class="dropdown-item" href="#">Something else here</a></li>
+                    </ul>
+                </div>
+
+
+                <div class = "border border-2 border-white rounded-3 w-75 h-75 d-flex flex-column px-3 py-3 mb-4">
+                    <h1>Details</h1>
+                    <div class = "d-flex justify-content-between mb-4">
+                        <p>Assignee</p>
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-outline-light dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Assign
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="#">Action</a></li>
+                                <li><a class="dropdown-item" href="#">Another action</a></li>
+                                <li><a class="dropdown-item" href="#">Something else here</a></li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class = "d-flex justify-content-between mb-4">
+                        <p>Labels</p>
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-outline-light dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Assign
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="#">Action</a></li>
+                                <li><a class="dropdown-item" href="#">Another action</a></li>
+                                <li><a class="dropdown-item" href="#">Something else here</a></li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class = "d-flex justify-content-between mb-4">
+                        <p>Parent</p>
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-outline-light dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Assign
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="#">Action</a></li>
+                                <li><a class="dropdown-item" href="#">Another action</a></li>
+                                <li><a class="dropdown-item" href="#">Something else here</a></li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class = "d-flex justify-content-between mb-4">
+                        <p>Sprint</p>
+                        <p class = "fw-bold px-2">Sprint A</p>
+                    </div>
+
+                    <div class = "d-flex justify-content-between mb-4">
+                        <p>SP ESTIMATE</p>
+                        <input type="number" id="typeNumber" class = "border bordered-2 rounded-2 w-25"  placeholder="Number"/>
+                    </div>
+                </div>
+
+                <div class = "d-flex flex-column align-items-start w-75">
+                    <p>Created: <span>09/09/2024</span></p>
+                    <p>Updated: <span>09/09/2024</span></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
