@@ -1,0 +1,118 @@
+@extends('layouts.app')
+
+<body>
+    <div id = "sidebar" class = "flex flex-column h-100 py-3 bg-dark text-white" style = "height: 100vh; width: 15vw; font-size: 1.5rem;">
+        <div class = "mb-5">
+            <h1 class = "px-3"><a class = "nav-link" href = "/">Mangie</a></h1>
+        </div>
+        <ul class = "nav nav-pills flex flex-column mb-auto">
+            <li><a class = "nav-link link-light" href = "/backlog">Product backlog</a></li>
+            <li><a class = "nav-link link-light" href = "/board">Sprint Board</a></li>
+        </ul>
+    </div>
+
+    <!-- <h1>We are going to make this cool thing guys</h1>
+    <a class="btn btn-success" href="/">Home</a> -->
+    <div class = "d-flex flex-column h-100" style = "width: 85vw;">
+        <div class = "d-flex justify-content-between px-3 py-3 bg-secondary">
+            <h1>Sprint Board</h1>
+            <h1>PFP</h1>
+        </div>
+        <div class = "px-3 py-3 h-100">
+            <!-- Info about sprint -->
+            <div class = "d-flex justify-content-between">
+                <div class = "d-flex flex-wrap w-50">
+                    <h3 class = "w-100">This is a sprint NAME</h3>
+                    <p>Our sprint goal is to complete a sprint because that is our goal and the goal of this is to fill the word count</p>
+                </div>
+                <h5>Date and Time LEFT</h5>
+                <div><a class = "btn btn-primary">Complete Sprint</a></div>
+            </div>
+
+            <!-- Sprint Table -->
+            <div class = "px-5 h-75">
+                <p class = "w-100">Members</p>
+                <div class = "d-flex w-100 h-100">
+                    <div class = "d-flex flex-column w-25 border border-2 border-dark px-3 py-2 rounded-4 h-100 me-3">
+                        <h1 class = "mb-5">To Do:</h1>
+
+                        <div class = "px-1 rounded-1 border border-2 border-dark mb-3 d-flex justify-content-between text-center">
+                            <p>EPIC</p>
+                            <div class = "d-flex">
+                                <p>Assigned: No one</p>
+                            </div>
+                        </div>
+
+                        
+                        <div class = "px-1 rounded-1 border border-2 border-dark mb-3 d-flex justify-content-between text-center">
+                            <p>EPIC</p>
+                            <div class = "d-flex">
+                                <p>Assigned: No one</p>
+                            </div>
+                        </div>
+
+                        <div class = "px-1 rounded-1 border border-2 border-dark mb-3 d-flex justify-content-between text-center">
+                            <p>EPIC</p>
+                            <div class = "d-flex">
+                                <p>Assigned: No one</p>
+                            </div>
+                        </div>
+
+                        <div class = "px-1 rounded-1 border border-2 border-dark mb-3 d-flex justify-content-between text-center">
+                            <p>EPIC</p>
+                            <div class = "d-flex">
+                                <p>Assigned: No one</p>
+                            </div>
+                        </div>
+
+                        <div class = "px-1 rounded-1 border border-2 border-dark mb-3 d-flex justify-content-between text-center">
+                            <p>EPIC</p>
+                            <div class = "d-flex">
+                                <p>Assigned: No one</p>
+                            </div>
+                        </div>
+                    </div>
+    
+                    <div class = "d-flex flex-column w-25 border border-2 border-dark px-3 py-2 rounded-4 h-100 me-3">
+                        <h1 class = "mb-5">In Progress:</h1>
+
+                        <div class = "px-1 rounded-1 border border-2 border-dark mb-3 d-flex justify-content-between text-center">
+                            <p>EPIC</p>
+                            <div class = "d-flex">
+                                <p>Assigned: No one</p>
+                            </div>
+                        </div>
+
+                        <div class = "px-1 rounded-1 border border-2 border-dark mb-3 d-flex justify-content-between text-center">
+                            <p>EPIC</p>
+                            <div class = "d-flex">
+                                <p>Assigned: No one</p>
+                            </div>
+                        </div>
+
+                    </div>
+    
+                    <div class = "d-flex flex-column w-25 border border-2 border-dark px-3 py-2 rounded-4 h-100 me-3">
+                        <h1 class = "mb-5">Done:</h1>
+
+                        <div class = "px-1 rounded-1 border border-2 border-dark mb-3 d-flex justify-content-between text-center">
+                            <p>EPIC</p>
+                            <div class = "d-flex">
+                                <p>Assigned: No one</p>
+                            </div>
+                        </div>
+
+                        <div class = "px-1 rounded-1 border border-2 border-dark mb-3 d-flex justify-content-between text-center">
+                            <p>EPIC</p>
+                            <div class = "d-flex">
+                                <p>Assigned: No one</p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>    
+            </div>
+        </div>
+    </div>
+</body>
+</html>

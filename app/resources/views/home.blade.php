@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="container mx-auto">
-    <h1 class="text-3xl font-bold text-center my-8">Project Management System</h1>
+    <h1 class="text-3xl font-black text-center my-8">Project Management System</h1>
 
     @foreach($projects as $project)
         <div class="bg-gray-100 rounded-lg shadow-lg p-6 mb-8">
