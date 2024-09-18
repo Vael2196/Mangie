@@ -29,7 +29,20 @@ class ProjectController extends Controller
 
         $projects = collect([$project]);
 
-        return view('home', compact('projects'));
+        return view('dashboard', compact('projects'));
+    }
+
+    public function store(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+        ]);
+
+        $project = Project::create([
+            'name' => $request->name,
+        ]);
+
+        return redirect()->route('dashboard');
     }
 // #TODO: Revert the test case from above th this one once you populate the database
 //     public function index()
