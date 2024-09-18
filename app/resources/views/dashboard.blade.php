@@ -16,16 +16,36 @@
 
     <div class = "flex flex-col">
         <x-top-bar title="Sprint"/>
-        <p class = "text-sm px-6 min-h-10">This is a description of a sprint</p>
+        <div class = "flex pr-10 items-start">
+            <p class = "text-sm px-6 min-h-20 grow">This is a description of a sprint</p>
+            <div class = "flex space-x-8 items-center">
+                <p>X-days left</p>
+                <x-secondary-button>Complete Sprint</x-secondary-button>
+                <a class = "hover:cursor-pointer"><i class="fa-solid fa-ellipsis"></i></a>
+            </div>
+        </div>
+
+        <ul class = "flex space-x-2 px-6">
+            <li class = "text-orange-500"><i class="fa-solid fa-circle-user fa-2x"></i></li>
+            <li class = "text-purple-500"><i class="fa-solid fa-circle-user fa-2x"></i></li>
+            <li class = "text-red-500"><i class="fa-solid fa-circle-user fa-2x"></i></li>
+        </ul>
     </div>
-    <div class = "flex flex-nowrap space-x-5 h-4/6 p-5 overflow-x-auto max-w-[80vw]">
+    <div class = "flex flex-nowrap space-x-5 h-4/6 p-5 overflow-auto max-w-[80vw] max-h-[70vh]">
         <x-task-column title="TO DO">
+            <x-task-box DESP="To make a task that safiuhiohgfutugcjvhkbln;lkvjchfxghcvjbklncfxg "/>
+            <x-task-box DESP="To make a task"/>
+            <x-task-box DESP="To make a task"/>
+            <x-task-box DESP="To make a task"/>
+            <x-task-box DESP="To make a task"/>
+            <x-task-box DESP="To make a task"/>
             <x-task-box DESP="To make a task"/>
             <x-task-box DESP="To make a task"/>
             <x-task-box DESP="To make a task"/>
         </x-task-column>
         <x-task-column title="DOING"></x-task-column>
         <x-task-column title="DONE"></x-task-column>
+        <a class = "hover:cursor-pointer" href = "/"><i class="fa-regular fa-square-plus fa-2x"></i></a>
     </div>
 
     {{-- <div class="py-12">
