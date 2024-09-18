@@ -14,9 +14,11 @@
         </div>
     </div> --}}
 
-    <x-top-bar title="Sprint"/>
-    <p class = "text-sm px-6 min-h-10">This is a description of a sprint</p>
-    <div class = "flex space-x-5 h-4/6 p-5">
+    <div class = "flex flex-col">
+        <x-top-bar title="Sprint"/>
+        <p class = "text-sm px-6 min-h-10">This is a description of a sprint</p>
+    </div>
+    <div class = "flex flex-nowrap space-x-5 h-4/6 p-5 overflow-x-auto max-w-[80vw]">
         <x-task-column title="TO DO">
             <x-task-box DESP="To make a task"/>
             <x-task-box DESP="To make a task"/>
