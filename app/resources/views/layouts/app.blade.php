@@ -34,9 +34,6 @@
                 <li><x-side-bar-link name="Task Board" link="/backlog">
                     <i class="fa-solid fa-list-check"></i>
                 </x-side-bar-link ></li>
-                <li><x-side-bar-link name="Task view" link="/backlog">
-                    <i class="fa-solid fa-list-check"></i>
-                </x-side-bar-link ></li>
             </ul>
         </div>
 
