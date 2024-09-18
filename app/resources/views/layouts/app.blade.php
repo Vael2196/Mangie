@@ -16,15 +16,26 @@
     
     <div class="min-h-screen flex">
         <!-- Navbar or header can be placed here -->
-        <div id = "sidebar" class = "flex flex-col py-3 h-screen w-52 shadow-[inset_-5px_0px_5px_0px_#00000024]">
-            <div class = "mb-10 mt-5 text-3xl font-medium">
+        <div id = "sidebar" class = "flex flex-col py-3 h-screen lg:w-52 shadow-[inset_-5px_0px_5px_0px_#00000024]
+                                    w-20 ">
+            <div class = "mb-10 mt-5 text-3xl font-medium lg:visible invisible">
                 <h1 class = "px-3"><a href = "/">Mangie</a></h1>
             </div>
             <ul class = "flex flex-col space-y-3 pl-3 pr-3">
-                <li><x-side-bar-link>Product backlog</x-side-bar-link ></li>
-                <li><x-side-bar-link>Sprint Board</x-side-bar-link ></li>
-                <li><x-side-bar-link>Sprint List</x-side-bar-link ></li>
-                <li><x-side-bar-link>Task view</x-side-bar-link ></li>
+                <li><x-side-bar-link name="Product backlog">
+                    <p>P</p>
+                </x-side-bar-link ></li>
+
+                <li><x-side-bar-link name="Sprint backlog">
+                    <p>P</p>
+                </x-side-bar-link ></li>
+
+                <li><x-side-bar-link name="Task Board">
+                    <p>P</p>
+                </x-side-bar-link ></li>
+                <li><x-side-bar-link name="Task view">
+                    <p>P</p>
+                </x-side-bar-link ></li>
             </ul>
         </div>
 

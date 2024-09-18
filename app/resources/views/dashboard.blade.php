@@ -14,13 +14,13 @@
         </div>
     </div> --}}
 
-    <x-top-bar>
-        <h1 class="text-2xl font-normal my-5 mx-2 pl-2">Sprint</h1>
-    </x-top-bar>
-
+    <x-top-bar title="Sprint"/>
+    <p class = "text-sm px-6 min-h-10">This is a description of a sprint</p>
     <div class = "flex space-x-5 h-4/6 p-5">
         <x-task-column title="TO DO">
-            <x-task-box></x-task-box>
+            <x-task-box DESP="To make a task"/>
+            <x-task-box DESP="To make a task"/>
+            <x-task-box DESP="To make a task"/>
         </x-task-column>
         <x-task-column title="DOING"></x-task-column>
         <x-task-column title="DONE"></x-task-column>
