@@ -17,9 +17,9 @@
     <div class = "flex flex-col">
         <x-top-bar title="Sprint"/>
         <div class = "flex pr-10 items-start">
-            <p class = "text-sm px-6 min-h-20 grow">This is a description of a sprint</p>
+            <p class = "text-sm px-6 min-h-20 max-h-40 overflow-y-auto max-w-[65vw]">This is a description of a sprint and this is really long for some reason in case you nee his is a description of a sprint and this is really long for some reason in case you need tow rite a log of stuff </p>
             <div class = "flex space-x-8 items-center">
-                <p>X-days left</p>
+                <p class = "lg:block hidden">X-days left</p>
                 <x-secondary-button>Complete Sprint</x-secondary-button>
                 <a class = "hover:cursor-pointer"><i class="fa-solid fa-ellipsis"></i></a>
             </div>
