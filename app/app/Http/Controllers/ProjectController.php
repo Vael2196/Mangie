@@ -29,7 +29,7 @@ class ProjectController extends Controller
 
         $projects = collect([$project]);
 
-        return view('home', compact('projects'));
+        return view('dashboard', compact('projects'));
     }
 // #TODO: Revert the test case from above th this one once you populate the database
 //     public function index()

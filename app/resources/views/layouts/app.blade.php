@@ -11,14 +11,25 @@
     </style>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="font-sans antialiased dark:bg-black dark:text-white/50">
+<body class="font-sans antialiased dark:bg-black dark:text-white/50 text-slate-700">
     {{-- <img id="background" class="absolute -left-20 top-0 max-w-[877px]" src="https://laravel.com/assets/img/welcome/background.svg" /> --}}
     
-    <div class="min-h-screen flex flex-col">
+    <div class="min-h-screen flex">
         <!-- Navbar or header can be placed here -->
-        
+        <div id = "sidebar" class = "flex flex-col py-3 h-screen w-52 shadow-[inset_-5px_0px_5px_0px_#00000024]">
+            <div class = "mb-10 mt-5 text-3xl font-medium">
+                <h1 class = "px-3"><a href = "/">Mangie</a></h1>
+            </div>
+            <ul class = "flex flex-col space-y-3 pl-3 pr-3">
+                <li><x-side-bar-link>Product backlog</x-side-bar-link ></li>
+                <li><x-side-bar-link>Sprint Board</x-side-bar-link ></li>
+                <li><x-side-bar-link>Sprint List</x-side-bar-link ></li>
+                <li><x-side-bar-link>Task view</x-side-bar-link ></li>
+            </ul>
+        </div>
+
         <main class="flex-grow">
-            @yield('content')
+            {{$slot}}
         </main>
 
         <!-- Footer can be placed here -->
