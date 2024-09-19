@@ -1,4 +1,4 @@
-@extends('dashboard')
+{{-- @extends('dashboard')
 
 @section('content')
     <div class="py-12">
@@ -41,4 +41,84 @@
             </div>
         </div>
     </div>
-@endsection
+@endsection --}}
+
+
+
+<x-app-layout>
+
+    <div class="container mx-auto mt-8">
+        <h1 class="text-3xl font-bold mb-4">Project Boards</h1>
+    
+        <!-- Success message -->
+        @if (session('success'))
+            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4">
+                {{ session('success') }}
+            </div>
+        @endif
+    
+        <!-- Display boards in card format -->
+        <div class="grid grid-cols-4 gap-4">
+            <!-- Existing boards -->
+            @foreach($boards as $board)
+                <div class="bg-white shadow-lg rounded-lg p-4">
+                    <h2 class="text-xl font-bold">{{ $board->name }}</h2>
+                    <a href="#" class="text-blue-500 hover:underline">View Board</a>
+                </div>
+            @endforeach
+    
+            <!-- Create new board card -->
+            <div class="bg-gray-100 shadow-lg rounded-lg p-4 flex items-center justify-center">
+                <form id="new-board-form" action="{{ route('boards.store') }}" method="POST" onsubmit="createBoard(event)">
+                    @csrf
+                    <input type="text" name="name" id="board-name" class="bg-white shadow-inner rounded-lg p-2 w-full" placeholder="Create new board" required autocomplete="off">
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Function to handle the creation of a new board
+        // Function to handle the creation of a new board
+        function createBoard(event) {
+            event.preventDefault(); // Prevent form from reloading the page
+
+            const form = document.getElementById('new-board-form');
+            const boardNameInput = document.getElementById('board-name');
+            const boardName = boardNameInput.value.trim();
+
+            if (boardName === '') return; // Prevent empty submissions
+
+            // Submit the form via AJAX (using Fetch API)
+            fetch(form.action, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ name: boardName })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Add the new board dynamically to the page
+                    const grid = document.querySelector('.grid');
+                    const newBoardCard = document.createElement('div');
+                    newBoardCard.classList.add('bg-white', 'shadow-lg', 'rounded-lg', 'p-4');
+                    newBoardCard.innerHTML = `
+                        <h2 class="text-xl font-bold">${data.board.name}</h2>
+                        <a href="#" class="text-blue-500 hover:underline">View Board</a>
+                    `;
+                    grid.insertBefore(newBoardCard, form.closest('.bg-gray-100'));
+
+                    // Clear the input field
+                    boardNameInput.value = '';
+                } else {
+                    console.error('Error creating board:', data.message);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    </script>
+
+</x-app-layout>
