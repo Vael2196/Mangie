@@ -105,16 +105,44 @@ class BoardController extends Controller
             'name' => 'required|string|max:255',
         ]);
 
-        // Create the new board associated with the authenticated user
+        // Create the new board associated with the authenticated user and project
         $board = Board::create([
             'name' => $request->name,
+            'project_id' => 1,  // Use the passed project_id
             'user_id' => Auth::id(),
         ]);
+
+        // Create the default columns
+        $columns = ['TO DO', 'DOING', 'DONE'];
+
+        foreach ($columns as $index => $columnName) {
+            $board->columns()->create([
+                'name' => $columnName,
+                'position' => $index + 1,
+            ]);
+        }
 
         // Return a JSON response to the front-end
         return response()->json([
             'success' => true,
             'board' => $board,
         ]);
+    }
+
+    /**
+     * Display the specified board with its columns and tasks.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function show($id)
+    {
+        // Fetch the board by ID with its columns and tasks, and sort columns by position
+        $board = Board::with(['columns' => function ($query) {
+            $query->orderBy('position');
+        }, 'columns.tasks'])->findOrFail($id);
+
+        // Pass the board to the sprint_board view
+        return view('boards.show', compact('board'));
     }
 }

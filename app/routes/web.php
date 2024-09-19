@@ -21,5 +21,6 @@ Route::middleware('auth')->group(function () {
 
 Route::post('/boards', [BoardController::class, 'store'])->name('boards.store');
 Route::get('/home', [BoardController::class, 'index'])->middleware('auth')->name('home');
+Route::get('/boards/{id}', [BoardController::class, 'show'])->middleware('auth')->name('boards.show');
 
 require __DIR__.'/auth.php';

@@ -49,36 +49,36 @@
 
     <div class="container mx-auto mt-8">
         <h1 class="text-3xl font-bold mb-4">Project Boards</h1>
-    
+
         <!-- Success message -->
         @if (session('success'))
             <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4">
                 {{ session('success') }}
             </div>
         @endif
-    
+
         <!-- Display boards in card format -->
         <div class="grid grid-cols-4 gap-4">
             <!-- Existing boards -->
             @foreach($boards as $board)
                 <div class="bg-white shadow-lg rounded-lg p-4">
                     <h2 class="text-xl font-bold">{{ $board->name }}</h2>
-                    <a href="#" class="text-blue-500 hover:underline">View Board</a>
+                    <a href="{{ route('boards.show', $board->id) }}" class="text-blue-500 hover:underline">View Board</a>
                 </div>
             @endforeach
-    
+
             <!-- Create new board card -->
             <div class="bg-gray-100 shadow-lg rounded-lg p-4 flex items-center justify-center">
                 <form id="new-board-form" action="{{ route('boards.store') }}" method="POST" onsubmit="createBoard(event)">
                     @csrf
+                    <input type="hidden" name="project_id" value="{{ 1 }}">
                     <input type="text" name="name" id="board-name" class="bg-white shadow-inner rounded-lg p-2 w-full" placeholder="Create new board" required autocomplete="off">
                 </form>
             </div>
         </div>
     </div>
-    
+
     <script>
-        // Function to handle the creation of a new board
         // Function to handle the creation of a new board
         function createBoard(event) {
             event.preventDefault(); // Prevent form from reloading the page
@@ -96,7 +96,10 @@
                     'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value,
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ name: boardName })
+                body: JSON.stringify({
+                    name: boardName,
+                    project_id: document.querySelector('input[name="project_id"]').value
+                })
             })
             .then(response => response.json())
             .then(data => {
@@ -107,7 +110,7 @@
                     newBoardCard.classList.add('bg-white', 'shadow-lg', 'rounded-lg', 'p-4');
                     newBoardCard.innerHTML = `
                         <h2 class="text-xl font-bold">${data.board.name}</h2>
-                        <a href="#" class="text-blue-500 hover:underline">View Board</a>
+                        <a href="/boards/${data.board.id}" class="text-blue-500 hover:underline">View Board</a>
                     `;
                     grid.insertBefore(newBoardCard, form.closest('.bg-gray-100'));
 
