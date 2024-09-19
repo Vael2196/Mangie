@@ -8,9 +8,9 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/dashboard', [ProjectController::class, 'index'])
+Route::get('/sprint', [ProjectController::class, 'sprint'])
     ->middleware(['auth', 'verified'])
-    ->name('dashboard');
+    ->name('sprint');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -18,6 +18,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-Route::get('/home', [ProjectController::class, 'index'])->name('home');
+// Route::get('/home', [ProjectController::class, 'index'])->name('home');
+Route::get('/backlog', [ProjectController::class, 'backlog'])->name('backlog');
 
 require __DIR__.'/auth.php';

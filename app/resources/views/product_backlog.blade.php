@@ -1,24 +1,49 @@
-@extends('layouts.app')
-
-<body>
-    <div id = "sidebar" class = "flex flex-column h-100 py-3 bg-dark text-white" style = "height: 100vh; width: 15vw; font-size: 1.5rem;">
-        <div class = "mb-5">
-            <h1 class = "px-3"><a class = "nav-link" href = "/">Mangie</a></h1>
-        </div>
-        <ul class = "nav nav-pills flex flex-column mb-auto">
-            <li><a class = "nav-link link-light" href = "/backlog">Product backlog</a></li>
-            <li><a class = "nav-link link-light" href = "/board">Sprint Board</a></li>
-        </ul>
+<x-app-layout>
+    <x-top-bar title="Product Backlog"/>
+    <x-dropdown>
+        <x-slot name="trigger">
+            <button type="button" onclick="open"><i class="fa-solid fa-ellipsis"></i></button>
+        </x-slot>
+        <x-slot name="content">
+            <x-dropdown-link href="#">Edit</x-dropdown-link>
+            <x-dropdown-link href="#">Delete</x-dropdown-link>
+        </x-slot>
+    </x-dropdown>
+    <div class="w-[97%] h-[80%]">
+        <x-task-board>
+            <x-task-box DESP="To make a task"/>
+            <x-task-box DESP="To make a task"/>
+            <x-task-box DESP="To make a task"/>
+            <x-task-box DESP="To make a task"/>
+            <x-task-box DESP="To make a task"/>
+            <x-task-box DESP="To make a task"/>
+            <x-task-box DESP="To make a task"/>
+            <x-task-box DESP="To make a task"/>
+            <x-task-box DESP="To make a task"/>
+            <x-task-box DESP="To make a task"/>
+            <x-task-box DESP="To make a task"/>
+            <x-task-box DESP="To make a task"/>
+            <x-task-box DESP="To make a task"/>
+            <x-task-box DESP="To make a task"/>
+            <x-task-box DESP="To make a task"/>
+            <x-task-box DESP="To make a task"/>
+            <x-task-box DESP="To make a task"/>
+            <x-task-box DESP="To make a task"/>
+            <x-task-box DESP="To make a task"/>
+            <x-task-box DESP="To make a task"/>
+            <x-task-box DESP="To make a task"/>
+            <x-task-box DESP="To make a task"/>
+            <x-task-box DESP="To make a task"/>
+            <x-task-box DESP="To make a task"/>
+            <x-task-box DESP="To make a task"/>
+            <x-task-box DESP="To make a task"/>
+            <x-task-box DESP="To make a task"/>
+            <x-task-box DESP="To make a task"/>
+            <x-task-box DESP="To make a task"/>
+            <x-task-box DESP="To make a task"/>
+            <x-task-box DESP="To make a task"/>
+            <x-task-box DESP="To make a task"/>
+            <x-task-box DESP="To make a task"/>
+        </x-task-board>
     </div>
-    <!-- adding a row at the top of the website -->
-    <div class = "d-flex flex-column h-100" style = "width: 85vw;">
-        <div class = "d-flex justify-content-between px-3 py-3 bg-secondary">
-            <h1>Sprint Board</h1>
-            <h1>PFP</h1>
-        </div>
-    </div>
-        
-    <!-- <h1>We are going to make this cool cool thing guys</h1> -->
-    
-</body>
-</html>
+</x-app-layout>
