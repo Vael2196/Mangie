@@ -33,15 +33,15 @@
     </div>
     <div class = "flex flex-nowrap space-x-5 h-4/6 p-5 overflow-auto max-w-[80vw] max-h-[60vh]">
         <x-task-column title="TO DO">
-            <x-task-box DESP="To make a task that safiuhiohgfutugcjvhkbln;lkvjchfxghcvjbklncfxg "/>
-            <x-task-box DESP="To make a task"/>
-            <x-task-box DESP="To make a task"/>
-            <x-task-box DESP="To make a task"/>
-            <x-task-box DESP="To make a task"/>
-            <x-task-box DESP="To make a task"/>
-            <x-task-box DESP="To make a task"/>
-            <x-task-box DESP="To make a task"/>
-            <x-task-box DESP="To make a task"/>
+            <x-task-box desp="To make a task that safiuhiohgfutugcjvhkbln;lkvjchfxghcvjbklncfxg "/>
+            <x-task-box desp="To make a task"/>
+            <x-task-box desp="To make a task"/>
+            <x-task-box desp="To make a task"/>
+            <x-task-box desp="To make a task"/>
+            <x-task-box desp="To make a task"/>
+            <x-task-box desp="To make a task"/>
+            <x-task-box desp="To make a task"/>
+            <x-task-box desp="To make a task"/>
         </x-task-column>
         <x-task-column title="DOING"></x-task-column>
         <x-task-column title="DONE"></x-task-column>

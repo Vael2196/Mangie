@@ -26,7 +26,7 @@
         </x-dropdown>
     </div> --}}
     <div class="w-[97%] h-[80%]">
-        <x-task-board>
+        {{-- <x-task-board>
             <x-task-box DESP="To make a task"/>
             <x-task-box DESP="To make a task"/>
             <x-task-box DESP="To make a task"/>
@@ -60,6 +60,15 @@
             <x-task-box DESP="To make a task"/>
             <x-task-box DESP="To make a task"/>
             <x-task-box DESP="To make a task"/>
-        </x-task-board>
+        </x-task-board> --}}
+
+        <x-task-list-board>
+            <x-task-list-item task=""/>
+            <x-task-list-item task=""/>
+            <x-task-list-item task=""/>
+            <x-task-list-item task=""/>
+            <x-task-list-item task=""/>
+            <x-task-list-item task=""/>
+        </x-task-list-board>
     </div>
 </x-app-layout>

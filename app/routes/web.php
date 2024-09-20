@@ -18,7 +18,7 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
-
+Route::get('/backlog', [ProjectController::class, 'backlog'])->middleware('auth')->name('backlog');
 Route::post('/boards', [BoardController::class, 'store'])->name('boards.store');
 Route::get('/home', [BoardController::class, 'index'])->middleware('auth')->name('home');
 Route::get('/boards/{id}', [BoardController::class, 'show'])->middleware('auth')->name('boards.show');

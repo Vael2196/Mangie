@@ -30,7 +30,7 @@ class ProjectController extends Controller
 
         $projects = collect([$project]);
 
-        return view('dashboard', compact('projects'));
+        return view('/boards/dashboard', compact('projects'));
     }
 
     public function createProject(Request $request)
@@ -61,12 +61,12 @@ class ProjectController extends Controller
             'name' => $request->name,
         ]);
 
-        return redirect()->route('dashboard');
+        return redirect()->route('/boards/dashboard');
     }
 
     public function backlog()
     {
-        return view("product_backlog");
+        return view("/boards/product_backlog");
     }
 // #TODO: Revert the test case from above th this one once you populate the database
 //     public function index()
