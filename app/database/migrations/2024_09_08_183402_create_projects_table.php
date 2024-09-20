@@ -19,10 +19,10 @@ return new class extends Migration
 
         Schema::create('boards', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('project_id')->constrained('projects')->onDelete('cascade');
             $table->string('name');
+            $table->foreignId('project_id')->constrained()->onDelete('cascade'); // Cascade delete
             $table->timestamps();
-        });
+        });        
 
         Schema::create('columns', function (Blueprint $table) {
             $table->id();

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\BoardController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -18,7 +19,8 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-// Route::get('/home', [ProjectController::class, 'index'])->name('home');
-Route::get('/backlog', [ProjectController::class, 'backlog'])->name('backlog');
+Route::post('/boards', [BoardController::class, 'store'])->name('boards.store');
+Route::get('/home', [BoardController::class, 'index'])->middleware('auth')->name('home');
+Route::get('/boards/{id}', [BoardController::class, 'show'])->middleware('auth')->name('boards.show');
 
 require __DIR__.'/auth.php';

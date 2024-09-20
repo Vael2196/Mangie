@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Project;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ProjectController extends Controller
 {
@@ -30,6 +31,24 @@ class ProjectController extends Controller
         $projects = collect([$project]);
 
         return view('dashboard', compact('projects'));
+    }
+
+    public function createProject(Request $request)
+    {
+        // Validate the request to ensure 'name' is provided
+        $request->validate([
+            'name' => 'required|string|max:255',
+        ]);
+
+        // Insert a new project using raw SQL
+        DB::table('projects')->insert([
+            'name' => $request->name,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        // Return a success message or redirect
+        return response()->json(['success' => true, 'message' => 'Project created successfully']);
     }
 
     public function store(Request $request)

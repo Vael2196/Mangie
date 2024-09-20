@@ -9,7 +9,7 @@ class Board extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'project_id'];
+    protected $fillable = ['name', 'project_id', 'user_id'];
 
     // Board belongs to Project (one to one)
     public function project()
