@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 
 class ProjectController extends Controller
 {
-    public function sprint()
+    public function index()
     {
         // Simulate project data for testing
         $project = new \stdClass();
@@ -29,7 +29,7 @@ class ProjectController extends Controller
 
         $projects = collect([$project]);
 
-        return view('sprint_board', compact('projects'));
+        return view('dashboard', compact('projects'));
     }
 
     public function store(Request $request)
@@ -42,7 +42,7 @@ class ProjectController extends Controller
             'name' => $request->name,
         ]);
 
-        return redirect()->route('sprint_board');
+        return redirect()->route('dashboard');
     }
 
     public function backlog()

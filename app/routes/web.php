@@ -8,9 +8,9 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/sprint', [ProjectController::class, 'sprint'])
+Route::get('/dashboard', [ProjectController::class, 'index'])
     ->middleware(['auth', 'verified'])
-    ->name('sprint');
+    ->name('dashboard');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
