@@ -63,6 +63,11 @@ class ProjectController extends Controller
 
         return redirect()->route('dashboard');
     }
+
+    public function backlog()
+    {
+        return view("product_backlog");
+    }
 // #TODO: Revert the test case from above th this one once you populate the database
 //     public function index()
 // {

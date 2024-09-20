@@ -1,4 +1,5 @@
 <x-app-layout>
+    <x-top-bar title="Sprint"/>
     {{-- <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
         {{ __('Dashboard') }}
     </h2>
@@ -15,11 +16,10 @@
     </div> --}}
 
     <div class = "flex flex-col">
-        <x-top-bar title="Sprint"/>
         <div class = "flex pr-10 items-start">
-            <p class = "text-sm px-6 min-h-20 grow">This is a description of a sprint</p>
+            <p class = "text-sm px-6 min-h-20 max-h-40 overflow-y-auto max-w-[65vw]">This is a description of a sprint and this is really long for some reason in case you nee his is a description of a sprint and this is really long for some reason in case you need tow rite a log of stuff </p>
             <div class = "flex space-x-8 items-center">
-                <p>X-days left</p>
+                <p class = "lg:block hidden">X-days left</p>
                 <x-secondary-button>Complete Sprint</x-secondary-button>
                 <a class = "hover:cursor-pointer"><i class="fa-solid fa-ellipsis"></i></a>
             </div>
@@ -31,7 +31,7 @@
             <li class = "text-red-500"><i class="fa-solid fa-circle-user fa-2x"></i></li>
         </ul>
     </div>
-    <div class = "flex flex-nowrap space-x-5 h-4/6 p-5 overflow-auto max-w-[80vw] max-h-[70vh]">
+    <div class = "flex flex-nowrap space-x-5 h-4/6 p-5 overflow-auto max-w-[80vw] max-h-[60vh]">
         <x-task-column title="TO DO">
             <x-task-box DESP="To make a task that safiuhiohgfutugcjvhkbln;lkvjchfxghcvjbklncfxg "/>
             <x-task-box DESP="To make a task"/>

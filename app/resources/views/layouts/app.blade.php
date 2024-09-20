@@ -27,7 +27,7 @@
                     <i class="fa-solid fa-boxes-stacked"></i>
                 </x-side-bar-link ></li>
 
-                <li><x-side-bar-link name="Sprint backlog" link="/backlog">
+                <li><x-side-bar-link name="Sprint backlog" link="/dashboard">
                     <i class="fa-solid fa-box-archive"></i>
                 </x-side-bar-link ></li>
 
