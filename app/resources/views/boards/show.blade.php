@@ -1,5 +1,8 @@
 <x-app-layout>
 
+    <!-- Meta tag for CSRF token -->
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
     <div class="container mx-auto mt-8">
         <div class="flex flex-col">
             <x-top-bar :title="$board->name"/>
@@ -47,55 +50,60 @@
     </div>
 
     <script>
-        // JavaScript to handle the adding of a new column
-        document.getElementById('add-column-btn').addEventListener('click', function() {
-            // Show the input field when the button is clicked
+        document.addEventListener('DOMContentLoaded', function () {
+            const addColumnBtn = document.getElementById('add-column-btn');
             const inputField = document.getElementById('new-column-input');
-            inputField.classList.remove('hidden');
-            inputField.focus();
-            
-            // Move the "Add" button further to the right
-            document.getElementById('add-column-btn').style.marginLeft = '20px';
-        });
+            const columnsContainer = document.getElementById('columns-container');
 
-        // Handle the "Enter" key event when entering a new column name
-        document.getElementById('new-column-input').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                const columnName = this.value.trim();
-                if (columnName !== '') {
-                    // Make an AJAX call to store the new column
-                    fetch('{{ route('columns.store') }}', {
-                        method: 'POST',
-                        headers: {
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            name: columnName,
-                            board_id: {{ $board->id }}
+            addColumnBtn.addEventListener('click', function () {
+                // Show the input field when the button is clicked
+                inputField.classList.remove('hidden');
+                inputField.focus();
+
+                // Move the "Add" button further to the right
+                addColumnBtn.style.marginLeft = '20px';
+            });
+
+            // Handle the "Enter" key event when entering a new column name
+            inputField.addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') {
+                    const columnName = inputField.value.trim();
+                    if (columnName !== '') {
+                        // Make an AJAX call to store the new column
+                        fetch('{{ route('columns.store') }}', {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                name: columnName,
+                                board_id: {{ $board->id }}
+                            })
                         })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            // Append the new column to the page dynamically
-                            const newColumn = `
-                                <div class="bg-gray-100 shadow-lg rounded-lg p-4 w-64">
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                // Append the new column to the page dynamically
+                                const newColumn = document.createElement('div');
+                                newColumn.classList.add('bg-gray-100', 'shadow-lg', 'rounded-lg', 'p-4', 'w-64');
+                                newColumn.innerHTML = `
                                     <h2 class="text-xl font-bold">${data.column.name}</h2>
-                                </div>
-                            `;
-                            document.getElementById('columns-container').insertAdjacentHTML('beforeend', newColumn);
+                                `;
+                                columnsContainer.insertBefore(newColumn, document.getElementById('add-column-section'));
 
-                            // Reset the input field
-                            document.getElementById('new-column-input').value = '';
-                            document.getElementById('new-column-input').classList.add('hidden');
-                        } else {
-                            console.error('Error adding column:', data.message);
-                        }
-                    })
-                    .catch(error => console.error('Error:', error));
+                                // Reset the input field
+                                inputField.value = '';
+                                inputField.classList.add('hidden');
+                                addColumnBtn.style.marginLeft = '0';
+                            } else {
+                                console.error('Error adding column:', data.message);
+                            }
+                        })
+                        .catch(error => console.error('Error:', error));
+                    }
                 }
-            }
+            });
         });
     </script>
 
