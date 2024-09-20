@@ -14,10 +14,10 @@
             @endforeach
         </div>
     </div>
-    <div class = "flex flex-col justify-between">
+    <div class = "flex flex-col justify-between items-center">
         <details class="open">
-            <summary class="hover:cursor-pointer list-none">
-                <i class="fa-solid fa-ellipsis"></i>
+            <summary class="hover:cursor-pointer hover:bg-gray-100 bg-opacity-10 list-none">
+                <i class="fa-solid fa-ellipsis px-2"></i>
             </summary>
             <x-task-detail task=""/>
         </details>

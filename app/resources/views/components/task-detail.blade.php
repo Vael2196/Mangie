@@ -106,7 +106,7 @@
         </div>
 
         <span class="flex items-start" onclick="document.querySelector('details').removeAttribute('open')">
-            <div class="p-2 hover:cursor-pointer hover:bg-gray-200 bg-opacity-10 rounded">
+            <div class="p-2 hover:cursor-pointer hover:bg-gray-100 bg-opacity-10 rounded">
                 <i class="fa-solid fa-xmark fa-2xl"></i>
             </div>
         </span>
