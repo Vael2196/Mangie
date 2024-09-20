@@ -68,6 +68,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Board;
 use App\Models\Project;
+use App\Models\Column;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -145,4 +146,27 @@ class BoardController extends Controller
         // Pass the board to the sprint_board view
         return view('boards.show', compact('board'));
     }
+
+    public function storeColumn(Request $request)
+    {
+        // Validate the request
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'board_id' => 'required|exists:boards,id',
+        ]);
+
+        // Create a new column
+        $column = Column::create([
+            'name' => $request->name,
+            'board_id' => $request->board_id,
+            'position' => Column::where('board_id', $request->board_id)->max('position') + 1,
+        ]);
+
+        // Return the new column as a JSON response
+        return response()->json([
+            'success' => true,
+            'column' => $column,
+        ]);
+    }
+
 }
