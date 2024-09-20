@@ -5,9 +5,9 @@
             <x-top-bar :title="$board->name"/>
             
             <div class="flex pr-10 items-start">
-                <p class="text-sm px-6 min-h-20 grow">This is a description of the board.</p>
+                <p class = "text-sm px-6 min-h-20 max-h-40 overflow-y-auto max-w-[65vw]">This is a description of the board.</p>
                 <div class="flex space-x-8 items-center">
-                    <p>Some info here</p>
+                    <p class = "lg:block hidden">X-days-left</p>
                     <x-secondary-button>Complete Board</x-secondary-button>
                     <a class="hover:cursor-pointer"><i class="fa-solid fa-ellipsis"></i></a>
                 </div>
@@ -21,7 +21,7 @@
             </ul>
         </div>
 
-        <div class="flex flex-nowrap space-x-5 h-4/6 p-5 overflow-auto max-w-[80vw] max-h-[70vh]">
+        <div class="flex flex-nowrap space-x-5 h-4/6 p-5 overflow-auto max-w-[80vw] max-h-[60vh]">
             <!-- Display columns and tasks -->
             @foreach($board->columns as $column)
                 <x-task-column :title="$column->name">
