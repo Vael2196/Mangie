@@ -48,8 +48,6 @@
         <a class = "hover:cursor-pointer" href = "/"><i class="fa-regular fa-square-plus fa-2x"></i></a>
     </div>
 
-    <x-task-detail task=""/>
-
     {{-- <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">

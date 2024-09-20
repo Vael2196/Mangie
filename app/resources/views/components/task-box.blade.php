@@ -15,7 +15,12 @@
         </div>
     </div>
     <div class = "flex flex-col justify-between">
-        <a class = "hover:cursor-pointer"><i class="fa-solid fa-ellipsis"></i></a>
+        <details class="open">
+            <summary class="hover:cursor-pointer list-none">
+                <i class="fa-solid fa-ellipsis"></i>
+            </summary>
+            <x-task-detail task=""/>
+        </details>
         <h1>ICON</h1>
     </div>
 </div>
