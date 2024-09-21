@@ -107,11 +107,8 @@ class BoardController extends Controller
     public function destroy($id)
     {
         // where id=id
-        $board = Board::where('id', $id)->firstOrFail();
-
-        $board->delete();
+        Board::where('id', $id)->firstOrFail()->delete();
 
         return redirect()->route('home')->with('success', 'Board deleted successfully');
-
     }
 }

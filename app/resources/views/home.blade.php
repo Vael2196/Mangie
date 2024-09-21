@@ -6,7 +6,7 @@
 
         <!-- Success message -->
         @if (session('success'))
-            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4">
+            <div class="bg-green-100 border border-green-400 text-gray-700 px-4 py-3 rounded relative mb-4">
                 {{ session('success') }}
             </div>
         @endif
@@ -26,7 +26,7 @@
                             </button>
                         </form>
                     </div>
-                    <a href="{{ route('boards.show', $board->id) }}" class="text-blue-500 hover:underline">View Board</a>
+                    <a href="{{ route('boards.show', $board->id) }}" class="text-blue-500 hover:underline">View</a>
                 </div>
             @endforeach
 
