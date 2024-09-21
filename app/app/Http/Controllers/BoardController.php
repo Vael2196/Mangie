@@ -69,6 +69,7 @@ namespace App\Http\Controllers;
 use App\Models\Board;
 use App\Models\Project;
 use App\Models\Column;
+use App\Models\Task;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -169,9 +170,28 @@ class BoardController extends Controller
         ]);
     }
 
-    public function storeTask(Request $request)
+    public function showBacklog($id)
     {
-
+        return view("boards/product_backlog", compact('board'));
     }
 
+    public function storeBacklog(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+        ]);
+
+        $task = Task::create([
+            "title" => $request->taskName,
+            "description" => "",
+            "column_id" => "",
+            "position"
+        ]);
+
+        // Return the new column as a JSON response
+        return response()->json([
+            'success' => true,
+            'column' => $task,
+        ]);
+    }
 }

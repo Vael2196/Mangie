@@ -64,12 +64,7 @@
             <x-task-box DESP="To make a task"/>
         </x-task-board> --}}
 
-        <x-task-list-board>
-            <x-task-list-item task=""/>
-            <x-task-list-item task=""/>
-            <x-task-list-item task=""/>
-            <x-task-list-item task=""/>
-            <x-task-list-item task=""/>
+        <x-task-list-board id="task-list-container">
             <x-task-list-item task=""/>
         </x-task-list-board>
 
@@ -80,32 +75,54 @@
             </x-side-bar-link >
         </div>
         {{-- Form for submitting  --}}
-        <form id="input-task-form" action="{{route('backlog.store')}}" method="POST" class="border hidden">
-            <input id="input-task-field" type="text" name="taskName" placeholder="Enter Task Name" class="w-full"/>
-            <input type="submit" hidden/>
-        </form>
+        <input id="input-task-field" class="border hidden" type="text" name="taskName" placeholder="Enter Task Name" class="w-full"/>
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            const createTaskButton= document.getElementById('create-task-link');
-            const inputTaskForm = document.getElementById('input-task-form');
-            const inputTaskField= document.getElementById('input-task-field');
+            const createTaskButton = document.getElementById('create-task-link');
+            const inputTaskField = document.getElementById('input-task-field');
+            const taskListContainer = document.getElementById('task-list-container');
 
             createTaskButton.addEventListener('click', e => {
-                inputTaskForm.classList.remove('hidden');
+                inputTaskField.classList.remove('hidden');
                 inputTaskField.focus();
                 createTaskButton.classList.add("hidden");
             });
 
             inputTaskField.addEventListener('focusout', e => {
                 createTaskButton.classList.remove("hidden");
-                inputTaskForm.classList.add('hidden');
+                inputTaskField.classList.add('hidden');
             });
 
-            inputTaskForm.addEventListener('submit', e => {
+            inputTaskField.addEventListener('keypress', e => {
+                if (e.key === 'Enter') {
+                    const taskName = inputTaskField.value.trim();
+                    if(taskName != ""){
+                        fetch('{{ route('backlog.store') }}', {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                name: taskName,
+                                column_id: {{ $board->id }}
+                            })
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
 
-            });
+                                taskListContainer.insertBefore(, createTaskButton)
+                            }else{
+                                console.error('Error adding column:', data.message);
+                            }
+                        })
+                        .catch(error => console.error('Error:', error));
+                    }
+                }
+            })
         });
 
     </script>
