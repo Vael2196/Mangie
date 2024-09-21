@@ -12,14 +12,14 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
-<body class="font-sans antialiased dark:bg-black dark:text-white/50 text-slate-700">
+<body class="font-sans antialiased dark:bg-gradient-to-r from-slate-800 to-black dark:text-white/50 text-slate-700">
     {{-- <img id="background" class="absolute -left-20 top-0 max-w-[877px]" src="https://laravel.com/assets/img/welcome/background.svg" /> --}}
     
     <div class="min-h-screen flex">
         <!-- Navbar or header can be placed here -->
         <div id = "sidebar" class = "flex flex-col py-3 h-screen lg:w-52 shadow-[inset_-5px_0px_5px_0px_#00000024]
                                     w-20 ">
-            <div class = "mb-10 mt-5 text-3xl font-medium lg:visible invisible">
+            <div class = "mb-10 mt-5 text-3xl dark:text-white font-medium lg:visible invisible">
                 <h1 class = "px-6"><a href = "/">Mangie</a></h1>
             </div>
             <ul class = "flex flex-col space-y-3 pl-3 pr-3 text-2xl">
