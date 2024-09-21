@@ -27,14 +27,11 @@
         <div class="flex flex-nowrap space-x-5 h-4/6 p-5 overflow-auto max-w-[80vw] max-h-[70vh]" id="columns-container">
             <!-- Display columns and tasks -->
             @foreach($board->columns as $column)
-                <div class="bg-gray-100 shadow-lg rounded-lg p-4 w-64 dark:bg-gray-700">
-                    <h2 class="text-xl font-bold dark:text-white">{{ $column->name }}</h2>
+                <x-task-column title="{{ $column->name }}">
                     @foreach($column->tasks as $task)
-                        <div class="bg-white p-2 my-2 rounded-lg shadow">
-                            {{ $task->title }}
-                        </div>
+                        <x-task-box desp="{{ $task->title }}"/>
                     @endforeach
-                </div>
+                </x-task-column>
             @endforeach
 
             <!-- Option to add new columns -->
