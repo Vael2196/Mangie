@@ -2,13 +2,13 @@
 
     <!-- Meta tag for CSRF token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <x-top-bar :title="$board->name"/>
 
     <div class="container mx-auto mt-8">
         <div class="flex flex-col">
+            <x-top-bar :title="$board->name"/>
 
-            <div class="flex pr-10 items-start">
-                <p class = "text-sm px-6 min-h-20 max-h-40 overflow-y-auto max-w-[65vw] grow">This is a description of the board.</p>
+            <div class="flex pr-10 items-start dark:text-white">
+                <p class = "text-sm px-6 min-h-20 max-h-40 overflow-y-auto max-w-[65vw]">This is a description of the board.</p>
                 <div class="flex space-x-8 items-center">
                     <p class = "lg:block hidden">X-days-left</p>
                     <x-secondary-button>Complete Board</x-secondary-button>
@@ -27,8 +27,8 @@
         <div class="flex flex-nowrap space-x-5 h-4/6 p-5 overflow-auto max-w-[80vw] max-h-[70vh]" id="columns-container">
             <!-- Display columns and tasks -->
             @foreach($board->columns as $column)
-                <div class="bg-gray-100 shadow-lg rounded-lg p-4 w-64">
-                    <h2 class="text-xl font-bold">{{ $column->name }}</h2>
+                <div class="bg-gray-100 shadow-lg rounded-lg p-4 w-64 dark:bg-gray-700">
+                    <h2 class="text-xl font-bold dark:text-white">{{ $column->name }}</h2>
                     @foreach($column->tasks as $task)
                         <div class="bg-white p-2 my-2 rounded-lg shadow">
                             {{ $task->title }}
