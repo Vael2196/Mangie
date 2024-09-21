@@ -1,13 +1,13 @@
-<table class="table-auto">
-    <thead>
+<table class="table-fixed border min-w-full overflow-x-auto">
+    {{-- <thead>
         <tr>
-            <th>Name</th>
-            <th>Epic</th>
-            <th>Status</th>
-            <th>Priority</th>
-            <th>Assigned</th>
+            <th class="border-b-2 border-slate-300">Name</th>
+            <th class="border-b-2 border-slate-300">Epic</th>
+            <th class="border-b-2 border-slate-300">Status</th>
+            <th class="border-b-2 border-slate-300">Priority</th>
+            <th class="border-b-2 border-slate-300">Assigned</th>
         </tr>
-    </thead>
+    </thead> --}}
     <tbody>
         {{$slot}}
     </tbody>

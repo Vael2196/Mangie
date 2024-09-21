@@ -25,7 +25,8 @@
             </x-slot>
         </x-dropdown>
     </div> --}}
-    <div class="w-[97%] h-[80%]">
+    <div class="px-10 flex flex-col w-[80vw] overflow-x-auto">
+        <h1 class='mb-2'>Issue</h1>
         {{-- <x-task-board>
             <x-task-box DESP="To make a task"/>
             <x-task-box DESP="To make a task"/>
@@ -70,5 +71,8 @@
             <x-task-list-item task=""/>
             <x-task-list-item task=""/>
         </x-task-list-board>
+        <x-side-bar-link name="Create Issue" link="/backlog">
+            <i class="fa-solid fa-plus"></i>
+        </x-side-bar-link ></li>
     </div>
 </x-app-layout>
