@@ -5,7 +5,7 @@
     ])
 
 
-<div {{ $attributes->merge([ 'class' => 'rounded w-[15.5rem] min-h-20 max-h-40 bg-white flex p-2'])}}>
+<div {{ $attributes->merge([ 'class' => 'rounded w-[15.5rem] min-h-20 max-h-40 bg-white dark:bg-gray-500 dark:text-white flex p-2'])}}>
     <div class = "flex flex-col grow space-y-2 px-2 overflow-hidden mr-2">
         <p>{{$desp}}</p>
         <div class = "flex space-x-2">

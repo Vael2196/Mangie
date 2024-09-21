@@ -1,7 +1,7 @@
 @props(['task'])
 
 <div class = "absolute top-0 right-0 h-full w-full p-5 flex justify-center items-center z-30 backdrop-blur-sm bg-black bg-opacity-30">
-    <div class = "rounded lg:px-11 lg:py-7 p-5 lg:w-4/6 w-5/6 h-3/5 bg-white border-2 flex">
+    <div class = "rounded lg:px-11 lg:py-7 p-5 lg:w-4/6 w-5/6 h-3/5 bg-white dark:bg-gradient-to-l from-slate-700 to-gray-900 border-2 flex">
         <div class="flex justify-between">
             <div class = "flex flex-col lg:w-1/2 h-full">
                 <!-- Task info -->
@@ -49,7 +49,7 @@
             <!-- Task details -->
             <div class = "lg:flex lg:flex-col w-1/2 h-full items-center hidden mb-2">
                 {{-- Select details --}}
-                <select class = "mb-2">
+                <select class = "mb-2 dark:bg-transparent">
                     <option value="24" selected>Product 1</option>
                     <option value="32">Product 2</option>
                     <option value="54">Product 3</option>
@@ -60,7 +60,7 @@
                     <h1>Details</h1>
                     <div class = "flex justify-between mb-4 w-full">
                         <p>Assignee</p>
-                        <select>
+                        <select class = "dark:bg-transparent">
                             <option value="24" selected>Product 1</option>
                             <option value="32">Product 2</option>
                             <option value="54">Product 3</option>
@@ -69,7 +69,7 @@
 
                     <div class = "flex justify-between mb-4 w-full">
                         <p>Labels</p>
-                        <select>
+                        <select class = "dark:bg-transparent">
                             <option value="24" selected>Product 1</option>
                             <option value="32">Product 2</option>
                             <option value="54">Product 3</option>
@@ -79,7 +79,7 @@
                     <div class = "flex justify-between mb-4 w-full">
                         <p>Parent</p>
                         
-                        <select>
+                        <select class = "dark:bg-transparent">
                             <option value="24" selected>Product 1</option>
                             <option value="32">Product 2</option>
                             <option value="54">Product 3</option>
@@ -93,7 +93,7 @@
 
                     <div class = "flex justify-between mb-4 w-full">
                         <p>SP ESTIMATE</p>
-                        <input type="number" id="typeNumber" class = "border-2 rounded w-20"  placeholder="Number"/>
+                        <input type="number" id="typeNumber" class = "border-2 rounded w-20 dark:bg-transparent"  placeholder="Number"/>
                     </div>
                 </div>
 
