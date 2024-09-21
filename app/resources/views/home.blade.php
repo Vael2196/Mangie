@@ -12,11 +12,11 @@
                         @foreach($projects as $project)
                             <div class="bg-gray-100 dark:bg-gray-700 rounded-lg shadow-lg p-6 mb-8">
                                 <h2 class="text-2xl font-bold">{{ $project->name }}</h2>
-                                
+
                                 @foreach($project->boards as $board)
                                     <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 my-4">
                                         <h3 class="text-xl font-semibold">{{ $board->name }}</h3>
-                                        
+
                                         <div class="flex space-x-4">
                                             @foreach($board->columns as $column)
                                                 <div class="bg-gray-200 dark:bg-gray-600 rounded-lg p-4 w-1/4">
@@ -48,7 +48,7 @@
 <x-app-layout>
 
     <div class="container mx-auto mt-8">
-        <h1 class="text-3xl font-bold mb-4">Project Boards</h1>
+        <h1 class="text-3xl font-bold dark:text-white mb-4">Project Boards</h1>
 
         <!-- Success message -->
         @if (session('success'))
