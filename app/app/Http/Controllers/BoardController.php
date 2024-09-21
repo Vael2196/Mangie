@@ -1,69 +1,4 @@
 <?php
-
-// namespace App\Http\Controllers;
-
-// use App\Models\Board;
-// use Illuminate\Http\Request;
-
-// class BoardController extends Controller
-// {
-//     /**
-//      * Store a newly created board in storage.
-//      *
-//      * @param  \Illuminate\Http\Request  $request
-//      * @return \Illuminate\Http\Response
-//      */
-//     public function store(Request $request)
-//     {
-//         $request->validate([
-//             'name' => 'required|string|max:255',
-//             'project_id' => 'required|exists:projects,id'
-//         ]);
-
-//         $board = new Board([
-//             'name' => $request->name,
-//             'project_id' => $request->project_id
-//         ]);
-//         $board->save();
-
-//         return redirect()->back()->with('success', 'Board created successfully.');
-//     }
-
-//     /**
-//      * Update the specified board in storage.
-//      *
-//      * @param  \Illuminate\Http\Request  $request
-//      * @param  int  $id
-//      * @return \Illuminate\Http\Response
-//      */
-//     public function update(Request $request, $id)
-//     {
-//         $request->validate([
-//             'name' => 'required|string|max:255'
-//         ]);
-
-//         $board = Board::findOrFail($id);
-//         $board->update($request->all());
-
-//         return redirect()->back()->with('success', 'Board updated successfully.');
-//     }
-
-//     /**
-//      * Remove the specified board from storage.
-//      *
-//      * @param  int  $id
-//      * @return \Illuminate\Http\Response
-//      */
-//     public function destroy($id)
-//     {
-//         $board = Board::findOrFail($id);
-//         $board->delete();
-
-//         return redirect()->back()->with('success', 'Board deleted successfully.');
-//     }
-// }
-
-
 namespace App\Http\Controllers;
 
 use App\Models\Board;
@@ -170,28 +105,33 @@ class BoardController extends Controller
         ]);
     }
 
-    public function showBacklog($id)
+    public function destroy($id)
     {
-        return view("boards/product_backlog", compact('board'));
+        // where id=id
+        Board::where('id', $id)->firstOrFail()->delete();
+
+        return redirect()->route('home')->with('success', 'Board deleted successfully');
     }
 
-    public function storeBacklog(Request $request)
+    public function storeTask(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
+            'title' => 'required|string|max:255',
+            'column_id' => 'required|exists:columns,id',
         ]);
 
+        // Create the new task
         $task = Task::create([
-            "title" => $request->taskName,
-            "description" => "",
-            "column_id" => "",
-            "position"
+            'title' => $request->title,
+            'column_id' => $request->column_id,
+            'position' => Task::where('column_id', $request->column_id)->max('position') + 1,
         ]);
 
-        // Return the new column as a JSON response
+        // Return the new task as a JSON response
         return response()->json([
             'success' => true,
-            'column' => $task,
+            'task' => $task,
         ]);
     }
+
 }

@@ -1,78 +1,41 @@
-{{-- @extends('dashboard')
-
-@section('content')
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900 dark:text-gray-100">
-                    <!-- Insert Project Management Content -->
-                    <div class="container mx-auto">
-                        <h1 class="text-3xl font-black text-center my-8">Dashboard</h1>
-
-                        @foreach($projects as $project)
-                            <div class="bg-gray-100 dark:bg-gray-700 rounded-lg shadow-lg p-6 mb-8">
-                                <h2 class="text-2xl font-bold">{{ $project->name }}</h2>
-                                
-                                @foreach($project->boards as $board)
-                                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 my-4">
-                                        <h3 class="text-xl font-semibold">{{ $board->name }}</h3>
-                                        
-                                        <div class="flex space-x-4">
-                                            @foreach($board->columns as $column)
-                                                <div class="bg-gray-200 dark:bg-gray-600 rounded-lg p-4 w-1/4">
-                                                    <h4 class="font-bold mb-2">{{ $column->name }}</h4>
-                                                    <ul>
-                                                        @foreach($column->tasks as $task)
-                                                            <li class="bg-white dark:bg-gray-900 p-2 my-2 rounded-lg shadow">
-                                                                {{ $task->title }}
-                                                            </li>
-                                                        @endforeach
-                                                    </ul>
-                                                </div>
-                                            @endforeach
-                                        </div>
-                                    </div>
-                                @endforeach
-                            </div>
-                        @endforeach
-                    </div>
-                    <!-- End of Project Management Content -->
-                </div>
-            </div>
-        </div>
-    </div>
-@endsection --}}
-
-
-
 <x-app-layout>
+    <x-top-bar title="Project Boards"/>
 
     <div class="container mx-auto mt-8">
-        <h1 class="text-3xl font-bold mb-4">Project Boards</h1>
+        {{-- <h1 class="text-3xl px-6 font-bold dark:text-white mb-4">Project Boards</h1> --}}
 
         <!-- Success message -->
         @if (session('success'))
-            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4">
+            <div class="bg-green-100 border border-green-400 text-gray-700 px-4 py-3 rounded relative mb-4">
                 {{ session('success') }}
             </div>
         @endif
 
         <!-- Display boards in card format -->
-        <div class="grid grid-cols-4 gap-4">
+        <div class="grid px-6 grid-cols-4 gap-4">
             <!-- Existing boards -->
             @foreach($boards as $board)
-                <div class="bg-white shadow-lg rounded-lg p-4">
-                    <h2 class="text-xl font-bold">{{ $board->name }}</h2>
-                    <a href="{{ route('boards.show', $board->id) }}" class="text-blue-500 hover:underline">View Board</a>
+                <div class="bg-white px-6 shadow-lg rounded-lg dark:bg-gray-700 p-4">
+                    <div class="flex justify-between">
+                        <h2 class="text-xl font-bold dark:text-white">{{ $board->name }}</h2>
+                        <form method="POST" action="{{ route('boards.destroy', $board->id)}}" onsubmit="return confirm('Are you sure you want to delete this board?')">
+                            @csrf
+                            @method('delete')
+                            <button class="bg-red-600 hover:bg-red-400 text-white text-sm py-1 px-2 rounded-full">
+                                Delete
+                            </button>
+                        </form>
+                    </div>
+                    <a href="{{ route('boards.show', $board->id) }}" class="text-blue-500 hover:underline">View</a>
                 </div>
             @endforeach
 
             <!-- Create new board card -->
-            <div class="bg-gray-100 shadow-lg rounded-lg p-4 flex items-center justify-center">
+            <div class="bg-gray-100 dark:bg-gray-700 shadow-lg rounded-lg p-4 flex items-center justify-center">
                 <form id="new-board-form" action="{{ route('boards.store') }}" method="POST" onsubmit="createBoard(event)">
                     @csrf
                     <input type="hidden" name="project_id" value="{{ 1 }}">
-                    <input type="text" name="name" id="board-name" class="bg-white shadow-inner rounded-lg p-2 w-full" placeholder="Create new board" required autocomplete="off">
+                    <input type="text" name="name" id="board-name" class="bg-white dark:bg-gray-400 dark:placeholder-gray-700 shadow-inner rounded-lg p-2 w-full" placeholder="Create new board" required autocomplete="off">
                 </form>
             </div>
         </div>
