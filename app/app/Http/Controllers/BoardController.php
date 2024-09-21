@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 use App\Models\Board;
 use App\Models\Project;
 use App\Models\Column;
+use App\Models\Task;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -111,4 +112,26 @@ class BoardController extends Controller
 
         return redirect()->route('home')->with('success', 'Board deleted successfully');
     }
+
+    public function storeTask(Request $request)
+    {
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'column_id' => 'required|exists:columns,id',
+        ]);
+
+        // Create the new task
+        $task = Task::create([
+            'title' => $request->title,
+            'column_id' => $request->column_id,
+            'position' => Task::where('column_id', $request->column_id)->max('position') + 1,
+        ]);
+
+        // Return the new task as a JSON response
+        return response()->json([
+            'success' => true,
+            'task' => $task,
+        ]);
+    }
+
 }

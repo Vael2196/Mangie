@@ -8,9 +8,9 @@
         <div class="flex flex-col">
 
             <div class="flex pr-10 items-start dark:text-white">
-                <p class = "text-sm px-6 min-h-20 max-h-40 overflow-y-auto max-w-[65vw] grow">This is a description of the board.</p>
+                <p class="text-sm px-6 min-h-20 max-h-40 overflow-y-auto max-w-[65vw] grow">This is a description of the board.</p>
                 <div class="flex space-x-8 items-center">
-                    <p class = "lg:block hidden">X-days-left</p>
+                    <p class="lg:block hidden">X-days-left</p>
                     <x-secondary-button>Complete Board</x-secondary-button>
                     <a class="hover:cursor-pointer"><i class="fa-solid fa-ellipsis"></i></a>
                 </div>
@@ -27,11 +27,22 @@
         <div class="flex flex-nowrap space-x-5 h-4/6 p-5 overflow-auto max-w-[80vw] max-h-[70vh]" id="columns-container">
             <!-- Display columns and tasks -->
             @foreach($board->columns as $column)
-                <x-task-column title="{{ $column->name }}">
-                    @foreach($column->tasks as $task)
-                        <x-task-box desp="{{ $task->title }}"/>
-                    @endforeach
-                </x-task-column>
+                <div class="bg-gray-100 shadow-lg rounded-lg p-4 w-64">
+                    <h2 class="text-xl font-bold">{{ $column->name }}</h2>
+                    <div class="task-list" id="task-list-{{ $column->id }}">
+                        @foreach($column->tasks as $task)
+                            <div class="bg-white p-2 my-2 rounded-lg shadow">
+                                {{ $task->title }}
+                            </div>
+                        @endforeach
+                    </div>
+                    @if ($loop->first)
+                        <!-- Input field for adding a new task in the first column -->
+                        <div class="mt-2">
+                            <input type="text" id="new-task-input" class="bg-white shadow-inner rounded-lg p-2 w-full" placeholder="Enter new task" />
+                        </div>
+                    @endif
+                </div>
             @endforeach
 
             <!-- Option to add new columns -->
@@ -51,22 +62,20 @@
             const addColumnBtn = document.getElementById('add-column-btn');
             const inputField = document.getElementById('new-column-input');
             const columnsContainer = document.getElementById('columns-container');
+            const newTaskInput = document.getElementById('new-task-input');
+            const firstColumnTaskList = document.getElementById('task-list-{{ $board->columns->first()->id }}');
 
+            // Add new column
             addColumnBtn.addEventListener('click', function () {
-                // Show the input field when the button is clicked
                 inputField.classList.remove('hidden');
                 inputField.focus();
-
-                // Move the "Add" button further to the right
                 addColumnBtn.style.marginLeft = '20px';
             });
 
-            // Handle the "Enter" key event when entering a new column name
             inputField.addEventListener('keypress', function (e) {
                 if (e.key === 'Enter') {
                     const columnName = inputField.value.trim();
                     if (columnName !== '') {
-                        // Make an AJAX call to store the new column
                         fetch('{{ route('columns.store') }}', {
                             method: 'POST',
                             headers: {
@@ -81,20 +90,47 @@
                         .then(response => response.json())
                         .then(data => {
                             if (data.success) {
-                                // Append the new column to the page dynamically
                                 const newColumn = document.createElement('div');
                                 newColumn.classList.add('bg-gray-100', 'shadow-lg', 'rounded-lg', 'p-4', 'w-64');
-                                newColumn.innerHTML = `
-                                    <h2 class="text-xl font-bold">${data.column.name}</h2>
-                                `;
+                                newColumn.innerHTML = `<h2 class="text-xl font-bold">${data.column.name}</h2>`;
                                 columnsContainer.insertBefore(newColumn, document.getElementById('add-column-section'));
-
-                                // Reset the input field
                                 inputField.value = '';
                                 inputField.classList.add('hidden');
                                 addColumnBtn.style.marginLeft = '0';
                             } else {
                                 console.error('Error adding column:', data.message);
+                            }
+                        })
+                        .catch(error => console.error('Error:', error));
+                    }
+                }
+            });
+
+            // Add new task
+            newTaskInput.addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') {
+                    const taskTitle = newTaskInput.value.trim();
+                    if (taskTitle !== '') {
+                        fetch('{{ route('tasks.store') }}', {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                title: taskTitle,
+                                column_id: {{ $board->columns->first()->id }}
+                            })
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                // Insert task into the task list of the first column
+                                const newTask = `<div class="bg-white p-2 my-2 rounded-lg shadow">${data.task.title}</div>`;
+                                firstColumnTaskList.insertAdjacentHTML('beforeend', newTask);
+                                newTaskInput.value = '';
+                            } else {
+                                console.error('Error adding task:', data.message);
                             }
                         })
                         .catch(error => console.error('Error:', error));

@@ -24,5 +24,6 @@ Route::get('/home', [BoardController::class, 'index'])->middleware('auth')->name
 Route::get('/boards/{id}', [BoardController::class, 'show'])->middleware('auth')->name('boards.show');
 Route::delete('/boards/{id}', [BoardController::class, 'destroy'])->middleware('auth')->name('boards.destroy');
 Route::post('/columns/store', [BoardController::class, 'storeColumn'])->name('columns.store');
+Route::post('/tasks/store', [BoardController::class, 'storeTask'])->name('tasks.store');
 
 require __DIR__.'/auth.php';
