@@ -48,7 +48,7 @@
 <x-app-layout>
 
     <div class="container mx-auto mt-8">
-        <h1 class="text-3xl font-bold dark:text-white mb-4">Project Boards</h1>
+        <h1 class="text-3xl px-6 font-bold dark:text-white mb-4">Project Boards</h1>
 
         <!-- Success message -->
         @if (session('success'))
@@ -58,21 +58,21 @@
         @endif
 
         <!-- Display boards in card format -->
-        <div class="grid grid-cols-4 gap-4">
+        <div class="grid px-6 grid-cols-4 gap-4">
             <!-- Existing boards -->
             @foreach($boards as $board)
-                <div class="bg-white shadow-lg rounded-lg p-4">
-                    <h2 class="text-xl font-bold">{{ $board->name }}</h2>
+                <div class="bg-white px-6 shadow-lg rounded-lg dark:bg-gray-700 p-4">
+                    <h2 class="text-xl font-bold dark:text-white">{{ $board->name }}</h2>
                     <a href="{{ route('boards.show', $board->id) }}" class="text-blue-500 hover:underline">View Board</a>
                 </div>
             @endforeach
 
             <!-- Create new board card -->
-            <div class="bg-gray-100 shadow-lg rounded-lg p-4 flex items-center justify-center">
+            <div class="bg-gray-100 dark:bg-gray-700 shadow-lg rounded-lg p-4 flex items-center justify-center">
                 <form id="new-board-form" action="{{ route('boards.store') }}" method="POST" onsubmit="createBoard(event)">
                     @csrf
                     <input type="hidden" name="project_id" value="{{ 1 }}">
-                    <input type="text" name="name" id="board-name" class="bg-white shadow-inner rounded-lg p-2 w-full" placeholder="Create new board" required autocomplete="off">
+                    <input type="text" name="name" id="board-name" class="bg-white dark:bg-gray-400 dark:placeholder-gray-700 shadow-inner rounded-lg p-2 w-full" placeholder="Create new board" required autocomplete="off">
                 </form>
             </div>
         </div>
