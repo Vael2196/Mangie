@@ -1,4 +1,5 @@
 <x-app-layout>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <x-top-bar title="Product Backlog"/>
     <div class="hidden sm:flex sm:items-center sm:ms-6">
         <x-dropdown align="right" width="48">
@@ -63,16 +64,66 @@
             <x-task-box DESP="To make a task"/>
         </x-task-board> --}}
 
-        <x-task-list-board>
-            <x-task-list-item task=""/>
-            <x-task-list-item task=""/>
-            <x-task-list-item task=""/>
-            <x-task-list-item task=""/>
-            <x-task-list-item task=""/>
+        <x-task-list-board id="task-list-container">
             <x-task-list-item task=""/>
         </x-task-list-board>
-        <x-side-bar-link name="Create Issue" link="/backlog">
-            <i class="fa-solid fa-plus"></i>
-        </x-side-bar-link ></li>
+
+        {{-- Link to Form --}}
+        <div id="create-task-link" class="block">
+            <x-side-bar-link name="Create Issue" link="/backlog">
+                <i class="fa-solid fa-plus"></i>
+            </x-side-bar-link >
+        </div>
+        {{-- Form for submitting  --}}
+        <input id="input-task-field" class="border hidden" type="text" name="taskName" placeholder="Enter Task Name" class="w-full"/>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const createTaskButton = document.getElementById('create-task-link');
+            const inputTaskField = document.getElementById('input-task-field');
+            const taskListContainer = document.getElementById('task-list-container');
+
+            createTaskButton.addEventListener('click', e => {
+                inputTaskField.classList.remove('hidden');
+                inputTaskField.focus();
+                createTaskButton.classList.add("hidden");
+            });
+
+            inputTaskField.addEventListener('focusout', e => {
+                createTaskButton.classList.remove("hidden");
+                inputTaskField.classList.add('hidden');
+            });
+
+            inputTaskField.addEventListener('keypress', e => {
+                if (e.key === 'Enter') {
+                    const taskName = inputTaskField.value.trim();
+                    if(taskName != ""){
+                        fetch('{{ route('backlog.store') }}', {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                name: taskName,
+                                column_id: {{ $board->id }}
+                            })
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+
+                                taskListContainer.insertBefore(, createTaskButton)
+                            }else{
+                                console.error('Error adding column:', data.message);
+                            }
+                        })
+                        .catch(error => console.error('Error:', error));
+                    }
+                }
+            })
+        });
+
+    </script>
 </x-app-layout>
