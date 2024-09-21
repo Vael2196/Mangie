@@ -16,7 +16,16 @@
             <!-- Existing boards -->
             @foreach($boards as $board)
                 <div class="bg-white px-6 shadow-lg rounded-lg dark:bg-gray-700 p-4">
-                    <h2 class="text-xl font-bold dark:text-white">{{ $board->name }}</h2>
+                    <div class="flex justify-between">
+                        <h2 class="text-xl font-bold dark:text-white">{{ $board->name }}</h2>
+                        <form method="POST" action="{{ route('boards.destroy', $board->id)}}" onsubmit="return confirm('Are you sure you want to delete this board?')">
+                            @csrf
+                            @method('delete')
+                            <button class="bg-red-600 hover:bg-red-400 text-white text-sm py-1 px-2 rounded-full">
+                                Delete
+                            </button>
+                        </form>
+                    </div>
                     <a href="{{ route('boards.show', $board->id) }}" class="text-blue-500 hover:underline">View Board</a>
                 </div>
             @endforeach
