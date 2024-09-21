@@ -107,7 +107,7 @@ class BoardController extends Controller
     public function destroy($id)
     {
         // where id=id
-        $board = Board::where('id', $id)->first();
+        $board = Board::where('id', $id)->firstOrFail();
 
         $board->delete();
 
