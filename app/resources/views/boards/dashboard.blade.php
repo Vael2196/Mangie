@@ -15,7 +15,7 @@
         </div>
     </div> --}}
 
-    <div class = "flex flex-col">
+    <div class = "flex dark:text-white flex-col">
         <div class = "flex pr-10 items-start">
             <p class = "text-sm px-6 min-h-20 max-h-40 overflow-y-auto max-w-[65vw]">This is a description of a sprint and this is really long for some reason in case you nee his is a description of a sprint and this is really long for some reason in case you need tow rite a log of stuff </p>
             <div class = "flex space-x-8 items-center">
@@ -43,7 +43,7 @@
             <x-task-box desp="To make a task"/>
             <x-task-box desp="To make a task"/>
         </x-task-column>
-        <x-task-column title="DOING"></x-task-column>
+        <x-task-column title="IN PROGRESS"></x-task-column>
         <x-task-column title="DONE"></x-task-column>
         <a class = "hover:cursor-pointer" href = "/"><i class="fa-regular fa-square-plus fa-2x"></i></a>
     </div>
