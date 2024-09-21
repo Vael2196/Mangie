@@ -16,7 +16,7 @@
     </div>
     <div class = "flex flex-col justify-between items-center">
         <details class="open">
-            <summary class="hover:cursor-pointer hover:bg-gray-100 bg-opacity-10 list-none">
+            <summary class="hover:cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 bg-opacity-10 list-none">
                 <i class="fa-solid fa-ellipsis px-2"></i>
             </summary>
             <x-task-detail task=""/>
