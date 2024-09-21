@@ -1,7 +1,8 @@
 <x-app-layout>
+    <x-top-bar title="Project Boards"/>
 
     <div class="container mx-auto mt-8">
-        <h1 class="text-3xl px-6 font-bold dark:text-white mb-4">Project Boards</h1>
+        {{-- <h1 class="text-3xl px-6 font-bold dark:text-white mb-4">Project Boards</h1> --}}
 
         <!-- Success message -->
         @if (session('success'))
