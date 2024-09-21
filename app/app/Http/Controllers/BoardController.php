@@ -169,4 +169,9 @@ class BoardController extends Controller
         ]);
     }
 
+    public function storeTask(Request $request)
+    {
+
+    }
+
 }

@@ -1,4 +1,5 @@
 <x-app-layout>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <x-top-bar title="Product Backlog"/>
     <div class="hidden sm:flex sm:items-center sm:ms-6">
         <x-dropdown align="right" width="48">
@@ -71,8 +72,41 @@
             <x-task-list-item task=""/>
             <x-task-list-item task=""/>
         </x-task-list-board>
-        <x-side-bar-link name="Create Issue" link="/backlog">
-            <i class="fa-solid fa-plus"></i>
-        </x-side-bar-link ></li>
+
+        {{-- Link to Form --}}
+        <div id="create-task-link" class="block">
+            <x-side-bar-link name="Create Issue" link="/backlog">
+                <i class="fa-solid fa-plus"></i>
+            </x-side-bar-link >
+        </div>
+        {{-- Form for submitting  --}}
+        <form id="input-task-form" action="{{route('backlog.store')}}" method="POST" class="border hidden">
+            <input id="input-task-field" type="text" name="taskName" placeholder="Enter Task Name" class="w-full"/>
+            <input type="submit" hidden/>
+        </form>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const createTaskButton= document.getElementById('create-task-link');
+            const inputTaskForm = document.getElementById('input-task-form');
+            const inputTaskField= document.getElementById('input-task-field');
+
+            createTaskButton.addEventListener('click', e => {
+                inputTaskForm.classList.remove('hidden');
+                inputTaskField.focus();
+                createTaskButton.classList.add("hidden");
+            });
+
+            inputTaskField.addEventListener('focusout', e => {
+                createTaskButton.classList.remove("hidden");
+                inputTaskForm.classList.add('hidden');
+            });
+
+            inputTaskForm.addEventListener('submit', e => {
+
+            });
+        });
+
+    </script>
 </x-app-layout>
