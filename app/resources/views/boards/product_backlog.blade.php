@@ -28,7 +28,7 @@
     </div>
     <div class="px-10 flex flex-col w-[80vw] overflow-x-auto">
         @foreach ($board->columns as $column)
-            <h1 class='mb-2'>Issues: {{count($column->tasks)}}</h1>
+            <h1 id="issues" class='mb-2'>Issues: {{count($column->tasks)}}</h1>
         @endforeach
         {{-- <x-task-board>
             <x-task-box DESP="To make a task"/>
@@ -99,6 +99,7 @@
             const createTaskButton = document.getElementById('create-task-link');
             const inputTaskField = document.getElementById('input-task-field');
             const taskColumn = document.getElementById('task-list');
+            const issuesNo = document.getElementById('issues');
 
             createTaskButton.addEventListener('click', e => {
                 inputTaskField.classList.remove('hidden');
@@ -149,6 +150,7 @@
                                                     <td class="py-2 border-b-2 w-20">Assigned</td>
                                                 </tr>`;
                                 taskColumn.insertAdjacentHTML('beforeend', newTask);
+                                issuesNo.innerHTML = `Issues: ${parseInt(issuesNo.innerHTML.split(":")[1]) + 1}`;
                                 inputTaskField.value = '';
                             } else {
                                 console.error('Error adding task:', data.message);
