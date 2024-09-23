@@ -73,6 +73,13 @@
                     @endforeach
             </x-task-list-board>
 
+            <!-- Task detail -->
+            @foreach($column->tasks as $task)
+                <div class='hidden' id="task-list-detail-{{$loop->index}}">
+                    <x-task-detail :task="$task"/>
+                </div>
+            @endforeach
+
             {{-- Link to Form --}}
             <div class="w-full text-start">
                 <div id="create-task-link" class="block">
@@ -103,6 +110,15 @@
                 createTaskButton.classList.remove("hidden");
                 inputTaskField.classList.add('hidden');
             });
+
+            var tbody = taskColumn.children[0].children;
+            for (let i = 0; i < tbody.length; i++) {
+                const task = tbody[i];
+                task.addEventListener('click', e => {
+                    const taskDetail = document.getElementById(`task-list-detail-${i}`);
+                    taskDetail.classList.toggle('hidden');
+                });
+            }
 
             // Add new task
             inputTaskField.addEventListener('keypress', function (e) {
