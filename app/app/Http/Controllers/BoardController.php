@@ -134,14 +134,14 @@ class BoardController extends Controller
         ]);
     }
 
-    public function showBacklog($id)
+    public function showBacklog()
     {
         // Fetch the board by ID with its columns and tasks, and sort columns by position
         $board = Board::with(['columns' => function ($query) {
             $query->orderBy('position');
-        }, 'columns.tasks'])->findOrFail($id);
+        }, 'columns.tasks'])->findOrFail(1);
 
-        $tasks = Task::where('board_id')->get();
+        $tasks = Task::all();
 
         // Pass the board to the sprint_board view
         return view('boards.product_backlog', compact('board', 'tasks'));

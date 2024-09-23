@@ -29,13 +29,13 @@
     <div class="px-10 flex flex-col w-[80vw] overflow-x-auto">
         <h1 id="issues" class='mb-2'>Issues: {{count($tasks)}}</h1>
         <x-task-list-board id="task-list">
-                @foreach($column->tasks as $task)
+                @foreach($tasks as $task)
                     <x-task-list-item :task="$task"/>
                 @endforeach
         </x-task-list-board>
 
         <!-- Task detail -->
-        @foreach($column->tasks as $task)
+        @foreach($tasks as $task)
             <div class='hidden' id="task-list-detail-{{$loop->index}}">
                 <x-task-detail :task="$task"/>
             </div>

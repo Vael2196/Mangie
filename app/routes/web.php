@@ -9,9 +9,9 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/dashboard', [ProjectController::class, 'index'])
-    ->middleware(['auth', 'verified'])
-    ->name('dashboard');
+// Route::get('/dashboard', [ProjectController::class, 'index'])
+//     ->middleware(['auth', 'verified'])
+//     ->name('dashboard');
 
 // Login/Register
 Route::middleware('auth')->group(function () {
@@ -21,7 +21,7 @@ Route::middleware('auth')->group(function () {
 });
 
 // Board
-Route::get('/home', [BoardController::class, 'index'])->middleware('auth')->name('home');
+Route::get('/dashboard', [BoardController::class, 'index'])->middleware('auth')->name('home');
 Route::post('/boards', [BoardController::class, 'store'])->name('boards.store');
 Route::get('/boards/{id}', [BoardController::class, 'show'])->middleware('auth')->name('boards.show');
 Route::delete('/boards/{id}', [BoardController::class, 'destroy'])->middleware('auth')->name('boards.destroy');
