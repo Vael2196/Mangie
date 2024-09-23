@@ -27,7 +27,9 @@
         </x-dropdown>
     </div>
     <div class="px-10 flex flex-col w-[80vw] overflow-x-auto">
-        <h1 class='mb-2'>Issues: Number</h1>
+        @foreach ($board->columns as $column)
+            <h1 class='mb-2'>Issues: {{count($column->tasks)}}</h1>
+        @endforeach
         {{-- <x-task-board>
             <x-task-box DESP="To make a task"/>
             <x-task-box DESP="To make a task"/>
