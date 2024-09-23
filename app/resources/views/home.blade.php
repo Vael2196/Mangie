@@ -17,10 +17,7 @@
             @foreach($boards as $board)
                 {{-- Show project backlog --}}
                 @if($boards->first() == $board)
-                    <div class="bg-white px-6 shadow-lg rounded-lg dark:bg-gray-700 p-4">
-                        <h2 class="text-xl font-bold dark:text-white">{{ $board->name }}</h2>
-                        <a href="{{ route('backlog.show', $board->id) }}" class="text-blue-500 hover:underline">View</a>
-                    </div>
+
                 @else
                 {{-- Show sprint boards --}}
                     <div class="bg-white px-6 shadow-lg rounded-lg dark:bg-gray-700 p-4">

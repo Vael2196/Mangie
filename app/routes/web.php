@@ -9,9 +9,9 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/dashboard', [ProjectController::class, 'index'])
-    ->middleware(['auth', 'verified'])
-    ->name('dashboard');
+// Route::get('/dashboard', [ProjectController::class, 'index'])
+//     ->middleware(['auth', 'verified'])
+//     ->name('dashboard');
 
 // Login/Register
 Route::middleware('auth')->group(function () {
@@ -21,6 +21,7 @@ Route::middleware('auth')->group(function () {
 });
 
 // Board
+Route::get('/dashboard', [BoardController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
 Route::get('/home', [BoardController::class, 'index'])->middleware('auth')->name('home');
 Route::post('/boards', [BoardController::class, 'store'])->name('boards.store');
 Route::get('/boards/{id}', [BoardController::class, 'show'])->middleware('auth')->name('boards.show');
@@ -29,7 +30,7 @@ Route::post('/columns/store', [BoardController::class, 'storeColumn'])->name('co
 Route::post('/tasks/store', [BoardController::class, 'storeTask'])->name('tasks.store');
 
 // Backlog
-Route::get('/backlog/{id}', [BoardController::class, 'showBacklog'])->middleware('auth')->name('backlog.show');
+Route::get('/backlog', [BoardController::class, 'showBacklog'])->middleware('auth')->name('backlog.show');
 Route::post('/backlog/store', [BoardController::class, 'storeTask'])->middleware('auth')->name('backlog.store');
 
 require __DIR__.'/auth.php';
