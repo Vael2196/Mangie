@@ -65,22 +65,23 @@
         </x-task-board> --}}
 
         @foreach($board->columns as $column)
-            <div id="task-list">
-                <x-task-list-board>
+            <x-task-list-board id="task-list">
                     @foreach($column->tasks as $task)
-                        <x-task-list-item task="{{$task->title}}"/>
+                        <x-task-list-item :task="$task"/>
                     @endforeach
-                </x-task-list-board>
-            </div>
+            </x-task-list-board>
 
             {{-- Link to Form --}}
-            <div id="create-task-link" class="block">
-                <x-side-bar-link name="Create Issue" link="/backlog">
-                    <i class="fa-solid fa-plus"></i>
-                </x-side-bar-link >
+            <div class="w-full text-start">
+                <div id="create-task-link" class="block">
+                    <div class = 'px-4 py-2 leading-5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-500 hover:cursor-pointer focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out rounded flex space-x-3'>
+                        <div class = "text-center"><i class="fa-solid fa-plus"></i></div>
+                        <p class = "lg:block hidden text-sm">Create Issue</p>
+                    </div>
+                </div>
+                {{-- Form for submitting  --}}
+                <input id="input-task-field" class="border hidden w-full" type="text" placeholder="Enter Task Name" class="w-full"/>
             </div>
-            {{-- Form for submitting  --}}
-            <input id="input-task-field" class="border hidden" type="text" name="taskName" placeholder="Enter Task Name" class="w-full"/>
         @endforeach
     </div>
 
@@ -104,9 +105,9 @@
             // Add new task
             inputTaskField.addEventListener('keypress', function (e) {
                 if (e.key === 'Enter') {
-                    const taskTitle = newTaskInput.value.trim();
+                    const taskTitle = inputTaskField.value.trim();
                     if (taskTitle !== '') {
-                        fetch('{{ route('tasks.store') }}', {
+                        fetch('{{ route('backlog.store') }}', {
                             method: 'POST',
                             headers: {
                                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
@@ -121,9 +122,16 @@
                         .then(data => {
                             if (data.success) {
                                 // Insert task into the task list of the first column
-                                const newTask = `<x-task-list-item>${data.task.title}</x-task-list-item>`;
+                                const newTask = `<tr class="px-4 py-2 text-start leading-5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 hover:cursor-pointer focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out rounded"
+                                                    onclick="">
+                                                    <td class="py-2 pl-5 border-b-2">${data.task.title}</td>
+                                                    <td class="py-2 border-b-2 w-20">Epic</td>
+                                                    <td class="py-2 border-b-2 w-20">Status</td>
+                                                    <td class="py-2 border-b-2 w-20">Priority</td>
+                                                    <td class="py-2 border-b-2 w-20">Assigned</td>
+                                                </tr>`;
                                 taskColumn.insertAdjacentHTML('beforeend', newTask);
-                                newTaskInput.value = '';
+                                inputTaskField.value = '';
                             } else {
                                 console.error('Error adding task:', data.message);
                             }
