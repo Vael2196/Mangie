@@ -15,19 +15,28 @@
         <div class="grid px-6 grid-cols-4 gap-4">
             <!-- Existing boards -->
             @foreach($boards as $board)
-                <div class="bg-white px-6 shadow-lg rounded-lg dark:bg-gray-700 p-4">
-                    <div class="flex justify-between">
+                {{-- Show project backlog --}}
+                @if($boards->first() == $board)
+                    <div class="bg-white px-6 shadow-lg rounded-lg dark:bg-gray-700 p-4">
                         <h2 class="text-xl font-bold dark:text-white">{{ $board->name }}</h2>
-                        <form method="POST" action="{{ route('boards.destroy', $board->id)}}" onsubmit="return confirm('Are you sure you want to delete this board?')">
-                            @csrf
-                            @method('delete')
-                            <button class="bg-red-600 hover:bg-red-400 text-white text-sm py-1 px-2 rounded-full">
-                                Delete
-                            </button>
-                        </form>
+                        <a href="{{ route('backlog.show', $board->id) }}" class="text-blue-500 hover:underline">View</a>
                     </div>
-                    <a href="{{ route('boards.show', $board->id) }}" class="text-blue-500 hover:underline">View</a>
-                </div>
+                @else
+                {{-- Show sprint boards --}}
+                    <div class="bg-white px-6 shadow-lg rounded-lg dark:bg-gray-700 p-4">
+                        <div class="flex justify-between">
+                            <h2 class="text-xl font-bold dark:text-white">{{ $board->name }}</h2>
+                            <form method="POST" action="{{ route('boards.destroy', $board->id)}}" onsubmit="return confirm('Are you sure you want to delete this board?')">
+                                @csrf
+                                @method('delete')
+                                <button class="bg-red-600 hover:bg-red-400 text-white text-sm py-1 px-2 rounded-full">
+                                    Delete
+                                </button>
+                            </form>
+                        </div>
+                        <a href="{{ route('boards.show', $board->id) }}" class="text-blue-500 hover:underline">View</a>
+                    </div>
+                @endif
             @endforeach
 
             <!-- Create new board card -->

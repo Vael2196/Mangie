@@ -27,7 +27,9 @@
         </x-dropdown>
     </div>
     <div class="px-10 flex flex-col w-[80vw] overflow-x-auto">
-        <h1 class='mb-2'>Issues: Number</h1>
+        @foreach ($board->columns as $column)
+            <h1 id="issues" class='mb-2'>Issues: {{count($column->tasks)}}</h1>
+        @endforeach
         {{-- <x-task-board>
             <x-task-box DESP="To make a task"/>
             <x-task-box DESP="To make a task"/>
@@ -64,25 +66,40 @@
             <x-task-box DESP="To make a task"/>
         </x-task-board> --}}
 
-        <x-task-list-board id="task-list-container">
-            <x-task-list-item task=""/>
-        </x-task-list-board>
+        @foreach($board->columns as $column)
+            <x-task-list-board id="task-list">
+                    @foreach($column->tasks as $task)
+                        <x-task-list-item :task="$task"/>
+                    @endforeach
+            </x-task-list-board>
 
-        {{-- Link to Form --}}
-        <div id="create-task-link" class="block">
-            <x-side-bar-link name="Create Issue" link="/backlog">
-                <i class="fa-solid fa-plus"></i>
-            </x-side-bar-link >
-        </div>
-        {{-- Form for submitting  --}}
-        <input id="input-task-field" class="border hidden" type="text" name="taskName" placeholder="Enter Task Name" class="w-full"/>
+            <!-- Task detail -->
+            @foreach($column->tasks as $task)
+                <div class='hidden' id="task-list-detail-{{$loop->index}}">
+                    <x-task-detail :task="$task"/>
+                </div>
+            @endforeach
+
+            {{-- Link to Form --}}
+            <div class="w-full text-start">
+                <div id="create-task-link" class="block">
+                    <div class = 'px-4 py-2 leading-5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-500 hover:cursor-pointer focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out rounded flex space-x-3'>
+                        <div class = "text-center"><i class="fa-solid fa-plus"></i></div>
+                        <p class = "lg:block hidden text-sm">Create Issue</p>
+                    </div>
+                </div>
+                {{-- Form for submitting  --}}
+                <input id="input-task-field" class="border hidden w-full" type="text" placeholder="Enter Task Name" class="w-full"/>
+            </div>
+        @endforeach
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const createTaskButton = document.getElementById('create-task-link');
             const inputTaskField = document.getElementById('input-task-field');
-            const taskListContainer = document.getElementById('task-list-container');
+            const taskColumn = document.getElementById('task-list');
+            const issuesNo = document.getElementById('issues');
 
             createTaskButton.addEventListener('click', e => {
                 inputTaskField.classList.remove('hidden');
@@ -95,10 +112,20 @@
                 inputTaskField.classList.add('hidden');
             });
 
-            inputTaskField.addEventListener('keypress', e => {
+            var tbody = taskColumn.children[0].children;
+            for (let i = 0; i < tbody.length; i++) {
+                const task = tbody[i];
+                task.addEventListener('click', e => {
+                    const taskDetail = document.getElementById(`task-list-detail-${i}`);
+                    taskDetail.classList.toggle('hidden');
+                });
+            }
+
+            // Add new task
+            inputTaskField.addEventListener('keypress', function (e) {
                 if (e.key === 'Enter') {
-                    const taskName = inputTaskField.value.trim();
-                    if(taskName != ""){
+                    const taskTitle = inputTaskField.value.trim();
+                    if (taskTitle !== '') {
                         fetch('{{ route('backlog.store') }}', {
                             method: 'POST',
                             headers: {
@@ -106,23 +133,33 @@
                                 'Content-Type': 'application/json'
                             },
                             body: JSON.stringify({
-                                name: taskName,
-                                column_id: {{ $board->id }}
+                                title: taskTitle,
+                                column_id: {{ $board->columns->first()->id }}
                             })
                         })
                         .then(response => response.json())
                         .then(data => {
                             if (data.success) {
-
-                                taskListContainer.insertBefore(, createTaskButton)
-                            }else{
-                                console.error('Error adding column:', data.message);
+                                // Insert task into the task list of the first column
+                                const newTask = `<tr class="px-4 py-2 text-start leading-5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 hover:cursor-pointer focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out rounded"
+                                                    onclick="">
+                                                    <td class="py-2 pl-5 border-b-2">${data.task.title}</td>
+                                                    <td class="py-2 border-b-2 w-20">Epic</td>
+                                                    <td class="py-2 border-b-2 w-20">Status</td>
+                                                    <td class="py-2 border-b-2 w-20">Priority</td>
+                                                    <td class="py-2 border-b-2 w-20">Assigned</td>
+                                                </tr>`;
+                                taskColumn.insertAdjacentHTML('beforeend', newTask);
+                                issuesNo.innerHTML = `Issues: ${parseInt(issuesNo.innerHTML.split(":")[1]) + 1}`;
+                                inputTaskField.value = '';
+                            } else {
+                                console.error('Error adding task:', data.message);
                             }
                         })
                         .catch(error => console.error('Error:', error));
                     }
                 }
-            })
+            });
         });
 
     </script>

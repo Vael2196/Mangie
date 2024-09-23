@@ -1,19 +1,17 @@
-@props(['task'])
-
 <div class = "absolute top-0 right-0 h-full w-full p-5 flex justify-center items-center z-30 backdrop-blur-sm bg-black bg-opacity-30">
     <div class = "rounded lg:px-11 lg:py-7 p-5 lg:w-4/6 w-5/6 h-3/5 bg-white dark:bg-gradient-to-l from-slate-700 to-gray-900 border-2 flex">
         <div class="flex justify-between">
             <div class = "flex flex-col lg:w-1/2 h-full">
                 <!-- Task info -->
                 <div class="mb-10">
-                    <h1>NAME</h1>
+                    <h1>{{$task->title}}</h1>
                     <h3>Description</h3>
-                    <p>This is a description and its purpose it to describe the task and the reason for this is to fill up the word count and make a buffer layer so that the text can be sized correctly</p>
+                    <p>{{$task->description}}</p>
                 </div>
 
                 <!-- Task activity -->
                 <div>
-                    <h3 class = "mb-4">Activity</h3> 
+                    <h3 class = "mb-4">Activity</h3>
 
                     <!-- Tab icons -->
                     <div class = "flex justify-between w-100">
@@ -78,7 +76,7 @@
 
                     <div class = "flex justify-between mb-4 w-full">
                         <p>Parent</p>
-                        
+
                         <select class = "dark:bg-transparent">
                             <option value="24" selected>Product 1</option>
                             <option value="32">Product 2</option>
@@ -105,7 +103,7 @@
             </div>
         </div>
 
-        <span class="flex items-start" onclick="document.querySelector('details').removeAttribute('open')">
+        <span class="flex items-start" onclick="this.parentElement.parentElement.parentElement.classList.toggle('hidden')">
             <div class="p-2 hover:cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-900 bg-opacity-10 rounded">
                 <i class="fa-solid fa-xmark fa-2xl"></i>
             </div>

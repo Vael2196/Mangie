@@ -64,11 +64,11 @@ class ProjectController extends Controller
         return redirect()->route('/boards/dashboard');
     }
 // #TODO: Revert the test case from above th this one once you populate the database
-//     public function index()
-// {
-//     $projects = Project::with(['boards.columns.tasks'])->get();
-//     return view('home', compact('projects'));
-// }
+    //     public function index()
+    // {
+    //     $projects = Project::with(['boards.columns.tasks'])->get();
+    //     return view('home', compact('projects'));
+    // }
 
 }
 
