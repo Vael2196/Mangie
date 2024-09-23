@@ -141,7 +141,9 @@ class BoardController extends Controller
             $query->orderBy('position');
         }, 'columns.tasks'])->findOrFail($id);
 
+        $tasks = Task::where('board_id')->get();
+
         // Pass the board to the sprint_board view
-        return view('boards.product_backlog', compact('board'));
+        return view('boards.product_backlog', compact('board', 'tasks'));
     }
 }

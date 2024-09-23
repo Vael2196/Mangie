@@ -27,71 +27,31 @@
         </x-dropdown>
     </div>
     <div class="px-10 flex flex-col w-[80vw] overflow-x-auto">
-        @foreach ($board->columns as $column)
-            <h1 id="issues" class='mb-2'>Issues: {{count($column->tasks)}}</h1>
-        @endforeach
-        {{-- <x-task-board>
-            <x-task-box DESP="To make a task"/>
-            <x-task-box DESP="To make a task"/>
-            <x-task-box DESP="To make a task"/>
-            <x-task-box DESP="To make a task"/>
-            <x-task-box DESP="To make a task"/>
-            <x-task-box DESP="To make a task"/>
-            <x-task-box DESP="To make a task"/>
-            <x-task-box DESP="To make a task"/>
-            <x-task-box DESP="To make a task"/>
-            <x-task-box DESP="To make a task"/>
-            <x-task-box DESP="To make a task"/>
-            <x-task-box DESP="To make a task"/>
-            <x-task-box DESP="To make a task"/>
-            <x-task-box DESP="To make a task"/>
-            <x-task-box DESP="To make a task"/>
-            <x-task-box DESP="To make a task"/>
-            <x-task-box DESP="To make a task"/>
-            <x-task-box DESP="To make a task"/>
-            <x-task-box DESP="To make a task"/>
-            <x-task-box DESP="To make a task"/>
-            <x-task-box DESP="To make a task"/>
-            <x-task-box DESP="To make a task"/>
-            <x-task-box DESP="To make a task"/>
-            <x-task-box DESP="To make a task"/>
-            <x-task-box DESP="To make a task"/>
-            <x-task-box DESP="To make a task"/>
-            <x-task-box DESP="To make a task"/>
-            <x-task-box DESP="To make a task"/>
-            <x-task-box DESP="To make a task"/>
-            <x-task-box DESP="To make a task"/>
-            <x-task-box DESP="To make a task"/>
-            <x-task-box DESP="To make a task"/>
-            <x-task-box DESP="To make a task"/>
-        </x-task-board> --}}
+        <h1 id="issues" class='mb-2'>Issues: {{count($tasks)}}</h1>
+        <x-task-list-board id="task-list">
+                @foreach($column->tasks as $task)
+                    <x-task-list-item :task="$task"/>
+                @endforeach
+        </x-task-list-board>
 
-        @foreach($board->columns as $column)
-            <x-task-list-board id="task-list">
-                    @foreach($column->tasks as $task)
-                        <x-task-list-item :task="$task"/>
-                    @endforeach
-            </x-task-list-board>
-
-            <!-- Task detail -->
-            @foreach($column->tasks as $task)
-                <div class='hidden' id="task-list-detail-{{$loop->index}}">
-                    <x-task-detail :task="$task"/>
-                </div>
-            @endforeach
-
-            {{-- Link to Form --}}
-            <div class="w-full text-start">
-                <div id="create-task-link" class="block">
-                    <div class = 'px-4 py-2 leading-5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-500 hover:cursor-pointer focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out rounded flex space-x-3'>
-                        <div class = "text-center"><i class="fa-solid fa-plus"></i></div>
-                        <p class = "lg:block hidden text-sm">Create Issue</p>
-                    </div>
-                </div>
-                {{-- Form for submitting  --}}
-                <input id="input-task-field" class="border hidden w-full" type="text" placeholder="Enter Task Name" class="w-full"/>
+        <!-- Task detail -->
+        @foreach($column->tasks as $task)
+            <div class='hidden' id="task-list-detail-{{$loop->index}}">
+                <x-task-detail :task="$task"/>
             </div>
         @endforeach
+
+        {{-- Link to Form --}}
+        <div class="w-full text-start">
+            <div id="create-task-link" class="block">
+                <div class = 'px-4 py-2 leading-5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-500 hover:cursor-pointer focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out rounded flex space-x-3'>
+                    <div class = "text-center"><i class="fa-solid fa-plus"></i></div>
+                    <p class = "lg:block hidden text-sm">Create Issue</p>
+                </div>
+            </div>
+            {{-- Form for submitting  --}}
+            <input id="input-task-field" class="border hidden w-full" type="text" placeholder="Enter Task Name" class="w-full"/>
+        </div>
     </div>
 
     <script>
