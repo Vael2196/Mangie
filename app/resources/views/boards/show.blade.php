@@ -32,7 +32,7 @@
                     {{-- Show tasks for each column --}}
                     <div class="task-list" id="task-list-{{ $column->id }}">
                         @foreach($column->tasks as $task)
-                            <x-task-box :task="$task"/>
+                            <x-task-box :task="$task" index="{{$loop->index}}"/>
                         @endforeach
                     </div>
 

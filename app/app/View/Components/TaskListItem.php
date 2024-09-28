@@ -9,10 +9,12 @@ use Illuminate\View\Component;
 class TaskListItem extends Component
 {
     public $task;
+    public $index;
 
-    public function __construct($task)
+    public function __construct($task, $index)
     {
         $this->task = $task;
+        $this->index = $index;
     }
 
     /**

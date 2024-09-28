@@ -8,25 +8,24 @@
         </div>
     </div>
     <div class = "flex flex-col justify-between items-center">
-        <div class="hover:cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 bg-opacity-10 list-none">
+        <div id="task-box-{{$index}}" class="hover:cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 bg-opacity-10 list-none">
             <i class="fa-solid fa-ellipsis px-2"></i>
         </div>
-        {{-- <x-task-detail task=""/> --}}
+
+        <div class='hidden' id="task-list-detail-{{$index}}">
+            <x-task-detail :task="$task"/>
+        </div>
         <div class="text-red-500"><i class="fa-solid fa-circle-user fa-2x"></i></div>
     </div>
 </div>
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        const details = document.querySelectorAll('details');
-        details.forEach(detail => {
-            detail.addEventListener('toggle', () => {
-                details.forEach(d => {
-                    if (d !== detail) {
-                        d.removeAttribute('open');
-                    }
-                });
-            });
+        var index = {!! json_encode($index, JSON_HEX_TAG) !!};
+        taskMenu = document.getElementById(`task-box-${index}`);
+        taskMenu.addEventListener('click', e => {
+            const taskDetail = document.getElementById(`task-list-detail-${index}`);
+            taskDetail.classList.toggle('hidden');
         });
     });
 </script>
