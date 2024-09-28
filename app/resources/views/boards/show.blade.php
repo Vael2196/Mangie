@@ -36,12 +36,12 @@
                             </div>
                         @endforeach
                     </div>
-                    @if ($loop->first)
+                    {{-- @if ($loop->first)
                         <!-- Input field for adding a new task in the first column -->
                         <div class="mt-2">
                             <input type="text" id="new-task-input" class="bg-white shadow-inner rounded-lg p-2 w-full" placeholder="Enter new task" />
                         </div>
-                    @endif
+                    @endif --}}
                 </div>
             @endforeach
 
