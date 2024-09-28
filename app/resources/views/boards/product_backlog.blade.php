@@ -27,12 +27,25 @@
         </x-dropdown>
     </div>
     <div class="px-10 flex flex-col w-[80vw] overflow-x-auto">
-        <h1 id="issues" class='mb-2'>Issues: {{count($tasks)}}</h1>
-        <x-task-list-board id="task-list">
+        <div class='flex justify-between'>
+            <h1 id="issues" class='mb-2'>Issues: {{count($tasks)}}</h1>
+            {{-- Add list to card view dropdown switch here --}}
+        </div>
+
+        {{-- Product backlog main list --}}
+        <div id="task-list">
+
+            {{-- List view --}}
+            <x-task-list-board>
                 @foreach($tasks as $task)
                     <x-task-list-item :task="$task"/>
                 @endforeach
-        </x-task-list-board>
+            </x-task-list-board>
+
+            {{-- Board view --}}
+            {{--  --}}
+            {{--  --}}
+        </div>
 
         <!-- Task detail -->
         @foreach($tasks as $task)
@@ -58,7 +71,7 @@
         document.addEventListener('DOMContentLoaded', function () {
             const createTaskButton = document.getElementById('create-task-link');
             const inputTaskField = document.getElementById('input-task-field');
-            const taskColumn = document.getElementById('task-list');
+            const taskColumn = document.getElementById('task-list').children[0];
             const issuesNo = document.getElementById('issues');
 
             createTaskButton.addEventListener('click', e => {
@@ -72,6 +85,7 @@
                 inputTaskField.classList.add('hidden');
             });
 
+            // Show task detail logic
             var tbody = taskColumn.children[0].children;
             for (let i = 0; i < tbody.length; i++) {
                 const task = tbody[i];
