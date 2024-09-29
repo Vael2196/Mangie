@@ -19,14 +19,15 @@
         });
 
         task.addEventListener('contextmenu', e => {
+            const taskHighlight = document.getElementById(`task-list-item-${index}`);
             e.preventDefault();
+            if (!e.ctrlKey){return false;};
             const origin = {
                 left: e.pageX,
                 top: e.pageY
             };
-            const taskHighlight = document.getElementById(`task-list-item-${index}`);
             toggleArr = ["hover:bg-gray-100","dark:hover:bg-gray-600",              // OFF
-                        "hover:bg-blue-100", "dark:hover:bg-blue-600", "bg-blue-300" // ON
+                        "hover:bg-blue-100", "dark:hover:bg-blue-600", "bg-blue-300", "taskItemON" // ON
                         ];
             for(toggleOption of toggleArr){
                 taskHighlight.classList.toggle(toggleOption);
