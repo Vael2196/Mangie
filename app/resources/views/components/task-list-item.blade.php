@@ -1,18 +1,18 @@
 <tr {{ $attributes->merge(["class" => "px-4 py-2 text-start leading-5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 hover:cursor-pointer focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out rounded",
-                            "id" => $index])}}>
+                            "id" => "task-list-item-$index"])}}>
     <td class="py-2 pl-5 border-b-2">{{$task->title}}</td>
     <td class="py-2 border-b-2 w-20"><x-status-icon name="Epic"/></td>
     <td class="py-2 border-b-2 w-20"><x-status-icon name="status"/></td>
     <td class="py-2 border-b-2 w-20">Priority</td>
     <td class="py-2 border-b-2 w-20">Assigned</td>
+    <div class='hidden' id="task-list-detail-{{$index}}">
+        <x-task-detail :task="$task"/>
+    </div>
 </tr>
-<div class='hidden' id="task-list-detail-{{$index}}">
-    <x-task-detail :task="$task"/>
-</div>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         var index = {!! json_encode($index, JSON_HEX_TAG) !!};
-        task = document.getElementById(`${index}`);
+        task = document.getElementById(`task-list-item-${index}`);
         task.addEventListener('click', e => {
             const taskDetail = document.getElementById(`task-list-detail-${index}`);
             taskDetail.classList.toggle('hidden');

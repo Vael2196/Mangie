@@ -64,7 +64,7 @@
         document.addEventListener('DOMContentLoaded', function () {
             const createTaskButton = document.getElementById('create-task-link');
             const inputTaskField = document.getElementById('input-task-field');
-            const taskColumn = document.getElementById('task-list').children[0];
+            const taskColumn = document.getElementById('task-list').lastElementChild; // Hack
             const issuesNo = document.getElementById('issues');
 
             createTaskButton.addEventListener('click', e => {
@@ -98,8 +98,7 @@
                         .then(data => {
                             if (data.success) {
                                 // Insert task into the task list of the first column
-                                const newTask = `<tr class="px-4 py-2 text-start leading-5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 hover:cursor-pointer focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out rounded"
-                                                    onclick="">
+                                const newTask = `<tr class="px-4 py-2 text-start leading-5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 hover:cursor-pointer focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out rounded">
                                                     <td class="py-2 pl-5 border-b-2">${data.task.title}</td>
                                                     <td class="py-2 border-b-2 w-20">Epic</td>
                                                     <td class="py-2 border-b-2 w-20">Status</td>
