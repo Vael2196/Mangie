@@ -38,7 +38,7 @@
             {{-- List view --}}
             <x-task-list-board>
                 @foreach($tasks as $task)
-                    <x-task-list-item :task="$task" index="{{$loop->index}}"/>
+                    <x-task-list-item :task="$task"/>
                 @endforeach
             </x-task-list-board>
 
