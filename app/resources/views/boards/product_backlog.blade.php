@@ -58,7 +58,17 @@
 
         {{-- Context Menu --}}
         <div class="hidden absolute z-30" id="task-context-menu">
-            <x-context-menu/>
+            <div class='bg-white border px-4 py-2 text-start leading-5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-500 hover:cursor-pointer focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out rounded flex space-x-3'>
+                <div class = "text-center" onmouseover="document.getElementById('contextBoardMenu').classList.toggle('hidden')">Move To</div>
+            </div>
+
+            <div class="hidden" id="contextBoardMenu">
+                @foreach($boards as $board)
+                    <div class='bg-white border px-4 py-2 text-start leading-5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-500 hover:cursor-pointer focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out rounded flex space-x-3'>
+                        <h1>{{$board->name}}</h1>
+                    </div>
+                @endforeach
+            </div>
         </div>
 
         {{-- Link to Form --}}
@@ -83,6 +93,15 @@
             const issuesNo = document.getElementById('issues');
             const createSprint = document.getElementById('create-sprint');
 
+            // Task Items
+            const taskMenus = document.querySelectorAll(`[id*="task-list-menu"]`);
+            const taskItems = document.querySelectorAll(`[id*="task-list-item"]`);
+
+            // Context Menu
+            const taskContextMenu = document.getElementById(`task-context-menu`);
+            const contextSubMenu = document.getElementById(`contextBoardMenu`);
+
+
             createTaskButton.addEventListener('click', e => {
                 inputTaskField.classList.remove('hidden');
                 inputTaskField.focus();
@@ -94,7 +113,47 @@
                 inputTaskField.classList.add('hidden');
             });
 
+            // Context Menu ---------------------------------------------------------------
+            // Reset context menu on right click
+            document.addEventListener('contextmenu', e => {
+                taskContextMenu.classList.add('hidden');
+                contextSubMenu.classList.add('hidden');
+            });
 
+            // Reset context menu on left click
+            document.addEventListener('click', e => {
+                taskContextMenu.classList.add('hidden');
+                contextSubMenu.classList.add('hidden');
+            });
+
+
+            // Show context menu when clicking three dots
+            for(let taskMenu of taskMenus){
+                taskMenu.addEventListener('click', e => {
+                    e.stopPropagation();
+
+                    const rect = taskMenu.getBoundingClientRect();
+                    taskContextMenu.style.left = (window.scrollX + rect.left) + 'px';
+                    taskContextMenu.style.top = (window.scrollY + rect.top + rect.height) + 'px';
+                    taskContextMenu.classList.remove('hidden');
+                });
+            }
+
+            // Show context menu when rightclicking task
+            for(let task of taskItems){
+                task.addEventListener('contextmenu', e=> {
+                    e.stopPropagation();
+                    // Show context menu when right-clicking
+                    if (!e.ctrlKey){
+
+                        taskContextMenu.style.left = (e.pageX) + 'px';
+                        taskContextMenu.style.top = (e.pageY + 2) + 'px';
+                        taskContextMenu.classList.remove('hidden');
+                    };
+                    return false;
+                }, false);
+            }
+            // ----------------------------------------------------------------------------
 
             // Add new task
             inputTaskField.addEventListener('keypress', function (e) {
@@ -109,7 +168,7 @@
                             },
                             body: JSON.stringify({
                                 title: taskTitle,
-                                column_id: {{ $board->columns->first()->id }}
+                                column_id: {{ $backlog->columns->first()->id }}
                             })
                         })
                         .then(response => response.json())

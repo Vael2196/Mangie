@@ -14,6 +14,7 @@
         <x-task-detail :task="$task"/>
     </div>
 </tr>
+
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         var index = {!! json_encode($task->id, JSON_HEX_TAG) !!};
@@ -27,32 +28,15 @@
         // Reset everything when clicking outside
         document.addEventListener('click', e => {
             const taskItem = document.getElementById(`task-list-item-${index}`);
-            const taskContextMenu = document.getElementById(`task-context-menu`);
-
-            taskContextMenu.classList.add('hidden');
             taskItem.classList.remove("hover:bg-blue-100", "dark:hover:bg-blue-600", "bg-blue-300");
             taskItem.classList.add("hover:bg-gray-100", "dark:hover:bg-gray-600");
         })
 
         document.addEventListener('contextmenu', e => {
             const taskItem = document.getElementById(`task-list-item-${index}`);
-            const taskContextMenu = document.getElementById(`task-context-menu`);
-
-            taskContextMenu.classList.add('hidden');
             taskItem.classList.remove("hover:bg-blue-100", "dark:hover:bg-blue-600", "bg-blue-300");
             taskItem.classList.add("hover:bg-gray-100", "dark:hover:bg-gray-600");
         })
-
-        // Show context menu when clicking three dots
-        taskMenu.addEventListener('click', e => {
-            e.stopPropagation();
-            const taskContextMenu = document.getElementById(`task-context-menu`);
-            const taskItem = document.getElementById(`task-list-menu-${index}`);
-            var rect = taskItem.getBoundingClientRect();
-            taskContextMenu.style.left = (window.scrollX + rect.left) + 'px';
-            taskContextMenu.style.top = (window.scrollY + rect.top + rect.height) + 'px';
-            taskContextMenu.classList.remove('hidden');
-        });
 
         // Show detailed task view when clicking on the item
         task.addEventListener('click', e => {
@@ -69,14 +53,8 @@
             const taskHighlight = document.getElementById(`task-list-item-${index}`);
             e.preventDefault();
 
-            // Show context menu when right-clicking
-            if (!e.ctrlKey){
-                const taskContextMenu = document.getElementById(`task-context-menu`);
-                taskContextMenu.style.left = (e.pageX) + 'px';
-                taskContextMenu.style.top = (e.pageY) + 'px';
-                taskContextMenu.classList.remove('hidden');
-                return false;
-            };
+            // Do nothing when right clicking
+            if (!e.ctrlKey){return false;};
 
             // Highlight task when ctrl-right-clicking
             toggleArr = ["hover:bg-gray-100","dark:hover:bg-gray-600",              // OFF
