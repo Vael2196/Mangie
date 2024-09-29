@@ -14,49 +14,71 @@
         <x-task-detail :task="$task"/>
     </div>
 </tr>
-<div class="hidden absolute z-30" id="task-context-menu-{{$task->id}}">
-    <x-context-menu/>
-</div>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         var index = {!! json_encode($task->id, JSON_HEX_TAG) !!};
         task = document.getElementById(`task-list-item-${index}`);
         taskMenu = document.getElementById(`task-list-menu-${index}`);
 
+        // Extract later into product backlog script
+        // Add temp array
+        // Add add bulk task to sprint function
+
+        // Reset everything when clicking outside
         document.addEventListener('click', e => {
-            e.stopPropagation();
             const taskItem = document.getElementById(`task-list-item-${index}`);
-            const taskContextMenu = document.getElementById(`task-context-menu-${index}`);
-            // Reset Task items
+            const taskContextMenu = document.getElementById(`task-context-menu`);
+
             taskContextMenu.classList.add('hidden');
             taskItem.classList.remove("hover:bg-blue-100", "dark:hover:bg-blue-600", "bg-blue-300");
             taskItem.classList.add("hover:bg-gray-100", "dark:hover:bg-gray-600");
         })
 
+        document.addEventListener('contextmenu', e => {
+            const taskItem = document.getElementById(`task-list-item-${index}`);
+            const taskContextMenu = document.getElementById(`task-context-menu`);
+
+            taskContextMenu.classList.add('hidden');
+            taskItem.classList.remove("hover:bg-blue-100", "dark:hover:bg-blue-600", "bg-blue-300");
+            taskItem.classList.add("hover:bg-gray-100", "dark:hover:bg-gray-600");
+        })
+
+        // Show context menu when clicking three dots
         taskMenu.addEventListener('click', e => {
             e.stopPropagation();
-            const taskContextMenu = document.getElementById(`task-context-menu-${index}`);
+            const taskContextMenu = document.getElementById(`task-context-menu`);
             const taskItem = document.getElementById(`task-list-menu-${index}`);
             var rect = taskItem.getBoundingClientRect();
             taskContextMenu.style.left = (window.scrollX + rect.left) + 'px';
             taskContextMenu.style.top = (window.scrollY + rect.top + rect.height) + 'px';
-            taskContextMenu.classList.toggle('hidden');
+            taskContextMenu.classList.remove('hidden');
         });
 
+        // Show detailed task view when clicking on the item
         task.addEventListener('click', e => {
             e.stopPropagation();
             const taskDetail = document.getElementById(`task-list-detail-${index}`);
+            const taskContextMenu = document.getElementById(`task-context-menu`);
+            taskContextMenu.classList.add('hidden');
             taskDetail.classList.toggle('hidden');
         });
 
+        // Right clicking behaviour
         task.addEventListener('contextmenu', e => {
+            e.stopPropagation();
             const taskHighlight = document.getElementById(`task-list-item-${index}`);
             e.preventDefault();
-            if (!e.ctrlKey){return false;};
-            const origin = {
-                left: e.pageX,
-                top: e.pageY
+
+            // Show context menu when right-clicking
+            if (!e.ctrlKey){
+                const taskContextMenu = document.getElementById(`task-context-menu`);
+                taskContextMenu.style.left = (e.pageX) + 'px';
+                taskContextMenu.style.top = (e.pageY) + 'px';
+                taskContextMenu.classList.remove('hidden');
+                return false;
             };
+
+            // Highlight task when ctrl-right-clicking
             toggleArr = ["hover:bg-gray-100","dark:hover:bg-gray-600",              // OFF
                         "hover:bg-blue-100", "dark:hover:bg-blue-600", "bg-blue-300" // ON
                         ];

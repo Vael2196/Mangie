@@ -56,6 +56,11 @@
             {{--  --}}
         </div>
 
+        {{-- Context Menu --}}
+        <div class="hidden absolute z-30" id="task-context-menu">
+            <x-context-menu/>
+        </div>
+
         {{-- Link to Form --}}
         <div class="w-full text-start">
             <div id="create-task-link" class="block">
@@ -70,6 +75,7 @@
     </div>
 
     <script>
+        var selectedTaskItems = [];
         document.addEventListener('DOMContentLoaded', function () {
             const createTaskButton = document.getElementById('create-task-link');
             const inputTaskField = document.getElementById('input-task-field');
