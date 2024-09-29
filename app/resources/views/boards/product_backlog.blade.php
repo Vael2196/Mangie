@@ -33,7 +33,7 @@
         </div>
 
         {{-- Product backlog main list --}}
-        <div id="task-list">
+        <div id="task-list" class="overflow-auto max-h-[70vh]">
 
             {{-- List view --}}
             <x-task-list-board>
