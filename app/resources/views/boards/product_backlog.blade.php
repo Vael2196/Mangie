@@ -29,9 +29,13 @@
     <div class="px-10 flex flex-col w-[80vw] overflow-auto max-h-[70vh]">
 
         {{-- Sprint loading list --}}
-        <div class="mb-10">
-            <x-sprint-loading-board>
-            </x-sprint-loading-board>
+        <div class="mb-7 space-y-3">
+            @foreach($boards as $board)
+                @if($board->id == 1)
+                    @continue
+                @endif
+                <x-sprint-loading-board></x-sprint-loading-board>
+            @endforeach
         </div>
 
         <div class='flex justify-between mb-2'>
@@ -91,6 +95,7 @@
             const createTaskButton = document.getElementById('create-task-link');
             const inputTaskField = document.getElementById('input-task-field');
             const taskColumn = document.getElementById('task-list').lastElementChild; // Hack
+
             const issuesNo = document.getElementById('issues');
             const createSprint = document.getElementById('create-sprint');
 
@@ -227,17 +232,23 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        // // Insert task into the task list of the first column
-                        // const newTask = `<tr class="px-4 py-2 text-start leading-5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 hover:cursor-pointer focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out rounded">
-                        //                     <td class="py-2 pl-5 border-b-2">${data.task.title}</td>
+                        // // Insert tasks into the
+                        // const loadingSprint = document.getElementById(`loading-board-${board_id}`);
+                        // const loadingSprintColumn = loadingSprint.lastElementChild;
+                        // const loadingSprintIssues = loadingSprint.getElementById('issues');
+
+                        // const newTasks = "";
+                        // for(let task of data.task){
+                        //     const newTask += `<tr class="px-4 py-2 text-start leading-5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 hover:cursor-pointer focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out rounded">
+                        //                     <td class="py-2 pl-5 border-b-2">${task.title}</td>
                         //                     <td class="py-2 border-b-2 w-20">Epic</td>
                         //                     <td class="py-2 border-b-2 w-20">Status</td>
                         //                     <td class="py-2 border-b-2 w-20">Priority</td>
                         //                     <td class="py-2 border-b-2 w-20">Assigned</td>
                         //                 </tr>`;
-                        // taskColumn.insertAdjacentHTML('beforeend', newTask);
-                        // issuesNo.innerHTML = `Issues: ${parseInt(issuesNo.innerHTML.split(":")[1]) + 1}`;
-                        // inputTaskField.value = '';
+                        // }
+                        // loadingSprintColumn.insertAdjacentHTML('beforeend', newTask);
+                        // loadingSprintIssues.innerHTML = `Issues: ${parseInt(issuesNo.innerHTML.split(":")[1]) + 1}`;
                     } else {
                         console.error('Error moving tasks:', data.message);
                     }

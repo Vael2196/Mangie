@@ -174,7 +174,7 @@ class BoardController extends Controller
 
         return response()->json([
             'success' => true,
-            'tasks' => $tasks,
+            'tasks' => $tasks
         ]);
     }
 }
