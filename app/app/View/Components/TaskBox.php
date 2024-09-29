@@ -9,14 +9,12 @@ use Illuminate\View\Component;
 class TaskBox extends Component
 {
     public $task;
-    public $index;
     /**
      * Create a new component instance.
      */
-    public function __construct($task, $index)
+    public function __construct($task)
     {
         $this->task = $task;
-        $this->index = $index;
     }
 
 
