@@ -23,6 +23,16 @@
         task = document.getElementById(`task-list-item-${index}`);
         taskMenu = document.getElementById(`task-list-menu-${index}`);
 
+        document.addEventListener('click', e => {
+            e.stopPropagation();
+            const taskItem = document.getElementById(`task-list-item-${index}`);
+            const taskContextMenu = document.getElementById(`task-context-menu-${index}`);
+            // Reset Task items
+            taskContextMenu.classList.add('hidden');
+            taskItem.classList.remove("hover:bg-blue-100", "dark:hover:bg-blue-600", "bg-blue-300");
+            taskItem.classList.add("hover:bg-gray-100", "dark:hover:bg-gray-600");
+        })
+
         taskMenu.addEventListener('click', e => {
             e.stopPropagation();
             const taskContextMenu = document.getElementById(`task-context-menu-${index}`);
