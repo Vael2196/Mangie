@@ -33,4 +33,6 @@ Route::post('/tasks/store', [BoardController::class, 'storeTask'])->name('tasks.
 Route::get('/backlog', [BoardController::class, 'showBacklog'])->middleware('auth')->name('backlog.show');
 Route::post('/backlog/store', [BoardController::class, 'storeTask'])->middleware('auth')->name('backlog.store');
 
+//User Deletion
+Route::delete('/projects/{project}/users/{user}', [ProjectController::class, 'removeUser'])->middleware('auth')->name('projects.users.remove');
 require __DIR__.'/auth.php';
