@@ -27,22 +27,23 @@
         <div class="flex flex-nowrap space-x-5 h-4/6 p-5 overflow-auto max-w-[80vw] max-h-[70vh]" id="columns-container">
             <!-- Display columns and tasks -->
             @foreach($board->columns as $column)
-                <div class="bg-gray-100 shadow-lg rounded-lg p-4 w-64">
-                    <h2 class="text-xl font-bold">{{ $column->name }}</h2>
+                <x-task-column title="{{ $column->name }}">
+
+                    {{-- Show tasks for each column --}}
                     <div class="task-list" id="task-list-{{ $column->id }}">
                         @foreach($column->tasks as $task)
-                            <div class="bg-white p-2 my-2 rounded-lg shadow">
-                                {{ $task->title }}
-                            </div>
+                            <x-task-box :task="$task"/>
                         @endforeach
                     </div>
+
+                    {{-- Add task button --}}
                     @if ($loop->first)
                         <!-- Input field for adding a new task in the first column -->
                         <div class="mt-2">
                             <input type="text" id="new-task-input" class="bg-white shadow-inner rounded-lg p-2 w-full" placeholder="Enter new task" />
                         </div>
                     @endif
-                </div>
+                </x-task-column>
             @endforeach
 
             <!-- Option to add new columns -->

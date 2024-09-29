@@ -27,19 +27,25 @@
         </x-dropdown>
     </div>
     <div class="px-10 flex flex-col w-[80vw] overflow-x-auto">
-        <h1 id="issues" class='mb-2'>Issues: {{count($tasks)}}</h1>
-        <x-task-list-board id="task-list">
+        <div class='flex justify-between'>
+            <h1 id="issues" class='mb-2'>Issues: {{count($tasks)}}</h1>
+            {{-- Add list to card view dropdown switch here --}}
+        </div>
+
+        {{-- Product backlog main list --}}
+        <div id="task-list" class="overflow-auto max-h-[70vh]">
+
+            {{-- List view --}}
+            <x-task-list-board>
                 @foreach($tasks as $task)
                     <x-task-list-item :task="$task"/>
                 @endforeach
-        </x-task-list-board>
+            </x-task-list-board>
 
-        <!-- Task detail -->
-        @foreach($tasks as $task)
-            <div class='hidden' id="task-list-detail-{{$loop->index}}">
-                <x-task-detail :task="$task"/>
-            </div>
-        @endforeach
+            {{-- Board view --}}
+            {{--  --}}
+            {{--  --}}
+        </div>
 
         {{-- Link to Form --}}
         <div class="w-full text-start">
@@ -58,7 +64,7 @@
         document.addEventListener('DOMContentLoaded', function () {
             const createTaskButton = document.getElementById('create-task-link');
             const inputTaskField = document.getElementById('input-task-field');
-            const taskColumn = document.getElementById('task-list');
+            const taskColumn = document.getElementById('task-list').lastElementChild; // Hack
             const issuesNo = document.getElementById('issues');
 
             createTaskButton.addEventListener('click', e => {
@@ -71,15 +77,6 @@
                 createTaskButton.classList.remove("hidden");
                 inputTaskField.classList.add('hidden');
             });
-
-            var tbody = taskColumn.children[0].children;
-            for (let i = 0; i < tbody.length; i++) {
-                const task = tbody[i];
-                task.addEventListener('click', e => {
-                    const taskDetail = document.getElementById(`task-list-detail-${i}`);
-                    taskDetail.classList.toggle('hidden');
-                });
-            }
 
             // Add new task
             inputTaskField.addEventListener('keypress', function (e) {
@@ -101,8 +98,7 @@
                         .then(data => {
                             if (data.success) {
                                 // Insert task into the task list of the first column
-                                const newTask = `<tr class="px-4 py-2 text-start leading-5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 hover:cursor-pointer focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out rounded"
-                                                    onclick="">
+                                const newTask = `<tr class="px-4 py-2 text-start leading-5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 hover:cursor-pointer focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out rounded">
                                                     <td class="py-2 pl-5 border-b-2">${data.task.title}</td>
                                                     <td class="py-2 border-b-2 w-20">Epic</td>
                                                     <td class="py-2 border-b-2 w-20">Status</td>
