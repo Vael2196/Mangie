@@ -26,14 +26,23 @@
             </x-slot>
         </x-dropdown>
     </div>
-    <div class="px-10 flex flex-col w-[80vw] overflow-x-auto">
-        <div class='flex justify-between'>
-            <h1 id="issues" class='mb-2'>Issues: {{count($tasks)}}</h1>
-            {{-- Add list to card view dropdown switch here --}}
+    <div class="px-10 flex flex-col w-[80vw] overflow-auto max-h-[70vh]">
+
+        {{-- Sprint loading list --}}
+        <div class="mb-10">
+            <x-sprint-loading-board>
+            </x-sprint-loading-board>
         </div>
 
+        <div class='flex justify-between mb-2'>
+            <h1 id="issues">Issues: {{count($tasks)}}</h1>
+            {{-- Add list to card view dropdown switch here --}}
+            <div>
+                <x-secondary-button>Create Sprint</x-secondary-button>
+            </div>
+        </div>
         {{-- Product backlog main list --}}
-        <div id="task-list" class="overflow-auto max-h-[70vh]">
+        <div id="task-list">
 
             {{-- List view --}}
             <x-task-list-board>
@@ -66,6 +75,7 @@
             const inputTaskField = document.getElementById('input-task-field');
             const taskColumn = document.getElementById('task-list').lastElementChild; // Hack
             const issuesNo = document.getElementById('issues');
+            const createSprint = document.getElementById('create-sprint');
 
             createTaskButton.addEventListener('click', e => {
                 inputTaskField.classList.remove('hidden');
@@ -77,6 +87,8 @@
                 createTaskButton.classList.remove("hidden");
                 inputTaskField.classList.add('hidden');
             });
+
+
 
             // Add new task
             inputTaskField.addEventListener('keypress', function (e) {

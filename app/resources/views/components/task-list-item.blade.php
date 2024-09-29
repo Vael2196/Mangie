@@ -17,5 +17,21 @@
             const taskDetail = document.getElementById(`task-list-detail-${index}`);
             taskDetail.classList.toggle('hidden');
         });
+
+        task.addEventListener('contextmenu', e => {
+            e.preventDefault();
+            const origin = {
+                left: e.pageX,
+                top: e.pageY
+            };
+            const taskHighlight = document.getElementById(`task-list-item-${index}`);
+            toggleArr = ["hover:bg-gray-100","dark:hover:bg-gray-600",              // OFF
+                        "hover:bg-blue-100", "dark:hover:bg-blue-600", "bg-blue-300" // ON
+                        ];
+            for(toggleOption of toggleArr){
+                taskHighlight.classList.toggle(toggleOption);
+            }
+            return false;
+        }, false);
     });
 </script>
