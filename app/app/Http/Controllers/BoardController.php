@@ -140,14 +140,41 @@ class BoardController extends Controller
         $backlog = Board::with(['columns' => function ($query) {
             $query->orderBy('position');
         }, 'columns.tasks'])->findOrFail(1);
-        $user = Auth::user();
 
-        // Get All boards, including the product backlog
+        // Get All boards for a user, including the product backlog
+        $user = Auth::user();
         $boards = Board::where('user_id', $user->id)->orWhere('id', 1)->get();
 
         $tasks = Task::all();
 
-        // Pass the board to the sprint_board view
+        // Pass the boards and tasks to the backlog view
         return view('boards.product_backlog', compact('backlog', 'tasks', 'boards'));
+    }
+
+    public function moveTasks(Request $request){
+        $request->validate([
+            'task_ids' => [
+                'ids' => 'required|array',
+                'ids.*' => 'exists:tasks,id'
+            ],
+            'board_id' => 'required|exists:boards,id',
+        ]);
+        $todo_column = Column::where('board_id', $request->board_id)
+                            ->where('name', "TO DO");
+
+        $tasks = [];
+
+        foreach ($request->task_ids as $task_id){
+            $task = Task::where('id', $task_id);
+            $task->column_id = $todo_column->id;
+            $task->position = Task::where('column_id', $todo_column->id)->max('position') + 1;
+            array_push($tasks, $task);
+        };
+
+
+        return response()->json([
+            'success' => true,
+            'tasks' => $tasks,
+        ]);
     }
 }

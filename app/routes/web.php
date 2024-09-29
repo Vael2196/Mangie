@@ -32,5 +32,6 @@ Route::post('/tasks/store', [BoardController::class, 'storeTask'])->name('tasks.
 // Backlog
 Route::get('/backlog', [BoardController::class, 'showBacklog'])->middleware('auth')->name('backlog.show');
 Route::post('/backlog/store', [BoardController::class, 'storeTask'])->middleware('auth')->name('backlog.store');
+Route::post('/backlog/move', [BoardController::class, 'moveTasks'])->middleware('auth')->name('backlog.move');
 
 require __DIR__.'/auth.php';

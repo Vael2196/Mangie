@@ -5,9 +5,9 @@
     <td class="py-2 border-b-2 w-20"><x-status-icon name="status"/></td>
     <td class="py-2 border-b-2 w-10">Pr</td>
     <td class="py-2 border-b-2 w-10">As</td>
-    <td class="py-2 border-b-2 w-10">
+    <td class="py-1 border-b-2 w-10">
         <div id="task-list-menu-{{$task->id}}" class="hover:cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 bg-opacity-10 list-none rounded">
-            <i class="fa-solid fa-ellipsis px-2 py-1"></i>
+            <i class="fa-solid fa-ellipsis px-2 py-2"></i>
         </div>
     </td>
     <div class='hidden' id="task-list-detail-{{$task->id}}">
@@ -20,10 +20,6 @@
         var index = {!! json_encode($task->id, JSON_HEX_TAG) !!};
         task = document.getElementById(`task-list-item-${index}`);
         taskMenu = document.getElementById(`task-list-menu-${index}`);
-
-        // Extract later into product backlog script
-        // Add temp array
-        // Add add bulk task to sprint function
 
         // Reset everything when clicking outside
         document.addEventListener('click', e => {

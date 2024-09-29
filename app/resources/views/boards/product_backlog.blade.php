@@ -64,8 +64,9 @@
 
             <div class="hidden" id="contextBoardMenu">
                 @foreach($boards as $board)
-                    <div class='bg-white border px-4 py-2 text-start leading-5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-500 hover:cursor-pointer focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out rounded flex space-x-3'>
-                        <h1>{{$board->name}}</h1>
+                    <div class='bg-white border px-4 py-2 text-start leading-5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-500 hover:cursor-pointer focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out rounded flex space-x-3'
+                        onclick="moveTasks($board->id)">
+                            <h1>{{$board->name}}</h1>
                     </div>
                 @endforeach
             </div>
@@ -85,8 +86,8 @@
     </div>
 
     <script>
-        var selectedTaskItems = [];
         document.addEventListener('DOMContentLoaded', function () {
+            var selectedTaskItems = [];
             const createTaskButton = document.getElementById('create-task-link');
             const inputTaskField = document.getElementById('input-task-field');
             const taskColumn = document.getElementById('task-list').lastElementChild; // Hack
@@ -118,12 +119,18 @@
             document.addEventListener('contextmenu', e => {
                 taskContextMenu.classList.add('hidden');
                 contextSubMenu.classList.add('hidden');
+
+                // Clear temp arr
+                selectedTaskItems = [];
             });
 
             // Reset context menu on left click
             document.addEventListener('click', e => {
                 taskContextMenu.classList.add('hidden');
                 contextSubMenu.classList.add('hidden');
+
+                // Clear temp arr
+                selectedTaskItems = [];
             });
 
 
@@ -136,6 +143,9 @@
                     taskContextMenu.style.left = (window.scrollX + rect.left) + 'px';
                     taskContextMenu.style.top = (window.scrollY + rect.top + rect.height) + 'px';
                     taskContextMenu.classList.remove('hidden');
+
+                    // Set task as selected item
+                    selectedTaskItems = [Number(taskMenu.parentElement.parentElement.id.replace('task-list-item', ''))];
                 });
             }
 
@@ -145,17 +155,23 @@
                     e.stopPropagation();
                     // Show context menu when right-clicking
                     if (!e.ctrlKey){
-
                         taskContextMenu.style.left = (e.pageX) + 'px';
                         taskContextMenu.style.top = (e.pageY + 2) + 'px';
                         taskContextMenu.classList.remove('hidden');
+
+                        // Set task as selected item
+                        selectedTaskItems = [Number(task.id.replace('task-list-item', ''))];
+                        return false;
                     };
+
+                    // Add task to temp array when ctrl right clicking
+                    selectedTaskItems.push(Number(task.id.replace('task-list-item', '')));
                     return false;
                 }, false);
             }
             // ----------------------------------------------------------------------------
 
-            // Add new task
+            // Add new task to the product backlog
             inputTaskField.addEventListener('keypress', function (e) {
                 if (e.key === 'Enter') {
                     const taskTitle = inputTaskField.value.trim();
@@ -193,6 +209,40 @@
                     }
                 }
             });
+
+
+            // Bulk move tasks from backlog to sprint board
+            function moveTasks(board_id){
+                fetch('{{ route('backlog.moveTasks') }}', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        task_ids: selectedTaskItems, // Array(Num)
+                        board_id: board_id // Num
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // // Insert task into the task list of the first column
+                        // const newTask = `<tr class="px-4 py-2 text-start leading-5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 hover:cursor-pointer focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out rounded">
+                        //                     <td class="py-2 pl-5 border-b-2">${data.task.title}</td>
+                        //                     <td class="py-2 border-b-2 w-20">Epic</td>
+                        //                     <td class="py-2 border-b-2 w-20">Status</td>
+                        //                     <td class="py-2 border-b-2 w-20">Priority</td>
+                        //                     <td class="py-2 border-b-2 w-20">Assigned</td>
+                        //                 </tr>`;
+                        // taskColumn.insertAdjacentHTML('beforeend', newTask);
+                        // issuesNo.innerHTML = `Issues: ${parseInt(issuesNo.innerHTML.split(":")[1]) + 1}`;
+                        // inputTaskField.value = '';
+                    } else {
+                        console.error('Error moving tasks:', data.message);
+                    }
+                })
+            }
         });
 
     </script>
