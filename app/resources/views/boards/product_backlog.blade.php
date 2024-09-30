@@ -34,7 +34,13 @@
                 @if($board->id == 1)
                     @continue
                 @endif
-                <x-sprint-loading-board></x-sprint-loading-board>
+                <x-sprint-loading-board>
+                    @foreach($board->columns as $column)
+                        @foreach($column->tasks as $task)
+                            <x-task-list-item :task="$task"/>
+                        @endforeach
+                    @endforeach
+                </x-sprint-loading-board>
             @endforeach
         </div>
 
@@ -62,17 +68,20 @@
 
         {{-- Context Menu --}}
         <div class="hidden absolute z-30" id="task-context-menu">
-            <div class='bg-white border px-4 py-2 text-start leading-5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-500 hover:cursor-pointer focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out rounded flex space-x-3'>
-                <div class = "text-center" onmouseover="document.getElementById('contextBoardMenu').classList.toggle('hidden')">Move To</div>
-            </div>
+            <div class="lg:flex lg:items-start">
+                <div class='bg-white border px-4 py-2 items-center leading-5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-500 hover:cursor-pointer focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out rounded flex space-x-3'>
+                    <div class = "text-center" onmouseover="document.getElementById('contextBoardMenu').classList.toggle('hidden')">Move To</div>
+                    <div class="text-center"><i class="fa-solid fa-angle-right"></i></div>
+                </div>
 
-            <div class="hidden" id="contextBoardMenu">
-                @foreach($boards as $board)
-                    <div class='bg-white border px-4 py-2 text-start leading-5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-500 hover:cursor-pointer focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out rounded flex space-x-3'
-                        onclick="moveTasks($board->id)">
-                            <h1>{{$board->name}}</h1>
-                    </div>
-                @endforeach
+                <div class="hidden shadow-lg" id="contextBoardMenu">
+                    @foreach($boards as $board)
+                        <div class='bg-white border px-4 py-2 text-start leading-5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-500 hover:cursor-pointer focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out flex space-x-3'
+                            onclick="moveTasks($board->id)">
+                                <h1>{{$board->name}}</h1>
+                        </div>
+                    @endforeach
+                </div>
             </div>
         </div>
 
