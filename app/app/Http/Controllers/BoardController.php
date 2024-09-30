@@ -159,6 +159,14 @@ class BoardController extends Controller
             ],
             'board_id' => 'required|exists:boards,id',
         ]);
+
+        // $output = $request;
+        // if (is_array($output)){
+        //     $output = implode(',', $output);
+        // }
+        // echo "<script>console.log('Debug Objects: " . $output . "' );</script>";
+
+
         $todo_column = Column::where('board_id', $request->board_id)
                             ->where('name', "TO DO")->get();
 

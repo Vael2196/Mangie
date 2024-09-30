@@ -69,16 +69,18 @@
         {{-- Context Menu --}}
         <div class="hidden absolute z-30" id="task-context-menu">
             <div class="lg:flex lg:items-start">
+                {{-- "Move To" Button --}}
                 <div class='bg-white border px-4 py-2 items-center leading-5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-500 hover:cursor-pointer focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out rounded flex space-x-3'>
                     <div class = "text-center" onmouseover="document.getElementById('contextBoardMenu').classList.toggle('hidden')">Move To</div>
                     <div class="text-center"><i class="fa-solid fa-angle-right"></i></div>
                 </div>
 
+                {{-- Context sub menu (Buttons for each sprint to move to) --}}
                 <div class="hidden shadow-lg" id="contextBoardMenu">
                     @foreach($boards as $board)
                         <div class='bg-white border px-4 py-2 text-start leading-5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-500 hover:cursor-pointer focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out flex space-x-3'
-                            onclick="moveTasks($board->id)">
-                                <h1>{{$board->name}}</h1>
+                            id="context-board-menu-{{$board->id}}">
+                            <h1>{{$board->name}}</h1>
                         </div>
                     @endforeach
                 </div>
@@ -109,13 +111,13 @@
             const createSprint = document.getElementById('create-sprint');
 
             // Task Items
-            const taskMenus = document.querySelectorAll(`[id*="task-list-menu"]`);
-            const taskItems = document.querySelectorAll(`[id*="task-list-item"]`);
+            const taskMenus = document.querySelectorAll(`[id*="task-list-menu"]`); // Three dots
+            const taskItems = document.querySelectorAll(`[id*="task-list-item"]`); // Rows of the table -- change to be more general name
 
             // Context Menu
-            const taskContextMenu = document.getElementById(`task-context-menu`);
-            const contextSubMenu = document.getElementById(`contextBoardMenu`);
-
+            const taskContextMenu = document.getElementById(`task-context-menu`); // Context menu
+            const contextSubMenu = document.getElementById(`contextBoardMenu`); // Context sub menu box
+            const contextSubMenuChildren = contextSubMenu.children; // Context sub menu buttons
 
             createTaskButton.addEventListener('click', e => {
                 inputTaskField.classList.remove('hidden');
@@ -148,6 +150,7 @@
             });
 
 
+            // MAKE INTO ONE LOOP
             // Show context menu when clicking three dots
             for(let taskMenu of taskMenus){
                 taskMenu.addEventListener('click', e => {
@@ -183,6 +186,13 @@
                     return false;
                 }, false);
             }
+
+            // Call moveTasks function when clicking on sub menu button
+            for (let child of contextSubMenuChildren){
+                let subMenuId = Number(child.id.replace('context-board-menu-', ""));
+                child.addEventListener('click', moveTasks(subMenuId));
+            }
+
             // ----------------------------------------------------------------------------
 
             // Add new task to the product backlog
@@ -227,6 +237,7 @@
 
             // Bulk move tasks from backlog to sprint board
             function moveTasks(board_id){
+                console.log(board_id);
                 fetch('{{ route('backlog.moveTasks') }}', {
                     method: 'POST',
                     headers: {
@@ -234,7 +245,7 @@
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        task_ids: selectedTaskItems, // Array(Num)
+                        task_ids: JSON.stringify({task_ids: selectedTaskItems}),// BUG HERE
                         board_id: board_id // Num
                     })
                 })
