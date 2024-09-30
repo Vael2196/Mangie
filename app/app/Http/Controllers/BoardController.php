@@ -160,17 +160,14 @@ class BoardController extends Controller
             'board_id' => 'required|exists:boards,id',
         ]);
         $todo_column = Column::where('board_id', $request->board_id)
-                            ->where('name', "TO DO");
+                            ->where('name', "TO DO")->get();
 
-        $tasks = [];
-
-        foreach ($request->task_ids as $task_id){
-            $task = Task::where('id', $task_id);
-            $task->column_id = $todo_column->id;
-            $task->position = Task::where('column_id', $todo_column->id)->max('position') + 1;
-            array_push($tasks, $task);
-        };
-
+        // Updating the column id and positions of each task
+        // Return the tasks at in their new column
+        $tasks = Task::whereIn('id', $request->task_ids)->update([
+            'column_id' => $todo_column->id,
+            'position' => Task::where('column_id', $todo_column->id)->max('position') + 1,
+        ])->get();
 
         return response()->json([
             'success' => true,

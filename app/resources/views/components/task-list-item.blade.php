@@ -1,8 +1,14 @@
 <tr {{ $attributes->merge(["class" => "px-4 py-2 text-start leading-5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 hover:cursor-pointer focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out rounded",
                             "id" => "task-list-item-$task->id"])}}>
     <td class="py-2 pl-5 border-b-2 min-w-20">{{$task->title}}</td>
-    <td class="py-2 border-b-2 w-20"><x-status-icon name="Epic"/></td>
-    <td class="py-2 border-b-2 w-20"><x-status-icon name="status"/></td>
+    <td class="py-2 border-b-2 w-20">
+        @if($task->column_id != 1)
+            <x-status-icon name="Epic"/>
+        @endif
+    </td>
+    <td class="py-2 border-b-2 w-20">
+        <x-status-icon name="status"/>
+    </td>
     <td class="py-2 border-b-2 w-10">Pr</td>
     <td class="py-2 border-b-2 w-10">As</td>
     <td class="py-1 border-b-2 w-10">
@@ -37,11 +43,12 @@
         // Show detailed task view when clicking on the item
         task.addEventListener('click', e => {
             e.stopPropagation();
+            if (e.ctrlKey){return false;};
             const taskDetail = document.getElementById(`task-list-detail-${index}`);
             const taskContextMenu = document.getElementById(`task-context-menu`);
             taskContextMenu.classList.add('hidden');
             taskDetail.classList.toggle('hidden');
-        });
+        }, false);
 
         // Right clicking behaviour
         task.addEventListener('contextmenu', e => {
