@@ -131,7 +131,7 @@
             });
 
             // Context Menu ---------------------------------------------------------------
-            // Reset context menu on right click
+            // Reset context menu on right click anywhere outside
             document.addEventListener('contextmenu', e => {
                 taskContextMenu.classList.add('hidden');
                 contextSubMenu.classList.add('hidden');
@@ -140,7 +140,7 @@
                 selectedTaskItems = [];
             });
 
-            // Reset context menu on left click
+            // Reset context menu on left click anywhere outside
             document.addEventListener('click', e => {
                 taskContextMenu.classList.add('hidden');
                 contextSubMenu.classList.add('hidden');
@@ -166,7 +166,7 @@
                 });
             }
 
-            // Show context menu when rightclicking task
+            // Right clicking functionality
             for(let task of taskItems){
                 task.addEventListener('contextmenu', e=> {
                     e.stopPropagation();
@@ -238,6 +238,8 @@
             // Bulk move tasks from backlog to sprint board
             function moveTasks(board_id){
                 console.log(board_id);
+                console.log(selectedTaskItems);
+                console.log(JSON.stringify({task_ids: selectedTaskItems}));
                 fetch('{{ route('backlog.moveTasks') }}', {
                     method: 'POST',
                     headers: {
