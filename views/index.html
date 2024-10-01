@@ -29,7 +29,51 @@
                 <a href="#" class="btn btn-primary">Go to Sprint ></a>
             </div>
         </div>
+        <!-- Delete User Section -->
+        <div class="card mt-4">
+            <div class="card-body">
+                <h2 class="card-title">Manage Users</h2>
+                <form id="deleteUserForm" method="POST">
+                    <div class="mb-3">
+                        <label for="userId" class="form-label">User ID to Delete:</label>
+                        <input type="text" id="userId" name="userId" class="form-control" placeholder="Enter User ID" required />
+                    </div>
+
+                    <button type="button" class="btn btn-danger" onclick="submitForm()">Delete User</button>
+                </form>
+            </div>
+        </div>
     </div>
+
+    <script>
+        function submitForm() {
+            var projectId = document.getElementById('projectId').value;
+            var userId = document.getElementById('userId').value;
+
+            // Set form action dynamically
+            var form = document.getElementById('deleteUserForm');
+            form.action = `/projects/${projectId}/users/${userId}`;
+            form.method = 'POST';
+
+            // Add hidden input fields for CSRF token and method spoofing to simulate DELETE
+            var csrfInput = document.createElement('input');
+            csrfInput.type = 'hidden';
+            csrfInput.name = '_token'; // CSRF token name for Laravel
+            csrfInput.value = '{{ csrf_token() }}'; // Laravel automatically generates a CSRF token
+
+            var methodInput = document.createElement('input');
+            methodInput.type = 'hidden';
+            methodInput.name = '_method'; // Method spoofing for DELETE
+            methodInput.value = 'DELETE';
+
+            form.appendChild(csrfInput);
+            form.appendChild(methodInput);
+
+            // Submit the form
+            form.submit();
+        }
+    </script>
+    
 
 </body>
 </html>

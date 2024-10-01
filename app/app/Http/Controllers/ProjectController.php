@@ -63,6 +63,19 @@ class ProjectController extends Controller
 
         return redirect()->route('/boards/dashboard');
     }
+    public function removeUser(Project $project, User $user)
+    {
+        // Assuming you have a relation like $project->users() in the Project model
+        if ($project->users()->where('id', $user->id)->exists()) {
+            // Detach the user from the project (if many-to-many)
+            $project->users()->detach($user->id);
+
+            return redirect()->back()->with('success', 'User removed successfully.');
+        }
+
+        return redirect()->back()->with('error', 'User not found in the project.');
+    }
+
 // #TODO: Revert the test case from above th this one once you populate the database
     //     public function index()
     // {
