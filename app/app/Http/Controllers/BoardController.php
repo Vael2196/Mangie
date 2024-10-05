@@ -198,7 +198,8 @@ class BoardController extends Controller
 
         return response()->json([
             'success' => true,
-            // 'type' => $task_id_num,
+            'task_ids' => $task_ids,
+            'type' => $task_id_num,
             // "column_id" => $todo_column->id,
             "starting_board_id" => $initial_board_ids, // Arr({board_id: board_id})
             'tasks' => $tasks
