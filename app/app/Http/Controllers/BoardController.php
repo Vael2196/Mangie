@@ -153,31 +153,29 @@ class BoardController extends Controller
 
     public function moveTasks(Request $request){
         $request->validate([
-            // 'task_ids' => 'array:tasks,id',
             'board_id' => 'required|exists:boards,id',
         ]);
 
-        // $output = $request;
-        // if (is_array($output)){
-        //     $output = implode(',', $output);
-        // }
-        // echo "<script>console.log('Debug Objects: " . $output . "' );</script>";
+        // Get the column to move the tasks to
+        if ($request->board_id == 1){
+            $todo_column = Column::where('board_id', 1)
+                            ->where('name', "Backlog")->get()[0];
+        }else{
+            $todo_column = Column::where('board_id', $request->board_id)
+            ->where('name', "TO DO")->get()[0];
+        }
 
-
-        $todo_column = Column::where('board_id', $request->board_id)
-                            ->where('name', "TO DO")->get()[0];
-
+        // Parse task_ids string to php array
         $task_id_string = $request->task_ids;
         $task_id_string = str_replace('[', '', $task_id_string);
         $task_id_string = str_replace(']', '', $task_id_string);
         $task_ids = explode(',', $task_id_string);
+
+        // Convert task_ids to integer
         $task_id_num = [];
         foreach ($task_ids as $task_id){
             array_push($task_id_num, (int)$task_id);
         }
-
-        // Find the initial board ids for each task
-        $initial_board_ids = Column::select('board_id')->where('id', Task::select('column_id')->whereIn('id', $task_id_num))->get();
 
         // Updating the column id and positions of each task
         $res = Task::whereIn('id', $task_id_num)->update([
@@ -196,12 +194,9 @@ class BoardController extends Controller
         // Fetch the new tasks
         $tasks = Task::whereIn('id', $task_id_num)->get();
 
+        // Return the new tasks as a JSON response
         return response()->json([
             'success' => true,
-            'task_ids' => $task_ids,
-            'type' => $task_id_num,
-            // "column_id" => $todo_column->id,
-            "starting_board_id" => $initial_board_ids, // Arr({board_id: board_id})
             'tasks' => $tasks
         ]);
     }

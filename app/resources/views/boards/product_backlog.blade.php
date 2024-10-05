@@ -253,7 +253,6 @@
 
             // Bulk move tasks from backlog to sprint board
             function moveTasks(board_id){
-                console.log(board_id);
                 fetch('{{ route('backlog.moveTasks') }}', {
                     method: 'POST',
                     headers: {
@@ -287,7 +286,6 @@
                             endPointBoard.appendChild(taskItem);
                         }
 
-                        // loadingSprintIssues.innerHTML = `Issues: ${parseInt(issuesNo.innerHTML.split(":")[1]) + 1}`;
                     } else {
                         console.error('Error moving tasks:', data.message);
                     }
