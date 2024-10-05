@@ -140,8 +140,8 @@
                 taskContextMenu.classList.add('hidden');
                 contextSubMenu.classList.add('hidden');
 
-                // // Clear temp arr
-                // selectedTaskItems = [];
+                // Clear temp arr
+                selectedTaskItems = [];
             });
 
             // Reset context menu on left click anywhere outside
@@ -149,8 +149,8 @@
                 taskContextMenu.classList.add('hidden');
                 contextSubMenu.classList.add('hidden');
 
-                // // Clear temp arr
-                // selectedTaskItems = [];
+                // Clear temp arr
+                selectedTaskItems = [];
             });
 
 
@@ -285,6 +285,9 @@
                             let taskItem = document.getElementById(`task-list-item-${task.id}`);
                             endPointBoard.appendChild(taskItem);
                         }
+
+                        // Reset Selected task items
+                        selectedTaskItems = [];
 
                     } else {
                         console.error('Error moving tasks:', data.message);
