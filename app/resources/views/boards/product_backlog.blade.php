@@ -34,7 +34,7 @@
                 @if($board->id == 1)
                     @continue
                 @endif
-                <x-sprint-loading-board>
+                <x-sprint-loading-board name="{{$board->name}}">
                     @foreach($board->columns as $column)
                         @foreach($column->tasks as $task)
                             <x-task-list-item :task="$task"/>
@@ -56,8 +56,10 @@
 
             {{-- List view --}}
             <x-task-list-board>
-                @foreach($tasks as $task)
-                    <x-task-list-item :task="$task"/>
+                @foreach($backlog->columns as $column)
+                    @foreach($column->tasks as $task)
+                        <x-task-list-item :task="$task"/>
+                    @endforeach
                 @endforeach
             </x-task-list-board>
 
@@ -68,7 +70,7 @@
 
         {{-- Context Menu --}}
         <div class="hidden absolute z-30" id="task-context-menu">
-            <div class="lg:flex lg:items-start">
+            <div class="2xl:flex 2xl:items-start">
                 {{-- "Move To" Button --}}
                 <div class='bg-white border px-4 py-2 items-center leading-5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-500 hover:cursor-pointer focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out rounded flex space-x-3'>
                     <div class = "text-center" onmouseover="document.getElementById('contextBoardMenu').classList.toggle('hidden')">Move To</div>
@@ -136,8 +138,8 @@
                 taskContextMenu.classList.add('hidden');
                 contextSubMenu.classList.add('hidden');
 
-                // Clear temp arr
-                selectedTaskItems = [];
+                // // Clear temp arr
+                // selectedTaskItems = [];
             });
 
             // Reset context menu on left click anywhere outside
@@ -145,8 +147,8 @@
                 taskContextMenu.classList.add('hidden');
                 contextSubMenu.classList.add('hidden');
 
-                // Clear temp arr
-                selectedTaskItems = [];
+                // // Clear temp arr
+                // selectedTaskItems = [];
             });
 
 
@@ -162,7 +164,7 @@
                     taskContextMenu.classList.remove('hidden');
 
                     // Set task as selected item
-                    selectedTaskItems = [Number(taskMenu.parentElement.parentElement.id.replace('task-list-item', ''))];
+                    selectedTaskItems = [Number(taskMenu.parentElement.parentElement.id.replace('task-list-item-', ''))];
                 });
             }
 
@@ -177,12 +179,12 @@
                         taskContextMenu.classList.remove('hidden');
 
                         // Set task as selected item
-                        selectedTaskItems = [Number(task.id.replace('task-list-item', ''))];
+                        selectedTaskItems = [Number(task.id.replace('task-list-item-', ''))];
                         return false;
                     };
 
                     // Add task to temp array when ctrl right clicking
-                    selectedTaskItems.push(Number(task.id.replace('task-list-item', '')));
+                    selectedTaskItems.push(Number(task.id.replace('task-list-item-', '')));
                     return false;
                 }, false);
             }
@@ -190,7 +192,7 @@
             // Call moveTasks function when clicking on sub menu button
             for (let child of contextSubMenuChildren){
                 let subMenuId = Number(child.id.replace('context-board-menu-', ""));
-                child.addEventListener('click', moveTasks(subMenuId));
+                child.addEventListener('click', e => {moveTasks(subMenuId);});
             }
 
             // ----------------------------------------------------------------------------
@@ -238,8 +240,6 @@
             // Bulk move tasks from backlog to sprint board
             function moveTasks(board_id){
                 console.log(board_id);
-                console.log(selectedTaskItems);
-                console.log(JSON.stringify({task_ids: selectedTaskItems}));
                 fetch('{{ route('backlog.moveTasks') }}', {
                     method: 'POST',
                     headers: {
@@ -247,21 +247,25 @@
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        task_ids: JSON.stringify({task_ids: selectedTaskItems}),// BUG HERE
+                        task_ids: JSON.stringify(selectedTaskItems),
                         board_id: board_id // Num
                     })
                 })
-                .then(response => response.json())
+                .then(response => {
+                    responseClone = response.clone();
+                    return response.json();
+                })
                 .then(data => {
                     if (data.success) {
+                        console.log(selectedTaskItems);
                         // // Insert tasks into the
                         // const loadingSprint = document.getElementById(`loading-board-${board_id}`);
                         // const loadingSprintColumn = loadingSprint.lastElementChild;
                         // const loadingSprintIssues = loadingSprint.getElementById('issues');
 
-                        // const newTasks = "";
+                        // let newTasks = "";
                         // for(let task of data.task){
-                        //     const newTask += `<tr class="px-4 py-2 text-start leading-5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 hover:cursor-pointer focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out rounded">
+                        //     newTask += `<tr class="px-4 py-2 text-start leading-5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 hover:cursor-pointer focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out rounded">
                         //                     <td class="py-2 pl-5 border-b-2">${task.title}</td>
                         //                     <td class="py-2 border-b-2 w-20">Epic</td>
                         //                     <td class="py-2 border-b-2 w-20">Status</td>
@@ -274,7 +278,15 @@
                     } else {
                         console.error('Error moving tasks:', data.message);
                     }
-                })
+
+                // print response for debugging
+                }, function (rejectionReason) {
+                    console.log('Error parsing JSON from response:', rejectionReason, responseClone);
+                    responseClone.text()
+                    .then(function (bodyText) {
+                        console.log('Received the following instead of valid JSON:', bodyText);
+                    });
+                });
             }
         });
 

@@ -153,10 +153,7 @@ class BoardController extends Controller
 
     public function moveTasks(Request $request){
         $request->validate([
-            'task_ids' => [
-                'ids' => 'required|array',
-                'ids.*' => 'exists:tasks,id'
-            ],
+            // 'task_ids' => 'array:tasks,id',
             'board_id' => 'required|exists:boards,id',
         ]);
 
@@ -170,9 +167,17 @@ class BoardController extends Controller
         $todo_column = Column::where('board_id', $request->board_id)
                             ->where('name', "TO DO")->get();
 
+        str_replace('[', '', $request->task_ids);
+        str_replace(']', '', $request->task_ids);
+        $task_ids = explode(',', $request->task_ids);
+        $task_id_num = [];
+        foreach ($task_ids as $task_id){
+            array_push($task_id_num, (int)$task_id);
+        }
+
         // Updating the column id and positions of each task
         // Return the tasks at in their new column
-        $tasks = Task::whereIn('id', $request->task_ids)->update([
+        $tasks = Task::whereIn('id', $task_id_num)->update([
             'column_id' => $todo_column->id,
             'position' => Task::where('column_id', $todo_column->id)->max('position') + 1,
         ])->get();
