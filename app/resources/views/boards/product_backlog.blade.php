@@ -31,6 +31,7 @@
         {{-- Sprint loading list --}}
         <div class="mb-7 space-y-3">
             @foreach($boards as $board)
+            <div id="sprint-loading-board-{{$board->id}}">
                 @if($board->id == 1)
                     @continue
                 @endif
@@ -41,6 +42,7 @@
                         @endforeach
                     @endforeach
                 </x-sprint-loading-board>
+            </div>
             @endforeach
         </div>
 
@@ -179,6 +181,7 @@
                         taskContextMenu.classList.remove('hidden');
 
                         // Set task as selected item
+                        if(selectedTaskItems.length == 1)
                         selectedTaskItems = [Number(task.id.replace('task-list-item-', ''))];
                         return false;
                     };
@@ -217,13 +220,23 @@
                         .then(data => {
                             if (data.success) {
                                 // Insert task into the task list of the first column
-                                const newTask = `<tr class="px-4 py-2 text-start leading-5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 hover:cursor-pointer focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out rounded">
-                                                    <td class="py-2 pl-5 border-b-2">${data.task.title}</td>
-                                                    <td class="py-2 border-b-2 w-20">Epic</td>
-                                                    <td class="py-2 border-b-2 w-20">Status</td>
-                                                    <td class="py-2 border-b-2 w-20">Priority</td>
-                                                    <td class="py-2 border-b-2 w-20">Assigned</td>
-                                                </tr>`;
+                                const newTask = `<tr class = "px-4 py-2 text-start leading-5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 hover:cursor-pointer focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out rounded" id = "task-list-item-${data.task.id}">
+                                                <td class="py-2 pl-5 border-b-2 min-w-20">${data.task.title}</td>
+                                                <td class="py-2 border-b-2 w-20">
+
+                                                </td>
+                                                <td class="py-2 border-b-2 w-20">
+
+                                                </td>
+                                                <td class="py-2 border-b-2 w-10">Pr</td>
+                                                <td class="py-2 border-b-2 w-10">As</td>
+                                                <td class="py-1 border-b-2 w-10">
+                                                    <div id="task-list-menu-${data.task.id}" class="hover:cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 bg-opacity-10 list-none rounded">
+                                                        <i class="fa-solid fa-ellipsis px-2 py-2"></i>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            `;
                                 taskColumn.insertAdjacentHTML('beforeend', newTask);
                                 issuesNo.innerHTML = `Issues: ${parseInt(issuesNo.innerHTML.split(":")[1]) + 1}`;
                                 inputTaskField.value = '';
@@ -257,23 +270,44 @@
                 })
                 .then(data => {
                     if (data.success) {
-                        console.log(selectedTaskItems);
-                        // // Insert tasks into the
-                        // const loadingSprint = document.getElementById(`loading-board-${board_id}`);
-                        // const loadingSprintColumn = loadingSprint.lastElementChild;
-                        // const loadingSprintIssues = loadingSprint.getElementById('issues');
+                        // Get product backlog if endpoint is 1
+                        let endPointBoard;
+                        if(board_id == 1){
+                            endPointBoard = taskColumn;
+                        } else {
+                            // Get sprint loading board if endpoint is anything else
+                            endPointBoard = document.getElementById(`sprint-loading-board-${board_id}`).lastElementChild.lastElementChild;
+                        }
 
-                        // let newTasks = "";
-                        // for(let task of data.task){
-                        //     newTask += `<tr class="px-4 py-2 text-start leading-5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 hover:cursor-pointer focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out rounded">
-                        //                     <td class="py-2 pl-5 border-b-2">${task.title}</td>
-                        //                     <td class="py-2 border-b-2 w-20">Epic</td>
-                        //                     <td class="py-2 border-b-2 w-20">Status</td>
-                        //                     <td class="py-2 border-b-2 w-20">Priority</td>
-                        //                     <td class="py-2 border-b-2 w-20">Assigned</td>
-                        //                 </tr>`;
-                        // }
-                        // loadingSprintColumn.insertAdjacentHTML('beforeend', newTask);
+                        // Insert task into the task list of the first column
+                        let newTasks = "";
+                        for(let task of data.tasks){
+                            newTasks += `<tr class = "px-4 py-2 text-start leading-5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 hover:cursor-pointer focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out rounded" id = "task-list-item-${task.id}">
+                                                <td class="py-2 pl-5 border-b-2 min-w-20">${task.title}</td>
+                                                <td class="py-2 border-b-2 w-20">
+
+                                                </td>
+                                                <td class="py-2 border-b-2 w-20">
+
+                                                </td>
+                                                <td class="py-2 border-b-2 w-10">Pr</td>
+                                                <td class="py-2 border-b-2 w-10">As</td>
+                                                <td class="py-1 border-b-2 w-10">
+                                                    <div id="task-list-menu-${task.id}" class="hover:cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 bg-opacity-10 list-none rounded">
+                                                        <i class="fa-solid fa-ellipsis px-2 py-2"></i>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            `;
+                        }
+                        endPointBoard.insertAdjacentHTML('beforeend', newTasks);
+                        console.log(endPointBoard);
+
+                        // Remove task from their respective boards
+                        for(let task of selectedTaskItems){
+                            document.getElementById(`task-list-item-${task}`).remove();
+                        }
+
                         // loadingSprintIssues.innerHTML = `Issues: ${parseInt(issuesNo.innerHTML.split(":")[1]) + 1}`;
                     } else {
                         console.error('Error moving tasks:', data.message);
