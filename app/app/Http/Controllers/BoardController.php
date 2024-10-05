@@ -179,19 +179,19 @@ class BoardController extends Controller
         // Find the initial board ids for each task
         $initial_board_ids = Column::select('board_id')->where('id', Task::select('column_id')->whereIn('id', $task_id_num))->get();
 
-        // // Updating the column id and positions of each task
-        // $res = Task::whereIn('id', $task_id_num)->update([
-        //     'column_id' => $todo_column->id,
-        //     'position' => Task::where('column_id', $todo_column->id)->max('position') + 1,
-        // ]);
+        // Updating the column id and positions of each task
+        $res = Task::whereIn('id', $task_id_num)->update([
+            'column_id' => $todo_column->id,
+            'position' => Task::where('column_id', $todo_column->id)->max('position') + 1,
+        ]);
 
-        // // Check is update success
-        // if (!$res){
-        //     return response()->json([
-        //         'success' => false,
-        //         'message' => 'Failed to move tasks'
-        //     ]);
-        // }
+        // Check is update success
+        if (!$res){
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to move tasks'
+            ]);
+        }
 
         // Fetch the new tasks
         $tasks = Task::whereIn('id', $task_id_num)->get();
