@@ -29,7 +29,7 @@
     <div class="px-10 flex flex-col w-[80vw] overflow-auto max-h-[70vh]">
 
         {{-- Sprint loading list --}}
-        <div class="mb-7 space-y-3">
+        <div class="mb-7 space-y-3" id="sprint-loading-board-list">
             @foreach($boards as $board)
             <div id="sprint-loading-board-{{$board->id}}">
                 @if($board->id == 1)
@@ -46,11 +46,22 @@
             @endforeach
         </div>
 
+        {{-- Create sprint input box --}}
+        <div class="border min-w-full overflow-x-auto rounded p-3 bg-gray-100 hidden" id="create-sprint">
+            <div class="flex justify-between mb-2">
+                <input class='border font-semibold text-xl' id="create-sprint-input" type="text" placeholder="Enter Sprint Name">
+                <x-secondary-button>Start Sprint</x-secondary-button>
+            </div>
+            <p class="text-sm">Add tasks here or from the product backlog</p>
+        </div>
+
         <div class='flex justify-between mb-2'>
             <h1 id="issues">Issues: {{count($tasks)}}</h1>
             {{-- Add list to card view dropdown switch here --}}
             <div>
-                <x-secondary-button>Create Sprint</x-secondary-button>
+                <div id="create-sprint-button"><x-secondary-button>Create Sprint</x-secondary-button></div>
+                {{--  --}}
+                {{--  --}}
             </div>
         </div>
         {{-- Product backlog main list --}}
@@ -112,7 +123,11 @@
             const taskColumn = document.getElementById('task-list').lastElementChild; // Hack
 
             const issuesNo = document.getElementById('issues');
-            const createSprint = document.getElementById('create-sprint');
+
+            //Create Sprint
+            const createSprint = document.getElementById('create-sprint'); // Box created when clicking on create sprint button
+            const createSprintButton = document.getElementById('create-sprint-button'); // Creates a sprint
+            const createSprintInput = document.getElementById('create-sprint-input');   // Input for name of sprint
 
             // Task Items
             const taskMenus = document.querySelectorAll(`[id*="task-list-menu"]`); // Three dots
@@ -123,6 +138,7 @@
             const contextSubMenu = document.getElementById(`contextBoardMenu`); // Context sub menu box
             const contextSubMenuChildren = contextSubMenu.children; // Context sub menu buttons
 
+            // Create task when clicking button ------------------------------------------
             createTaskButton.addEventListener('click', e => {
                 inputTaskField.classList.remove('hidden');
                 inputTaskField.focus();
@@ -133,6 +149,17 @@
                 createTaskButton.classList.remove("hidden");
                 inputTaskField.classList.add('hidden');
             });
+
+            // Create sprint when clicking button ------------------------------------------
+            createSprintButton.addEventListener('click', e => {
+                createSprint.classList.remove('hidden');
+                createSprintInput.focus();
+            });
+
+            createSprintInput.addEventListener('focusout', e => {
+                createSprint.classList.add('hidden');
+            });
+
 
             // Context Menu ---------------------------------------------------------------
             // Reset context menu on right click anywhere outside
@@ -203,51 +230,53 @@
 
             // Add new task to the product backlog
             inputTaskField.addEventListener('keypress', function (e) {
-                if (e.key === 'Enter') {
-                    const taskTitle = inputTaskField.value.trim();
-                    if (taskTitle !== '') {
-                        fetch('{{ route('backlog.store') }}', {
-                            method: 'POST',
-                            headers: {
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify({
-                                title: taskTitle,
-                                column_id: {{ $backlog->columns->first()->id }}
-                            })
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success) {
-                                // Insert task into the task list of the first column
-                                const newTask = `<tr class = "px-4 py-2 text-start leading-5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 hover:cursor-pointer focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out rounded" id = "task-list-item-${data.task.id}">
-                                                <td class="py-2 pl-5 border-b-2 min-w-20">${data.task.title}</td>
-                                                <td class="py-2 border-b-2 w-20">
+                // Check if the key pressed is the Enter key
+                if (e.key !== 'Enter') {return;}
 
-                                                </td>
-                                                <td class="py-2 border-b-2 w-20">
+                // Check if the input field is not empty
+                const taskTitle = inputTaskField.value.trim();
+                if (taskTitle === '') {return;}
 
-                                                </td>
-                                                <td class="py-2 border-b-2 w-10">Pr</td>
-                                                <td class="py-2 border-b-2 w-10">As</td>
-                                                <td class="py-1 border-b-2 w-10">
-                                                    <div id="task-list-menu-${data.task.id}" class="hover:cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 bg-opacity-10 list-none rounded">
-                                                        <i class="fa-solid fa-ellipsis px-2 py-2"></i>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                            `;
-                                taskColumn.insertAdjacentHTML('beforeend', newTask);
-                                issuesNo.innerHTML = `Issues: ${parseInt(issuesNo.innerHTML.split(":")[1]) + 1}`;
-                                inputTaskField.value = '';
-                            } else {
-                                console.error('Error adding task:', data.message);
-                            }
-                        })
-                        .catch(error => console.error('Error:', error));
+                fetch('{{ route('backlog.store') }}', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        title: taskTitle,
+                        column_id: {{ $backlog->columns->first()->id }}
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Insert task into the task list of the first column
+                        const newTask = `<tr class = "px-4 py-2 text-start leading-5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 hover:cursor-pointer focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out rounded" id = "task-list-item-${data.task.id}">
+                                        <td class="py-2 pl-5 border-b-2 min-w-20">${data.task.title}</td>
+                                        <td class="py-2 border-b-2 w-20">
+
+                                        </td>
+                                        <td class="py-2 border-b-2 w-20">
+
+                                        </td>
+                                        <td class="py-2 border-b-2 w-10">Pr</td>
+                                        <td class="py-2 border-b-2 w-10">As</td>
+                                        <td class="py-1 border-b-2 w-10">
+                                            <div id="task-list-menu-${data.task.id}" class="hover:cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 bg-opacity-10 list-none rounded">
+                                                <i class="fa-solid fa-ellipsis px-2 py-2"></i>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    `;
+                        taskColumn.insertAdjacentHTML('beforeend', newTask);
+                        issuesNo.innerHTML = `Issues: ${parseInt(issuesNo.innerHTML.split(":")[1]) + 1}`;
+                        inputTaskField.value = '';
+                    } else {
+                        console.error('Error adding task:', data.message);
                     }
-                }
+                })
+                .catch(error => console.error('Error:', error));
             });
 
 
@@ -302,6 +331,56 @@
                     });
                 });
             }
+        });
+
+
+        // Stop here
+        // Function to handle the creation of a new board
+        createSprintInput.addEventListener('keypress', e => {
+            // Check if the key pressed is the Enter key
+            if (e.key !== 'Enter') {return;}
+
+            // Check if the input field is not empty
+            const sprintTitle = createSprintInput.value.trim();
+            if (sprintTitle === '') {return;}
+
+            // Submit the form via AJAX (using Fetch API)
+            fetch('{{ route('boards.store') }}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    name: sprintTitle,
+                    project_id: 1 // Change later maybe
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const sprintList = document.getElementById('sprint-loading-board-list');
+                    // Add the new board dynamically to the page
+                    let new_sprint_board = `
+                                        <div id="sprint-loading-board-${$data.board.id}">
+                                            <div class="border min-w-full overflow-x-auto rounded p-3 bg-gray-100">
+                                                <div class="flex justify-between mb-2">
+                                                    <h1 class='font-semibold text-xl'>${$data.board.name}</h1>
+                                                    <x-secondary-button>Start Sprint</x-secondary-button>
+                                                </div>
+                                                <p class="text-sm">Add tasks here or from the product backlog</p>
+                                            </div>
+                                        </div>
+                                        `;
+                    sprintList.insertAdjacentHTML('beforeend', new_sprint_board)
+
+                    // Clear the input field
+                    createSprintInput.value = '';
+                } else {
+                    console.error('Error creating board:', data.message);
+                }
+            })
+            .catch(error => console.error('Error:', error));
         });
 
     </script>
