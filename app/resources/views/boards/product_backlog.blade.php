@@ -35,7 +35,7 @@
                 @if($board->id == 1)
                     @continue
                 @endif
-                <x-sprint-loading-board name="{{$board->name}}">
+                <x-sprint-loading-board :board="$board">
                     @foreach($board->columns as $column)
                         @foreach($column->tasks as $task)
                             <x-task-list-item :task="$task"/>
