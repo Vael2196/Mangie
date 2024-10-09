@@ -137,13 +137,67 @@ class BoardController extends Controller
     public function showBacklog()
     {
         // Fetch the board by ID with its columns and tasks, and sort columns by position
-        $board = Board::with(['columns' => function ($query) {
+        $backlog = Board::with(['columns' => function ($query) {
             $query->orderBy('position');
         }, 'columns.tasks'])->findOrFail(1);
 
+        // Get All boards for a user, including the product backlog
+        $user = Auth::user();
+        $boards = Board::where('user_id', $user->id)->orWhere('id', 1)->get();
+
         $tasks = Task::all();
 
-        // Pass the board to the sprint_board view
-        return view('boards.product_backlog', compact('board', 'tasks'));
+        // Pass the boards and tasks to the backlog view
+        return view('boards.product_backlog', compact('backlog', 'tasks', 'boards'));
+    }
+
+    public function moveTasks(Request $request){
+        $request->validate([
+            'board_id' => 'required|exists:boards,id',
+        ]);
+
+        // Get the column to move the tasks to
+        if ($request->board_id == 1){
+            $todo_column = Column::where('board_id', 1)
+                            ->where('name', "Backlog")->get()[0];
+        }else{
+            $todo_column = Column::where('board_id', $request->board_id)
+            ->where('name', "TO DO")->get()[0];
+        }
+
+        // Parse task_ids string to php array
+        $task_id_string = $request->task_ids;
+        $task_id_string = str_replace('[', '', $task_id_string);
+        $task_id_string = str_replace(']', '', $task_id_string);
+        $task_ids = explode(',', $task_id_string);
+
+        // Convert task_ids to integer
+        $task_id_num = [];
+        foreach ($task_ids as $task_id){
+            array_push($task_id_num, (int)$task_id);
+        }
+
+        // Updating the column id and positions of each task
+        $res = Task::whereIn('id', $task_id_num)->update([
+            'column_id' => $todo_column->id,
+            'position' => Task::where('column_id', $todo_column->id)->max('position') + 1,
+        ]);
+
+        // Check is update success
+        if (!$res){
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to move tasks'
+            ]);
+        }
+
+        // Fetch the new tasks
+        $tasks = Task::whereIn('id', $task_id_num)->get();
+
+        // Return the new tasks as a JSON response
+        return response()->json([
+            'success' => true,
+            'tasks' => $tasks
+        ]);
     }
 }
