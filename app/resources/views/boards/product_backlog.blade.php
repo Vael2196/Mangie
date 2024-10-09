@@ -55,6 +55,9 @@
             <p class="text-sm">Add tasks here or from the product backlog</p>
         </div>
 
+        {{-- Somehow there is an extra div needed to make this work --}}
+        </div>
+
         <div class='flex justify-between mb-2'>
             <h1 id="issues">Issues: {{count($tasks)}}</h1>
             {{-- Add list to card view dropdown switch here --}}
@@ -305,7 +308,8 @@
                             endPointBoard = taskColumn;
                         } else {
                             // Get sprint loading board if endpoint is anything else
-                            endPointBoard = document.getElementById(`sprint-loading-board-${board_id}`).lastElementChild.lastElementChild;
+                            // This is such a hack I dont even know what is happening
+                            endPointBoard = document.getElementById(`sprint-loading-board-${board_id}`).lastElementChild.lastElementChild.lastElementChild;
                         }
 
                         // Insert task into the task list of the first column
@@ -331,57 +335,57 @@
                     });
                 });
             }
-        });
 
+            // Stop here
+            // Function to handle the creation of a new board
+            createSprintInput.addEventListener('keypress', e => {
+                // Check if the key pressed is the Enter key
+                if (e.key !== 'Enter') {return;}
 
-        // Stop here
-        // Function to handle the creation of a new board
-        createSprintInput.addEventListener('keypress', e => {
-            // Check if the key pressed is the Enter key
-            if (e.key !== 'Enter') {return;}
+                // Check if the input field is not empty
+                const sprintTitle = createSprintInput.value.trim();
+                if (sprintTitle === '') {return;}
 
-            // Check if the input field is not empty
-            const sprintTitle = createSprintInput.value.trim();
-            if (sprintTitle === '') {return;}
-
-            // Submit the form via AJAX (using Fetch API)
-            fetch('{{ route('boards.store') }}', {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    name: sprintTitle,
-                    project_id: 1 // Change later maybe
+                // Submit the form via AJAX (using Fetch API)
+                fetch('{{ route('boards.store') }}', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        name: sprintTitle,
+                        project_id: 1 // Change later maybe
+                    })
                 })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    const sprintList = document.getElementById('sprint-loading-board-list');
-                    // Add the new board dynamically to the page
-                    let new_sprint_board = `
-                                        <div id="sprint-loading-board-${$data.board.id}">
-                                            <div class="border min-w-full overflow-x-auto rounded p-3 bg-gray-100">
-                                                <div class="flex justify-between mb-2">
-                                                    <h1 class='font-semibold text-xl'>${$data.board.name}</h1>
-                                                    <x-secondary-button>Start Sprint</x-secondary-button>
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const sprintList = document.getElementById('sprint-loading-board-list');
+                        // Add the new board dynamically to the page
+                        let new_sprint_board = `
+                                            <div id="sprint-loading-board-${data.board.id}">
+                                                <div class="border min-w-full overflow-x-auto rounded p-3 bg-gray-100">
+                                                    <div class="flex justify-between mb-2">
+                                                        <h1 class='font-semibold text-xl'>${data.board.name}</h1>
+                                                        <x-secondary-button>Start Sprint</x-secondary-button>
+                                                    </div>
+                                                    <p class="text-sm">Add tasks here or from the product backlog</p>
                                                 </div>
-                                                <p class="text-sm">Add tasks here or from the product backlog</p>
                                             </div>
-                                        </div>
-                                        `;
-                    sprintList.insertAdjacentHTML('beforeend', new_sprint_board)
+                                            `;
+                        sprintList.insertAdjacentHTML('beforeend', new_sprint_board)
 
-                    // Clear the input field
-                    createSprintInput.value = '';
-                } else {
-                    console.error('Error creating board:', data.message);
-                }
-            })
-            .catch(error => console.error('Error:', error));
+                        // Clear the input field
+                        createSprintInput.value = '';
+                    } else {
+                        console.error('Error creating board:', data.message);
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            });
         });
+
 
     </script>
 </x-app-layout>
