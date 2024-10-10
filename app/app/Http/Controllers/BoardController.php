@@ -181,6 +181,7 @@ class BoardController extends Controller
         $res = Task::whereIn('id', $task_id_num)->update([
             'column_id' => $todo_column->id,
             'position' => Task::where('column_id', $todo_column->id)->max('position') + 1,
+            'updated_at' => now()
         ]);
 
         // Check is update success
@@ -199,5 +200,9 @@ class BoardController extends Controller
             'success' => true,
             'tasks' => $tasks
         ]);
+    }
+
+    public function updateTask(Request $request){
+
     }
 }
