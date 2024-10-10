@@ -5,17 +5,21 @@ namespace App\View\Components;
 use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\View\Component;
+use App\Models\Column;
+use App\Models\Board;
 
 class TaskDetail extends Component
 {
 
     public $task;
+    public $parent_board;
     /**
      * Create a new component instance.
      */
     public function __construct($task)
     {
         $this->task = $task;
+        $this->parent_board = Board::where('id', Column::select('board_id')->where('id', $task->column_id)->get()[0]->board_id)->get()[0];
     }
 
     /**

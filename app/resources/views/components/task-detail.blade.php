@@ -29,7 +29,6 @@
                             <p>^</p>
                         </div> --}}
                     </div>
-
                     <!-- To DO -->
                     <div class = "flex justify-between mb-4">
                         <p><span>XXXXXXXXX</span> changed the status</p>
@@ -76,7 +75,7 @@
 
                     <div class = "flex justify-between mb-4 w-full">
                         <p>Sprint</p>
-                        <p class = "fw-bold px-2">Sprint A</p>
+                        <p class = "fw-bold px-2">{{$parent_board->name}}</p>
                     </div>
 
                     <div class = "flex justify-between mb-4 w-full">
