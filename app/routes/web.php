@@ -35,6 +35,7 @@ Route::get('/boards/{id}', [BoardController::class, 'show'])->middleware('auth')
 Route::delete('/boards/{id}', [BoardController::class, 'destroy'])->middleware('auth')->name('boards.destroy');
 Route::post('/columns/store', [BoardController::class, 'storeColumn'])->name('columns.store');
 Route::post('/tasks/store', [BoardController::class, 'storeTask'])->name('tasks.store');
+Route::post('/tasks/update', [BoardController::class, 'updateTask'])->name('tasks.update');
 
 // Backlog
 Route::get('/backlog', [BoardController::class, 'showBacklog'])->middleware('auth')->name('backlog.show');

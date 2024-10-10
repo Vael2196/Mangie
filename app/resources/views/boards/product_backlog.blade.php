@@ -336,7 +336,6 @@
                 });
             }
 
-            // Stop here
             // Function to handle the creation of a new board
             createSprintInput.addEventListener('keypress', e => {
                 // Check if the key pressed is the Enter key

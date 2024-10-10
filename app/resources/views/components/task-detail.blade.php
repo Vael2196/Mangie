@@ -1,13 +1,12 @@
-<div class = "absolute top-0 right-0 h-full w-full p-5 flex justify-center items-center z-30 backdrop-blur-sm bg-black bg-opacity-30">
-    {{Form::model($task, ['route' => ['tasks.update', $task->id]])}}
+<form class = "absolute top-0 right-0 h-full w-full p-5 flex justify-center items-center z-30 backdrop-blur-sm bg-black bg-opacity-30" method="POST" action="{{ route('tasks.update', $task->id) }}">
     <div class = "rounded lg:px-11 lg:py-7 p-5 lg:w-4/6 w-5/6 h-3/5 bg-white dark:bg-gradient-to-l from-slate-700 to-gray-900 border-2 flex">
         <div class="flex justify-between">
             <div class = "flex flex-col lg:w-1/2 h-full">
                 <!-- Task info -->
-                <div class="mb-10">
-                    <h1>{{$task->title}}</h1>
-                    <h3>Description</h3>
-                    <p>{{$task->description}}</p>
+                <div class="mb-10 flex flex-col">
+                    <input type="text" placeholder="{{$task->title}}" class="placeholder-slate-700 text-xl mb-4">
+                    <label for="formDescription" class="mb-2">Description</label>
+                    <textarea id="formDescription" rows="3" placeholder="{{$task->description}}"></textarea>
                 </div>
 
                 <!-- Task activity -->
@@ -55,7 +54,7 @@
                 </select>
 
                 {{-- Details box --}}
-                <div class = "border-2 rounded-3 w-3/4 h-3/4 flex flex-col justify-evenly px-3 py-3 mb-10">
+                <div class = "border-2 rounded-3 w-3/4 h-3/4 flex flex-col justify-evenly px-3 py-1 mb-10">
                     <h1>Details</h1>
                     <div class = "flex justify-between mb-4 w-full">
                         <p>Assignee</p>
@@ -76,16 +75,6 @@
                     </div>
 
                     <div class = "flex justify-between mb-4 w-full">
-                        <p>Parent</p>
-
-                        <select class = "dark:bg-transparent">
-                            <option value="24" selected>Product 1</option>
-                            <option value="32">Product 2</option>
-                            <option value="54">Product 3</option>
-                        </select>
-                    </div>
-
-                    <div class = "flex justify-between mb-4 w-full">
                         <p>Sprint</p>
                         <p class = "fw-bold px-2">Sprint A</p>
                     </div>
@@ -98,8 +87,8 @@
 
                 {{-- Creation dates --}}
                 <div class = "flex flex-col items-start w-75">
-                    <p>Created: <span>09/09/2024</span></p>
-                    <p>Updated: <span>09/09/2024</span></p>
+                    <p>Created: <span>{{$task->created_at}}</span></p>
+                    <p>Updated: <span>{{$task->updated_at}}</span></p>
                 </div>
             </div>
         </div>
@@ -110,5 +99,4 @@
             </div>
         </span>
     </div>
-    {{Form::close()}}
-</div>
+</form>
