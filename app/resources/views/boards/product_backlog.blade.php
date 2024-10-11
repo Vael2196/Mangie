@@ -310,7 +310,7 @@
                         } else {
                             // Get sprint loading board if endpoint is anything else
                             // This is such a hack I dont even know what is happening
-                            endPointBoard = document.getElementById(`sprint-loading-board-${board_id}`).lastElementChild.lastElementChild.lastElementChild;
+                            endPointBoard = document.getElementById(`sprint-loading-table-${board_id}`);
                         }
 
                         // Insert task into the task list of the first column
@@ -322,6 +322,8 @@
 
                         // Reset Selected task items
                         selectedTaskItems = [];
+
+                        location.reload();
 
                     } else {
                         console.error('Error moving tasks:', data.message);
