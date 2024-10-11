@@ -300,7 +300,13 @@
                         // const newTask = `<tr class = "px-4 py-2 text-start leading-5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 hover:cursor-pointer focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out rounded" id = "task-list-item-${data.task.id}">
                         //                 <td class="py-2 pl-5 border-b-2 min-w-20">${data.task.title}</td>
                         //                 <td class="py-2 border-b-2 w-20">
+                        // // Insert task into the task list of the first column
+                        // const newTask = `<tr class = "px-4 py-2 text-start leading-5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 hover:cursor-pointer focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out rounded" id = "task-list-item-${data.task.id}">
+                        //                 <td class="py-2 pl-5 border-b-2 min-w-20">${data.task.title}</td>
+                        //                 <td class="py-2 border-b-2 w-20">
 
+                        //                 </td>
+                        //                 <td class="py-2 border-b-2 w-20">
                         //                 </td>
                         //                 <td class="py-2 border-b-2 w-20">
 
@@ -316,7 +322,20 @@
                         //             `;
                         // taskColumn.insertAdjacentHTML('beforeend', newTask);
                         // issuesNo.innerHTML = `Issues: ${parseInt(issuesNo.innerHTML.split(":")[1]) + 1}`;
+                        //                 </td>
+                        //                 <td class="py-2 border-b-2 w-10">Pr</td>
+                        //                 <td class="py-2 border-b-2 w-10">As</td>
+                        //                 <td class="py-1 border-b-2 w-10">
+                        //                     <div id="task-list-menu-${data.task.id}" class="hover:cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 bg-opacity-10 list-none rounded">
+                        //                         <i class="fa-solid fa-ellipsis px-2 py-2"></i>
+                        //                     </div>
+                        //                 </td>
+                        //             </tr>
+                        //             `;
+                        // taskColumn.insertAdjacentHTML('beforeend', newTask);
+                        // issuesNo.innerHTML = `Issues: ${parseInt(issuesNo.innerHTML.split(":")[1]) + 1}`;
                         inputTaskField.value = '';
+                        location.reload();
                         location.reload();
                     } else {
                         console.error('Error adding task:', data.message);
@@ -352,13 +371,9 @@
                         // } else {
                         //     // Get sprint loading board if endpoint is anything else
                         //     // This is such a hack I dont even know what is happening
-                        //     let sprintList = document.getElementById('sprint-loading-board-list');
-                        //     let loadingBoardPTag = document.getElementById(`sprint-loading-p-tag-${board_id}`);
-                        //     if (sprintList.contains(loadingBoardPTag)){
-                        //         loadingBoardPTag.classList.add('hidden');
-                        //     }
-                        //     let endPointBoard = document.getElementById(`sprint-loading-table-${board_id}`);
+                        //     endPointBoard = document.getElementById(`sprint-loading-table-${board_id}`);
                         // }
+
                         // // Insert task into the task list of the first column
                         // for(let task of data.tasks){
                         //     // Find task by ids
@@ -423,8 +438,23 @@
                         //                     </div>
                         //                     `;
                         // sprintList.insertAdjacentHTML('beforeend', new_sprint_board)
+                        // const sprintList = document.getElementById('sprint-loading-board-list');
+                        // // Add the new board dynamically to the page
+                        // let new_sprint_board = `
+                        //                     <div id="sprint-loading-board-${data.board.id}">
+                        //                         <div class="border min-w-full overflow-x-auto rounded p-3 bg-gray-100">
+                        //                             <div class="flex justify-between mb-2">
+                        //                                 <h1 class='font-semibold text-xl'>${data.board.name}</h1>
+
+                        //                             </div>
+                        //                             <p class="text-sm">Add tasks here or from the product backlog</p>
+                        //                         </div>
+                        //                     </div>
+                        //                     `;
+                        // sprintList.insertAdjacentHTML('beforeend', new_sprint_board)
                         // Clear the input field
                         createSprintInput.value = '';
+                        location.reload();
                         location.reload();
                     } else {
                         console.error('Error creating board:', data.message);
