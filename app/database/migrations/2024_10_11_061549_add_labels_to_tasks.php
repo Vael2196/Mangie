@@ -1,0 +1,32 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::table('tasks', function (Blueprint $table) {
+            $table->integer('story_points')->default(0)->after('description');
+            $table->string('labels')->nullable()->after('description');
+            $table->string('assignees')->nullable()->after('description');
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::table('tasks', function (Blueprint $table) {
+            $table->dropColumn('story_points');
+            $table->dropColumn('labels');
+            $table->dropColumn('assignees');
+        });
+    }
+};

@@ -12,7 +12,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
-<body class="font-sans antialiased dark:bg-gradient-to-r from-slate-800 to-black dark:text-white/50 text-slate-700">
+<body class="clear-both font-sans antialiased dark:bg-gradient-to-r from-slate-800 to-black dark:text-white/50 text-slate-700">
     {{-- <img id="background" class="absolute -left-20 top-0 max-w-[877px]" src="https://laravel.com/assets/img/welcome/background.svg" /> --}}
 
     <div class="min-h-screen flex">
