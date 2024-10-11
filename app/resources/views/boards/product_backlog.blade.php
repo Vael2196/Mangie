@@ -88,7 +88,7 @@
         <div class="hidden absolute z-30" id="task-context-menu">
             <div class="2xl:flex 2xl:items-start">
                 {{-- "Move To" Button --}}
-                <div class='bg-white border px-4 py-2 items-center leading-5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-500 hover:cursor-pointer focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out rounded flex space-x-3'>
+                <div class='bg-white border px-4 py-2 items-center leading-5 dark:bg-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-500 hover:cursor-pointer focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out rounded flex space-x-3'>
                     <div class = "text-center" onmouseover="document.getElementById('contextBoardMenu').classList.toggle('hidden')">Move To</div>
                     <div class="text-center"><i class="fa-solid fa-angle-right"></i></div>
                 </div>
@@ -96,7 +96,7 @@
                 {{-- Context sub menu (Buttons for each sprint to move to) --}}
                 <div class="hidden shadow-lg" id="contextBoardMenu">
                     @foreach($boards as $board)
-                        <div class='bg-white border px-4 py-2 text-start leading-5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-500 hover:cursor-pointer focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out flex space-x-3'
+                        <div class='bg-white border px-4 py-2 text-start leading-5 dark:bg-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-500 hover:cursor-pointer focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out flex space-x-3'
                             id="context-board-menu-{{$board->id}}">
                             <h1>{{$board->name}}</h1>
                         </div>
@@ -108,13 +108,13 @@
         {{-- Link to Form --}}
         <div class="w-full text-start">
             <div id="create-task-link" class="block">
-                <div class = 'px-4 py-2 leading-5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-500 hover:cursor-pointer focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out rounded flex space-x-3'>
+                <div class = 'px-4 py-2 leading-5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:cursor-pointer focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out rounded flex space-x-3'>
                     <div class = "text-center"><i class="fa-solid fa-plus"></i></div>
                     <p class = "lg:block hidden text-sm">Create Issue</p>
                 </div>
             </div>
             {{-- Form for submitting  --}}
-            <input id="input-task-field" class="border hidden w-full" type="text" placeholder="Enter Task Name" class="w-full"/>
+            <input id="input-task-field" class="border hidden w-full dark:bg-gray-600 dark:text-white" type="text" placeholder="Enter Task Name" class="w-full"/>
         </div>
     </div>
 
@@ -255,7 +255,7 @@
                 .then(data => {
                     if (data.success) {
                         // Insert task into the task list of the first column
-                        const newTask = `<tr class = "px-4 py-2 text-start leading-5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 hover:cursor-pointer focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out rounded" id = "task-list-item-${data.task.id}">
+                        const newTask = `<tr class = "px-4 py-2 text-start leading-5 dark:bg-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 hover:cursor-pointer focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out rounded" id = "task-list-item-${data.task.id}">
                                         <td class="py-2 pl-5 border-b-2 min-w-20">${data.task.title}</td>
                                         <td class="py-2 border-b-2 w-20">
 
