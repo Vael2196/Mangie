@@ -14,7 +14,6 @@ return new class extends Migration
         Schema::table('tasks', function (Blueprint $table) {
             $table->integer('story_points')->default(0)->after('description');
             $table->string('labels')->nullable()->after('description');
-            $table->string('assignees')->nullable()->after('description');
         });
     }
 
@@ -26,7 +25,6 @@ return new class extends Migration
         Schema::table('tasks', function (Blueprint $table) {
             $table->dropColumn('story_points');
             $table->dropColumn('labels');
-            $table->dropColumn('assignees');
         });
     }
 };

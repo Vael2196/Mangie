@@ -3,11 +3,13 @@
     <td class="py-2 pl-5 border-b-2 min-w-20">{{$task->title}}</td>
     <td class="py-2 border-b-2 w-20">
         @if($task->column_id != 1)
-            <x-status-icon name="Epic"/>
+            <x-status-icon name="{{$column->name}}"/>
         @endif
     </td>
     <td class="py-2 border-b-2 w-20">
-        <x-status-icon name="status"/>
+        @if($task->labels != null)
+            <x-status-icon name="{{$task->labels}}"/>
+        @endif
     </td>
     <td class="py-2 border-b-2 w-10">Pr</td>
     <td class="py-2 border-b-2 w-10">As</td>

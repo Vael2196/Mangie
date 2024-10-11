@@ -5,6 +5,7 @@ use App\Models\Board;
 use App\Models\Project;
 use App\Models\Column;
 use App\Models\Task;
+use App\Models\TaskUser;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -209,13 +210,26 @@ class BoardController extends Controller
             'task_id' => 'required|exists:tasks,id',
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
+            'assignee' => 'integer',
+            'labels' => 'nullable|string',
+            'storyPoint' => 'integer',
         ]);
 
         // Update the task
         Task::where('id', $request->task_id)->update([
             'title' => $request->title,
             'description' => $request->description,
+            'labels' => $request->labels,
+            'story_points' => $request->storyPoint,
+            'updated_at' => now()
         ]);
+
+        // TaskUser::create([
+        //     'task_id' => $request->task_id,
+        //     'user_id' => $request->assignee,
+        //     'created_at' => now(),
+        //     'updated_at' => now()
+        // ]);
 
         // Fetch the new task
         $task = Task::where('id', $request->task_id)->get();

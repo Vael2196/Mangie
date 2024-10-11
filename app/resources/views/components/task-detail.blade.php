@@ -55,19 +55,23 @@
                     <h1>Details</h1>
                     <div class = "flex justify-between mb-4 w-full">
                         <p>Assignee</p>
-                        <select class = "dark:bg-transparent">
-                            <option value="24" selected>Product 1</option>
-                            <option value="32">Product 2</option>
-                            <option value="54">Product 3</option>
+                        <select class = "dark:bg-transparent" id="formAssignee">
+                            @foreach ($users as $assignee)
+                                <option value="{{$assignee->id}}">{{$assignee->name}}</option>
+                            @endforeach
                         </select>
                     </div>
 
                     <div class = "flex justify-between mb-4 w-full">
                         <p>Labels</p>
-                        <select class = "dark:bg-transparent">
-                            <option value="24" selected>Product 1</option>
-                            <option value="32">Product 2</option>
-                            <option value="54">Product 3</option>
+                        <select class = "dark:bg-transparent w-50" id="formLabels">
+                            @foreach (["API", "Backend", "Frontend", "UI/UX", "Database"] as $label)
+                                @if($task->labels == $label)
+                                    <option value="{{$label}}" selected>{{$label}}</option>
+                                @else
+                                    <option value="{{$label}}">{{$label}}</option>
+                                @endif
+                            @endforeach
                         </select>
                     </div>
 
@@ -78,7 +82,7 @@
 
                     <div class = "flex justify-between mb-4 w-full">
                         <p>SP ESTIMATE</p>
-                        <input type="number" id="typeNumber" class = "border-2 rounded w-20 dark:bg-transparent"  placeholder="Number"/>
+                        <input type="number" id="formStoryPoint" class = "border-2 rounded w-10 dark:bg-transparent"  placeholder="{{$task->story_points}}" value="{{$task->story_points}}"/>
                     </div>
                 </div>
 
@@ -90,7 +94,7 @@
             </div>
         </div>
 
-        <span class="flex items-start" onclick="this.parentElement.parentElement.parentElement.classList.toggle('hidden')">
+        <span class="flex items-start" id="xButton{{$task->id}}" onclick="this.parentElement.parentElement.parentElement.classList.toggle('hidden')">
             <div class="p-2 hover:cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-900 bg-opacity-10 rounded">
                 <i class="fa-solid fa-xmark fa-2xl"></i>
             </div>
@@ -101,11 +105,25 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        var task_id = "<?php echo"$task->id"?>";
-        taskDetail = document.getElementById(`saveTaskButton${task_id}`);
-        taskDetail.addEventListener('click', e => {
+        var task_id= Number("<?php echo "$task->id"?>");
+
+        var hasClicked = false;
+        saveButton = document.getElementById(`saveTaskButton${task_id}`);
+        xButton = document.getElementById(`xButton${task_id}`);
+
+        var initialInputTitle = document.getElementById("formTitle").value;
+        var initialInputDescription = document.getElementById("formDescription").value;
+        var initialAssignee = document.getElementById("formAssignee").value;
+        var initialLabels = document.getElementById("formLabels").value;
+        var initialStoryPoint = document.getElementById("formStoryPoint").value;
+
+        saveButton.addEventListener('click', e => {
+            hasClicked = true;
             var inputTitle = document.getElementById("formTitle").value;
             var inputDescription = document.getElementById("formDescription").value;
+            var assignee = document.getElementById("formAssignee").value;
+            var labels = document.getElementById("formLabels").value;
+            var storyPoint = document.getElementById("formStoryPoint").value;
 
             // Submit the form via AJAX (using Fetch API)
             fetch('{{ route('tasks.update') }}', {
@@ -113,7 +131,10 @@
                 body: JSON.stringify({
                     task_id: task_id,
                     title: inputTitle,
-                    description: inputDescription
+                    description: inputDescription,
+                    assignee: Number(assignee),
+                    labels: labels,
+                    storyPoint: Number(storyPoint)
                 }),
                 headers: {
                     'Content-Type': 'application/json',
@@ -138,6 +159,23 @@
                     console.log('Received the following instead of valid JSON:', bodyText);
                 });
             });
+
+        // Reset the form submission when closing without saving
+        xButton.addEventListener('click', e => {
+            //  Skip when the save button has been clicked
+            if(hasClicked){
+                // hasClicked = false;
+                return;
+            }
+
+            // Reset variables to their original values
+            document.getElementById("formTitle").value = initialInputTitle;
+            document.getElementById("formDescription").value = initialInputDescription;
+            document.getElementById("formLabels").value = initialLabels;
+            document.getElementById("formAssignee").value = initialAssignee;
+            document.getElementById("formStoryPoint").value = initialStoryPoint;
+        });
+
         });
     });
 

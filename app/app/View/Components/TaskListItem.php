@@ -5,14 +5,17 @@ namespace App\View\Components;
 use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\View\Component;
+use App\Models\Column;
 
 class TaskListItem extends Component
 {
     public $task;
+    public $column;
 
     public function __construct($task)
     {
         $this->task = $task;
+        $this->column = Column::where('id', $task->column_id)->get()[0];
     }
 
     /**
