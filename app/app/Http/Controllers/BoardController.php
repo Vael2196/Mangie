@@ -216,7 +216,7 @@ class BoardController extends Controller
         ]);
 
         // Update the task
-        Task::where('id', $request->task_id)->update([
+        $res = Task::where('id', $request->task_id)->update([
             'title' => $request->title,
             'description' => $request->description,
             'labels' => $request->labels,
@@ -230,6 +230,14 @@ class BoardController extends Controller
         //     'created_at' => now(),
         //     'updated_at' => now()
         // ]);
+
+        // Check is update success
+        if (!$res){
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to move tasks'
+            ]);
+        }
 
         // Fetch the new task
         $task = Task::where('id', $request->task_id)->get();
