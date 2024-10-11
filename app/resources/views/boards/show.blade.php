@@ -40,7 +40,7 @@
                     @if ($loop->first)
                         <!-- Input field for adding a new task in the first column -->
                         <div class="mt-2">
-                            <input type="text" id="new-task-input" class="bg-white shadow-inner rounded-lg p-2 w-full" placeholder="Enter new task" />
+                            <input type="text" id="new-task-input" class="bg-white shadow-inner rounded-lg p-2 w-full dark:bg-gray-500 dark:text-white" placeholder="Enter new task" />
                         </div>
                     @endif
                 </x-task-column>
