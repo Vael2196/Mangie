@@ -4,7 +4,7 @@
         <div class="flex justify-between items-center space-x-10 w-full mb-3">
 
             {{-- Task Title --}}
-            <input id="formTitle{{$task->id}}" type="text" placeholder="{{$task->title ? $task->title : "Enter a title"}}" value="{{$task->title}}" class="placeholder-slate-700 text-xl min-w-24 flex-grow">
+            <input id="formTitle{{$task->id}}" type="text" placeholder="{{$task->title ? $task->title : "Enter a title"}}" value="{{$task->title}}" class="placeholder-slate-700 text-xl min-w-24 max-w-lg flex-grow">
 
             {{-- Select details --}}
             <button type="button" id="saveTaskButton{{$task->id}}" class='inline-flex items-center px-4 py-2 bg-blue-500 dark:bg-gray-800 border border-gray-300 dark:border-gray-500 rounded-md font-semibold text-xs text-white dark:text-gray-300 uppercase tracking-widest shadow-sm hover:bg-blue-600 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:opacity-25 transition ease-in-out duration-150'>
@@ -169,7 +169,10 @@
         //  xbutton click behaviour
         xButton.addEventListener('click', e => {
             // Close the task detail view
-            xButton.parentElement.parentElement.parentElement.classList.toggle('hidden');
+            let taskDetail = document.getElementById(`task-list-detail-${task_id}`);
+            taskDetail.classList.toggle('hidden');
+
+            // xButton.parentElement.parentElement.parentElement.parentElement.classList.toggle('hidden');
 
             // Reset the form submission when closing without saving
             document.getElementById(`formTitle${task_id}`).value = initialInputTitle;
