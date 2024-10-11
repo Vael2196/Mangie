@@ -206,6 +206,7 @@ class BoardController extends Controller
     public function updateTask(Request $request){
         $request->validate([
             'task_id' => 'required|exists:tasks,id',
+            'column_id' => 'required|exists:columns,id',
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'assignee' => 'integer',
@@ -216,6 +217,7 @@ class BoardController extends Controller
         // Update the task
         $res = Task::where('id', $request->task_id)->update([
             'title' => $request->title,
+            'column_id' => $request->column_id,
             'description' => $request->description,
             'labels' => $request->labels,
             'story_points' => $request->storyPoint,
