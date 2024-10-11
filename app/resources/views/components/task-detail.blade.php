@@ -71,7 +71,8 @@
                     {{-- Assignee --}}
                     <div class = "flex justify-between w-full">
                         <p>Assignee</p>
-                        <select class = "dark:bg-transparent rounded border-2 border-white focus:ring-blue-500 focus:border-blue-500 cursor-pointer" id="formAssignee{{$task->id}}">
+                        <select class = "dark:bg-transparent rounded-md border-2 border-white focus:ring-blue-500 focus:border-blue-500 cursor-pointer" id="formAssignee{{$task->id}}">
+                            <option value="{{""}}">No one</option>
                             @foreach ($users as $assignee)
                                 <option value="{{$assignee->id}}">{{$assignee->name}}</option>
                             @endforeach
@@ -81,7 +82,7 @@
                     {{-- Column --}}
                     <div class = "flex justify-between w-full">
                         <p>Status</p>
-                        <select class = "dark:bg-transparent w-50 border-2 border-white focus:ring-blue-500 focus:border-blue-500 cursor-pointer" id="formColumn{{$task->id}}">
+                        <select class = "dark:bg-transparent w-50 rounded-md border-2 border-white focus:ring-blue-500 focus:border-blue-500 cursor-pointer" id="formColumn{{$task->id}}">
                             @foreach ($parent_board->columns as $column)
                                 @if($task->column_id == $column->id)
                                     <option value="{{$column->id}}" selected>{{$column->name}}</option>
@@ -95,7 +96,8 @@
                     {{-- Labels --}}
                     <div class = "flex justify-between w-full">
                         <p>Labels</p>
-                        <select class = "dark:bg-transparent w-50 border-2 border-white focus:ring-blue-500 focus:border-blue-500 cursor-pointer" id="formLabels{{$task->id}}">
+                        <select class = "dark:bg-transparent w-50 rounded-md border-2 border-white focus:ring-blue-500 focus:border-blue-500 cursor-pointer" id="formLabels{{$task->id}}">
+                            <option value="" selected>Select</option>
                             @foreach (["API", "Backend", "Frontend", "UI/UX", "Database"] as $label)
                                 @if($task->labels == $label)
                                     <option value="{{$label}}" selected>{{$label}}</option>
@@ -115,7 +117,7 @@
                     {{-- Story point estimate --}}
                     <div class = "flex justify-between w-full">
                         <p>SP ESTIMATE</p>
-                        <input type="number" id="formStoryPoint{{$task->id}}" class = "rounded w-10 dark:bg-transparent border-2 border-gray-300 focus:ring-blue-500 focus:border-blue-500 cursor-pointer"  placeholder="{{$task->story_points}}" value="{{$task->story_points}}"/>
+                        <input type="number" id="formStoryPoint{{$task->id}}" class = "text-end rounded-md w-10 dark:bg-transparent border-2 border-gray-300 focus:ring-blue-500 focus:border-blue-500 cursor-pointer placeholder-slate-700" placeholder="{{$task->story_points}}"/>
                     </div>
                 </div>
 
@@ -134,13 +136,13 @@
     document.addEventListener('DOMContentLoaded', function () {
         var task_id= Number("<?php echo "$task->id"?>");
         let saveButton = document.getElementById(`saveTaskButton${task_id}`);
-        let xButton = document.getElementById(`xButton${task_id}`);  // Not being saved as unique variable
+        let xButton = document.getElementById(`xButton${task_id}`);
 
-        var initialInputTitle = document.getElementById(`formTitle${task_id}`).value;
-        var initialInputDescription = document.getElementById(`formDescription${task_id}`).value;
-        var initialAssignee = document.getElementById(`formAssignee${task_id}`).value;
-        var initialLabels = document.getElementById(`formLabels${task_id}`).value;
-        var initialStoryPoint = document.getElementById(`formStoryPoint${task_id}`).value;
+        var initialInputTitle = document.getElementById(`formTitle${task_id}`).placeholder;
+        var initialInputDescription = document.getElementById(`formDescription${task_id}`).placeholder;
+        var initialAssignee = document.getElementById(`formAssignee${task_id}`).placeholder;
+        var initialLabels = document.getElementById(`formLabels${task_id}`).placeholder;
+        var initialStoryPoint = document.getElementById(`formStoryPoint${task_id}`).placeholder;
 
         saveButton.addEventListener('click', e => {
             var inputTitle = document.getElementById(`formTitle${task_id}`).value;
@@ -149,6 +151,11 @@
             var columnId = document.getElementById(`formColumn${task_id}`).value;
             var labels = document.getElementById(`formLabels${task_id}`).value;
             var storyPoint = document.getElementById(`formStoryPoint${task_id}`).value;
+
+            // Get placeholder is story point not emitted
+            if (!Number(storyPoint)){
+                storyPoint = initialStoryPoint;
+            }
 
             // Submit the form via AJAX (using Fetch API)
             fetch('{{ route('tasks.update') }}', {
