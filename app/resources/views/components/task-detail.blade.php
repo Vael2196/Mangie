@@ -1,5 +1,5 @@
 <div class = "absolute top-0 right-0 h-full w-full p-5 flex justify-center items-center z-30 backdrop-blur-sm bg-black bg-opacity-30">
-    <div class = "overflow-x-auto rounded lg:px-11 px-2 lg:py-7 py-3 w-4/6 h-3/5 bg-white dark:bg-gradient-to-l from-slate-700 to-gray-900 border-2 flex flex-col">
+    <div class = "overflow-x-auto rounded lg:px-11 px-2 py-7 w-4/6 h-3/5 bg-white dark:bg-gradient-to-l from-slate-700 to-gray-900 border-2 flex flex-col">
         {{-- Top bar --}}
         <div class="flex justify-between items-center space-x-10 w-full mb-3">
 
@@ -67,18 +67,35 @@
                 {{-- Details box --}}
                 <div class = "border-2 rounded-3 lg:w-3/4 w-10/12 h-3/4 flex flex-col justify-evenly px-3 py-1 mb-10">
                     <h1>Details</h1>
-                    <div class = "flex justify-between mb-4 w-full">
+
+                    {{-- Assignee --}}
+                    <div class = "flex justify-between w-full">
                         <p>Assignee</p>
-                        <select class = "dark:bg-transparent" id="formAssignee{{$task->id}}">
+                        <select class = "dark:bg-transparent rounded border-2 border-white focus:ring-blue-500 focus:border-blue-500 cursor-pointer" id="formAssignee{{$task->id}}">
                             @foreach ($users as $assignee)
                                 <option value="{{$assignee->id}}">{{$assignee->name}}</option>
                             @endforeach
                         </select>
                     </div>
 
-                    <div class = "flex justify-between mb-4 w-full">
+                    {{-- Column --}}
+                    <div class = "flex justify-between w-full">
+                        <p>Status</p>
+                        <select class = "dark:bg-transparent w-50 border-2 border-white focus:ring-blue-500 focus:border-blue-500 cursor-pointer" id="formColumn{{$task->id}}">
+                            @foreach ($parent_board->columns as $column)
+                                @if($task->column_id == $column->id)
+                                    <option value="{{$column->id}}" selected>{{$column->name}}</option>
+                                @else
+                                    <option value="{{$column->id}}">{{$column->name}}</option>
+                                @endif
+                            @endforeach
+                        </select>
+                    </div>
+
+                    {{-- Labels --}}
+                    <div class = "flex justify-between w-full">
                         <p>Labels</p>
-                        <select class = "dark:bg-transparent w-50" id="formLabels{{$task->id}}">
+                        <select class = "dark:bg-transparent w-50 border-2 border-white focus:ring-blue-500 focus:border-blue-500 cursor-pointer" id="formLabels{{$task->id}}">
                             @foreach (["API", "Backend", "Frontend", "UI/UX", "Database"] as $label)
                                 @if($task->labels == $label)
                                     <option value="{{$label}}" selected>{{$label}}</option>
@@ -89,14 +106,16 @@
                         </select>
                     </div>
 
-                    <div class = "flex justify-between mb-4 w-full">
+                    {{-- Sprint board --}}
+                    <div class = "flex justify-between w-full">
                         <p>Sprint</p>
-                        <p class = "fw-bold px-2">{{$parent_board->name}}</p>
+                        <p class = "fw-bold px-2 cursor-default">{{$parent_board->name}}</p>
                     </div>
 
-                    <div class = "flex justify-between mb-4 w-full">
+                    {{-- Story point estimate --}}
+                    <div class = "flex justify-between w-full">
                         <p>SP ESTIMATE</p>
-                        <input type="number" id="formStoryPoint{{$task->id}}" class = "border-2 rounded w-10 dark:bg-transparent"  placeholder="{{$task->story_points}}" value="{{$task->story_points}}"/>
+                        <input type="number" id="formStoryPoint{{$task->id}}" class = "rounded w-10 dark:bg-transparent border-2 border-gray-300 focus:ring-blue-500 focus:border-blue-500 cursor-pointer"  placeholder="{{$task->story_points}}" value="{{$task->story_points}}"/>
                     </div>
                 </div>
 
@@ -127,6 +146,7 @@
             var inputTitle = document.getElementById(`formTitle${task_id}`).value;
             var inputDescription = document.getElementById(`formDescription${task_id}`).value;
             var assignee = document.getElementById(`formAssignee${task_id}`).value;
+            var columnId = document.getElementById(`formColumn${task_id}`).value;
             var labels = document.getElementById(`formLabels${task_id}`).value;
             var storyPoint = document.getElementById(`formStoryPoint${task_id}`).value;
 
@@ -135,6 +155,7 @@
                 method: 'POST',
                 body: JSON.stringify({
                     task_id: task_id,
+                    column_id: columnId,
                     title: inputTitle,
                     description: inputDescription,
                     assignee: Number(assignee),
