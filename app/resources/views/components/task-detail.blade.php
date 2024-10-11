@@ -94,7 +94,7 @@
             </div>
         </div>
 
-        <span class="flex items-start" id="xButton{{$task->id}}" onclick="this.parentElement.parentElement.parentElement.classList.toggle('hidden')">
+        <span class="flex items-start" id="xButton{{$task->id}}">
             <div class="p-2 hover:cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-900 bg-opacity-10 rounded">
                 <i class="fa-solid fa-xmark fa-2xl"></i>
             </div>
@@ -106,31 +106,27 @@
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         var task_id= Number("<?php echo "$task->id"?>");
-
-        var hasClicked = false;
         let saveButton = document.getElementById(`saveTaskButton${task_id}`);
-        let xButton = document.getElementById(`xButton${task_id}`);
+        let xButton = document.getElementById(`xButton${task_id}`);  // Not being saved as unique variable
 
-        var initialInputTitle = document.getElementById(`formTitle${task_id}`).value;
-        var initialInputDescription = document.getElementById(`formDescription${task_id}`).value;
-        var initialAssignee = document.getElementById(`formAssignee${task_id}`).value;
-        var initialLabels = document.getElementById(`formLabels${task_id}`).value;
-        var initialStoryPoint = document.getElementById(`formStoryPoint${task_id}`).value;
+        // var initialInputTitle = document.getElementById(`formTitle${task_id}`).value;
+        // var initialInputDescription = document.getElementById(`formDescription${task_id}`).value;
+        // var initialAssignee = document.getElementById(`formAssignee${task_id}`).value;
+        // var initialLabels = document.getElementById(`formLabels${task_id}`).value;
+        // var initialStoryPoint = document.getElementById(`formStoryPoint${task_id}`).value;
 
-        console.log(initialInputTitle);
-        console.log(initialInputDescription);
-        console.log(initialAssignee);
-        console.log(initialLabels);
-        console.log(initialStoryPoint);
+        // console.log(initialInputTitle);
+        // console.log(initialInputDescription);
+        // console.log(initialAssignee);
+        // console.log(initialLabels);
+        // console.log(initialStoryPoint);
 
         saveButton.addEventListener('click', e => {
-            hasClicked = true;
             var inputTitle = document.getElementById(`formTitle${task_id}`).value;
             var inputDescription = document.getElementById(`formDescription${task_id}`).value;
             var assignee = document.getElementById(`formAssignee${task_id}`).value;
             var labels = document.getElementById(`formLabels${task_id}`).value;
             var storyPoint = document.getElementById(`formStoryPoint${task_id}`).value;
-
 
             // Submit the form via AJAX (using Fetch API)
             fetch('{{ route('tasks.update') }}', {
@@ -166,23 +162,22 @@
                     console.log('Received the following instead of valid JSON:', bodyText);
                 });
             });
-
-        // Reset the form submission when closing without saving
-        xButton.addEventListener('click', e => {
-            // //  Skip when the save button has been clicked
-            // if(hasClicked){
-            //     hasClicked = false;
-            //     return;
-            // }
-
-            // Reset variables to their original values
-            document.getElementById(`formTitle${task_id}`).placeholder = inputTitle;
-            document.getElementById(`formDescription${task_id}`).placeholder = initialInputDescription;
-            document.getElementById(`formAssignee${task_id}`).placeholder = initialAssignee;
-            document.getElementById(`formLabels${task_id}`).placeholder = initialLabels;
-            document.getElementById(`formStoryPoint${task_id}`).placeholder = initialStoryPoint;
         });
 
+        //  xbutton click behaviour
+        xButton.addEventListener('click', e => {
+            // Close the task detail view
+            xButton.parentElement.parentElement.parentElement.classList.toggle('hidden');
+
+            //  Skip when the save button has been clicked
+            console.log(e);
+
+            // // Reset the form submission when closing without saving
+            // document.getElementById(`formTitle${task_id}`).placeholder = inputTitle;
+            // document.getElementById(`formDescription${task_id}`).placeholder = initialInputDescription;
+            // document.getElementById(`formAssignee${task_id}`).placeholder = initialAssignee;
+            // document.getElementById(`formLabels${task_id}`).placeholder = initialLabels;
+            // document.getElementById(`formStoryPoint${task_id}`).placeholder = initialStoryPoint;
         });
     });
 
