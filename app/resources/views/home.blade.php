@@ -16,7 +16,7 @@
             <!-- Existing boards -->
             @foreach($boards as $board)
                 {{-- Skip product backlog board --}}
-                @if($loop->first)
+                @if($board->id == 1)
                     @continue
                 @endif
                 {{-- Show sprint boards --}}
