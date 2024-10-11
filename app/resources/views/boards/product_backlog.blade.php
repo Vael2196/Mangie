@@ -374,7 +374,6 @@
                                             </div>
                                             `;
                         sprintList.insertAdjacentHTML('beforeend', new_sprint_board)
-
                         // Clear the input field
                         createSprintInput.value = '';
                     } else {

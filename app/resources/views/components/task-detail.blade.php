@@ -4,9 +4,9 @@
             <div class = "flex flex-col lg:w-1/2 h-full">
                 <!-- Task info -->
                 <div class="mb-10 flex flex-col">
-                    <input id="formTitle" type="text" placeholder="{{$task->title}}" value="{{$task->title ? $task->title : "Enter a title"}}" class="placeholder-slate-700 text-xl mb-4">
-                    <label for="formDescription" class="mb-2">Description</label>
-                    <textarea id="formDescription" rows="3" placeholder="{{$task->description ? $task->description : "Enter a description"}}" value="{{$task->description}}"></textarea>
+                    <input id="formTitle{{$task->id}}" type="text" placeholder="{{$task->title ? $task->title : "Enter a title"}}" value="{{$task->title}}" class="placeholder-slate-700 text-xl mb-4">
+                    <label for="formDescription{{$task->id}}" class="mb-2">Description</label>
+                    <textarea id="formDescription{{$task->id}}" rows="3" placeholder="{{$task->description ? $task->description : "Enter a description"}}" value="{{$task->description}}"></textarea>
                 </div>
 
                 <!-- Task activity -->
@@ -55,7 +55,7 @@
                     <h1>Details</h1>
                     <div class = "flex justify-between mb-4 w-full">
                         <p>Assignee</p>
-                        <select class = "dark:bg-transparent" id="formAssignee">
+                        <select class = "dark:bg-transparent" id="formAssignee{{$task->id}}">
                             @foreach ($users as $assignee)
                                 <option value="{{$assignee->id}}">{{$assignee->name}}</option>
                             @endforeach
@@ -64,7 +64,7 @@
 
                     <div class = "flex justify-between mb-4 w-full">
                         <p>Labels</p>
-                        <select class = "dark:bg-transparent w-50" id="formLabels">
+                        <select class = "dark:bg-transparent w-50" id="formLabels{{$task->id}}">
                             @foreach (["API", "Backend", "Frontend", "UI/UX", "Database"] as $label)
                                 @if($task->labels == $label)
                                     <option value="{{$label}}" selected>{{$label}}</option>
@@ -82,7 +82,7 @@
 
                     <div class = "flex justify-between mb-4 w-full">
                         <p>SP ESTIMATE</p>
-                        <input type="number" id="formStoryPoint" class = "border-2 rounded w-10 dark:bg-transparent"  placeholder="{{$task->story_points}}" value="{{$task->story_points}}"/>
+                        <input type="number" id="formStoryPoint{{$task->id}}" class = "border-2 rounded w-10 dark:bg-transparent"  placeholder="{{$task->story_points}}" value="{{$task->story_points}}"/>
                     </div>
                 </div>
 
@@ -108,22 +108,29 @@
         var task_id= Number("<?php echo "$task->id"?>");
 
         var hasClicked = false;
-        saveButton = document.getElementById(`saveTaskButton${task_id}`);
-        xButton = document.getElementById(`xButton${task_id}`);
+        let saveButton = document.getElementById(`saveTaskButton${task_id}`);
+        let xButton = document.getElementById(`xButton${task_id}`);
 
-        var initialInputTitle = document.getElementById("formTitle").value;
-        var initialInputDescription = document.getElementById("formDescription").value;
-        var initialAssignee = document.getElementById("formAssignee").value;
-        var initialLabels = document.getElementById("formLabels").value;
-        var initialStoryPoint = document.getElementById("formStoryPoint").value;
+        var initialInputTitle = document.getElementById(`formTitle${task_id}`).value;
+        var initialInputDescription = document.getElementById(`formDescription${task_id}`).value;
+        var initialAssignee = document.getElementById(`formAssignee${task_id}`).value;
+        var initialLabels = document.getElementById(`formLabels${task_id}`).value;
+        var initialStoryPoint = document.getElementById(`formStoryPoint${task_id}`).value;
+
+        console.log(initialInputTitle);
+        console.log(initialInputDescription);
+        console.log(initialAssignee);
+        console.log(initialLabels);
+        console.log(initialStoryPoint);
 
         saveButton.addEventListener('click', e => {
             hasClicked = true;
-            var inputTitle = document.getElementById("formTitle").value;
-            var inputDescription = document.getElementById("formDescription").value;
-            var assignee = document.getElementById("formAssignee").value;
-            var labels = document.getElementById("formLabels").value;
-            var storyPoint = document.getElementById("formStoryPoint").value;
+            var inputTitle = document.getElementById(`formTitle${task_id}`).value;
+            var inputDescription = document.getElementById(`formDescription${task_id}`).value;
+            var assignee = document.getElementById(`formAssignee${task_id}`).value;
+            var labels = document.getElementById(`formLabels${task_id}`).value;
+            var storyPoint = document.getElementById(`formStoryPoint${task_id}`).value;
+
 
             // Submit the form via AJAX (using Fetch API)
             fetch('{{ route('tasks.update') }}', {
@@ -162,18 +169,18 @@
 
         // Reset the form submission when closing without saving
         xButton.addEventListener('click', e => {
-            //  Skip when the save button has been clicked
-            if(hasClicked){
-                // hasClicked = false;
-                return;
-            }
+            // //  Skip when the save button has been clicked
+            // if(hasClicked){
+            //     hasClicked = false;
+            //     return;
+            // }
 
             // Reset variables to their original values
-            document.getElementById("formTitle").value = initialInputTitle;
-            document.getElementById("formDescription").value = initialInputDescription;
-            document.getElementById("formLabels").value = initialLabels;
-            document.getElementById("formAssignee").value = initialAssignee;
-            document.getElementById("formStoryPoint").value = initialStoryPoint;
+            document.getElementById(`formTitle${task_id}`).placeholder = inputTitle;
+            document.getElementById(`formDescription${task_id}`).placeholder = initialInputDescription;
+            document.getElementById(`formAssignee${task_id}`).placeholder = initialAssignee;
+            document.getElementById(`formLabels${task_id}`).placeholder = initialLabels;
+            document.getElementById(`formStoryPoint${task_id}`).placeholder = initialStoryPoint;
         });
 
         });
