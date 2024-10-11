@@ -109,17 +109,11 @@
         let saveButton = document.getElementById(`saveTaskButton${task_id}`);
         let xButton = document.getElementById(`xButton${task_id}`);  // Not being saved as unique variable
 
-        // var initialInputTitle = document.getElementById(`formTitle${task_id}`).value;
-        // var initialInputDescription = document.getElementById(`formDescription${task_id}`).value;
-        // var initialAssignee = document.getElementById(`formAssignee${task_id}`).value;
-        // var initialLabels = document.getElementById(`formLabels${task_id}`).value;
-        // var initialStoryPoint = document.getElementById(`formStoryPoint${task_id}`).value;
-
-        // console.log(initialInputTitle);
-        // console.log(initialInputDescription);
-        // console.log(initialAssignee);
-        // console.log(initialLabels);
-        // console.log(initialStoryPoint);
+        var initialInputTitle = document.getElementById(`formTitle${task_id}`).value;
+        var initialInputDescription = document.getElementById(`formDescription${task_id}`).value;
+        var initialAssignee = document.getElementById(`formAssignee${task_id}`).value;
+        var initialLabels = document.getElementById(`formLabels${task_id}`).value;
+        var initialStoryPoint = document.getElementById(`formStoryPoint${task_id}`).value;
 
         saveButton.addEventListener('click', e => {
             var inputTitle = document.getElementById(`formTitle${task_id}`).value;
@@ -169,15 +163,12 @@
             // Close the task detail view
             xButton.parentElement.parentElement.parentElement.classList.toggle('hidden');
 
-            //  Skip when the save button has been clicked
-            console.log(e);
-
-            // // Reset the form submission when closing without saving
-            // document.getElementById(`formTitle${task_id}`).placeholder = inputTitle;
-            // document.getElementById(`formDescription${task_id}`).placeholder = initialInputDescription;
-            // document.getElementById(`formAssignee${task_id}`).placeholder = initialAssignee;
-            // document.getElementById(`formLabels${task_id}`).placeholder = initialLabels;
-            // document.getElementById(`formStoryPoint${task_id}`).placeholder = initialStoryPoint;
+            // Reset the form submission when closing without saving
+            document.getElementById(`formTitle${task_id}`).value = initialInputTitle;
+            document.getElementById(`formDescription${task_id}`).value = initialInputDescription;
+            document.getElementById(`formAssignee${task_id}`).value = initialAssignee;
+            document.getElementById(`formLabels${task_id}`).value = initialLabels;
+            document.getElementById(`formStoryPoint${task_id}`).value = initialStoryPoint;
         });
     });
 

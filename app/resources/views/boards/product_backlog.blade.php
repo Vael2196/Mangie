@@ -71,6 +71,7 @@
         <div id="task-list">
 
             {{-- List view --}}
+            {{-- DOES NOT SHOW BACKLOG FOR OTHER USERS SPRINTS --}}
             <x-task-list-board>
                 @foreach($backlog->columns as $column)
                     @foreach($column->tasks as $task)
