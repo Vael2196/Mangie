@@ -71,7 +71,7 @@
                     // Add the new board dynamically to the page
                     const grid = document.querySelector('.grid');
                     const newBoardCard = document.createElement('div');
-                    newBoardCard.classList.add('bg-white', 'shadow-lg', 'rounded-lg', 'p-4');
+                    // newBoardCard.classList.add('bg-white', 'shadow-lg', 'rounded-lg', 'p-4');
                     newBoardCard.innerHTML = `
                         <div class="bg-white px-6 shadow-lg rounded-lg dark:bg-gray-700 p-4">
                             <div class="flex justify-between">
