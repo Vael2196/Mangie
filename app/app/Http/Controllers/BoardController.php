@@ -205,6 +205,25 @@ class BoardController extends Controller
     }
 
     public function updateTask(Request $request){
+        $request->validate([
+            'task_id' => 'required|exists:tasks,id',
+            'title' => 'required|string|max:255',
+            'description' => 'nullable|string',
+        ]);
 
+        // Update the task
+        Task::where('id', $request->task_id)->update([
+            'title' => $request->title,
+            'description' => $request->description,
+        ]);
+
+        // Fetch the new task
+        $task = Task::where('id', $request->task_id)->get();
+
+        // Return the updated task as a JSON response
+        return response()->json([
+            'success' => true,
+            'task' => $task,
+        ]);
     }
 }

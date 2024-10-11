@@ -22,7 +22,7 @@ return new class extends Migration
             $table->string('name');
             $table->foreignId('project_id')->constrained()->onDelete('cascade'); // Cascade delete
             $table->timestamps();
-        });        
+        });
 
         Schema::create('columns', function (Blueprint $table) {
             $table->id();

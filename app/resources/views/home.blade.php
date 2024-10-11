@@ -15,6 +15,10 @@
         <div class="grid px-6 grid-cols-4 gap-4">
             <!-- Existing boards -->
             @foreach($boards as $board)
+                {{-- Skip product backlog board --}}
+                @if($loop->first)
+                    @continue
+                @endif
                 {{-- Show sprint boards --}}
                 <div class="bg-white px-6 shadow-lg rounded-lg dark:bg-gray-700 p-4">
                     <div class="flex justify-between">

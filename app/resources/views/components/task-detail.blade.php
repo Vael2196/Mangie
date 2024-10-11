@@ -1,12 +1,12 @@
-<form class = "absolute top-0 right-0 h-full w-full p-5 flex justify-center items-center z-30 backdrop-blur-sm bg-black bg-opacity-30" method="POST" action="{{ route('tasks.update', $task->id) }}">
+<div class = "absolute top-0 right-0 h-full w-full p-5 flex justify-center items-center z-30 backdrop-blur-sm bg-black bg-opacity-30">
     <div class = "rounded lg:px-11 lg:py-7 p-5 lg:w-4/6 w-5/6 h-3/5 bg-white dark:bg-gradient-to-l from-slate-700 to-gray-900 border-2 flex">
         <div class="flex justify-between">
             <div class = "flex flex-col lg:w-1/2 h-full">
                 <!-- Task info -->
                 <div class="mb-10 flex flex-col">
-                    <input type="text" placeholder="{{$task->title}}" class="placeholder-slate-700 text-xl mb-4">
+                    <input id="formTitle" type="text" placeholder="{{$task->title}}" value="{{$task->title ? $task->title : "Enter a title"}}" class="placeholder-slate-700 text-xl mb-4">
                     <label for="formDescription" class="mb-2">Description</label>
-                    <textarea id="formDescription" rows="3" placeholder="{{$task->description}}"></textarea>
+                    <textarea id="formDescription" rows="3" placeholder="{{$task->description ? $task->description : "Enter a description"}}" value="{{$task->description}}"></textarea>
                 </div>
 
                 <!-- Task activity -->
@@ -46,11 +46,9 @@
             <!-- Task details -->
             <div class = "lg:flex lg:flex-col w-1/2 h-full items-center hidden mb-2">
                 {{-- Select details --}}
-                <select class = "mb-2 dark:bg-transparent">
-                    <option value="24" selected>Product 1</option>
-                    <option value="32">Product 2</option>
-                    <option value="54">Product 3</option>
-                </select>
+                <button type="button" id="saveTaskButton{{$task->id}}" class='mb-3 inline-flex items-center px-4 py-2 bg-blue-500 dark:bg-gray-800 border border-gray-300 dark:border-gray-500 rounded-md font-semibold text-xs text-white dark:text-gray-300 uppercase tracking-widest shadow-sm hover:bg-blue-600 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:opacity-25 transition ease-in-out duration-150'>
+                    Save
+                </button>
 
                 {{-- Details box --}}
                 <div class = "border-2 rounded-3 w-3/4 h-3/4 flex flex-col justify-evenly px-3 py-1 mb-10">
@@ -98,4 +96,50 @@
             </div>
         </span>
     </div>
-</form>
+</div>
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var task_id = "<?php echo"$task->id"?>";
+        taskDetail = document.getElementById(`saveTaskButton${task_id}`);
+        taskDetail.addEventListener('click', e => {
+            var inputTitle = document.getElementById("formTitle").value;
+            var inputDescription = document.getElementById("formDescription").value;
+
+            // Submit the form via AJAX (using Fetch API)
+            fetch('{{ route('tasks.update') }}', {
+                method: 'POST',
+                body: JSON.stringify({
+                    task_id: task_id,
+                    title: inputTitle,
+                    description: inputDescription
+                }),
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                }
+            })
+            .then(response => {
+                    responseClone = response.clone();
+                    return response.json();
+                })
+            .then(data => {
+                if (data.success) {
+                    console.log(data.task);
+                } else {
+                    console.error('Error updating task:', data.message);
+                }
+                // Print the response to the console
+            }, function (rejectionReason) {
+                console.log('Error parsing JSON from response:', rejectionReason, responseClone);
+                responseClone.text()
+                .then(function (bodyText) {
+                    console.log('Received the following instead of valid JSON:', bodyText);
+                });
+            });
+        });
+    });
+
+
+</script>
