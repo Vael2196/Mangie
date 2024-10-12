@@ -29,9 +29,9 @@
     <div class="px-10 flex flex-col w-[80vw] overflow-auto max-h-[70vh]">
 
         {{-- Sprint loading list --}}
-        <div class="mb-7 space-y-3" id="sprint-loading-board-list">
+        <div class="mb-7" id="sprint-loading-board-list">
             @foreach($boards as $board)
-            <div id="sprint-loading-board-{{$board->id}}">
+            <div id="sprint-loading-board-{{$board->id}}" class="mb-3">
                 @if($board->id == 1)
                     @continue
                 @endif
@@ -42,6 +42,10 @@
                         @endforeach
                     @endforeach
                 </x-sprint-loading-board>
+
+                {{-- Sprint loading card view --}}
+                {{--  --}}
+                {{--  --}}
             </div>
             @endforeach
         </div>
@@ -311,9 +315,13 @@
                         // } else {
                         //     // Get sprint loading board if endpoint is anything else
                         //     // This is such a hack I dont even know what is happening
-                        //     endPointBoard = document.getElementById(`sprint-loading-table-${board_id}`);
+                        //     let sprintList = document.getElementById('sprint-loading-board-list');
+                        //     let loadingBoardPTag = document.getElementById(`sprint-loading-p-tag-${board_id}`);
+                        //     if (sprintList.contains(loadingBoardPTag)){
+                        //         loadingBoardPTag.classList.add('hidden');
+                        //     }
+                        //     let endPointBoard = document.getElementById(`sprint-loading-table-${board_id}`);
                         // }
-
                         // // Insert task into the task list of the first column
                         // for(let task of data.tasks){
                         //     // Find task by ids
