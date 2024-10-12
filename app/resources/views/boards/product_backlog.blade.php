@@ -164,8 +164,10 @@
     </div>
 
     <script>
+        // Globals
         let listViews = document.querySelectorAll('.task-list-class');
         let cardViews = document.querySelectorAll('.task-card-class');
+        let viewButton = document.getElementById('viewButton');
 
         // Toggle between card and list view
         function toggleViews(viewIndex) {
@@ -173,10 +175,12 @@
             if (viewIndex == 0) {
                 listViews.forEach(view => view.classList.remove('hidden'));
                 cardViews.forEach(view => view.classList.add('hidden'));
+                viewButton.value = "list";
                 // Card view
             } else if (viewIndex == 1) {
                 listViews.forEach(view => view.classList.add('hidden'));
                 cardViews.forEach(view => view.classList.remove('hidden'));
+                viewButton.value = "card";
             }
             // Else do nothing (Default is list view)
         }
@@ -204,23 +208,18 @@
             const issuesNo = document.getElementById('issues');
 
             //Create Sprint
-            const createSprint = document.getElementById(
-            'create-sprint'); // Box created when clicking on create sprint button
+            const createSprint = document.getElementById('create-sprint'); // Box created when clicking on create sprint button
             const createSprintButton = document.getElementById('create-sprint-button'); // Creates a sprint
             const createSprintInput = document.getElementById('create-sprint-input'); // Input for name of sprint
 
             // Task Items
             const taskMenus = document.querySelectorAll(`[id*="task-list-menu"]`); // Three dots
-            const taskItems = document.querySelectorAll(
-            `[id*="task-list-item"]`); // Rows of the table -- change to be more general name
+            const taskItems = document.querySelectorAll(`[id*="task-list-item"]`); // Rows of the table -- change to be more general name
 
             // Context Menu
             const taskContextMenu = document.getElementById(`task-context-menu`); // Context menu
             const contextSubMenu = document.getElementById(`contextBoardMenu`); // Context sub menu box
             const contextSubMenuChildren = contextSubMenu.children; // Context sub menu buttons
-
-            // View changer
-            const viewButton = document.getElementById('viewButton');
 
             // Create task when clicking button ------------------------------------------
             createTaskButton.addEventListener('click', e => {
@@ -247,8 +246,8 @@
             // Card to list view
             viewButton.addEventListener('change', e => {
                 let viewIndex = viewButton.selectedIndex;
-                toggleViews(viewIndex);
                 localStorage.setItem('viewIndex', viewIndex);
+                location.reload();
             });
 
             // Context Menu ---------------------------------------------------------------
