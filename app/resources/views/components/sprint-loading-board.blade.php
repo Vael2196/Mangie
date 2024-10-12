@@ -8,7 +8,7 @@
             @if($slot->isNotEmpty())
                 {{ $slot }}
             @else
-                <p class="text-sm">Add tasks here or from the product backlog</p>
+                <p id="sprint-loading-p-tag-{{$board->id}}" class="text-sm">Add tasks here or from the product backlog</p>
             @endif
         </tbody>
     </table>
