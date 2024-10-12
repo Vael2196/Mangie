@@ -31,27 +31,48 @@
         {{-- Sprint loading list --}}
         <div class="mb-7" id="sprint-loading-board-list">
             @foreach($boards as $board)
-            <div id="sprint-loading-board-{{$board->id}}" class="mb-3">
-                @if($board->id == 1)
-                    @continue
-                @endif
-                <x-sprint-loading-board :board="$board">
-                    @foreach($board->columns as $column)
-                        @foreach($column->tasks as $task)
-                            <x-task-list-item :task="$task"/>
-                        @endforeach
-                    @endforeach
-                </x-sprint-loading-board>
 
-                {{-- Sprint loading card view --}}
-                {{--  --}}
-                {{--  --}}
-            </div>
+                {{-- List View --}}
+                <div id="sprint-loading-board-{{$board->id}}" class="mb-3 task-list-class">
+                    @if($board->id == 1)
+                        @continue
+                    @endif
+                    <x-sprint-loading-board :board="$board">
+                        @foreach($board->columns as $column)
+                            @foreach($column->tasks as $task)
+                                <x-task-list-item :task="$task"/>
+                            @endforeach
+                        @endforeach
+                    </x-sprint-loading-board>
+                </div>
+
+                {{-- Card View --}}
+                <div id="sprint-loading-board-{{$board->id}}" class="mb-3 hidden task-card-class">
+                    @if($board->id == 1)
+                        @continue
+                    @endif
+                    <x-sprint-loading-board-card :board="$board">
+                        @foreach($board->columns as $column)
+                            @foreach($column->tasks as $task)
+                                <x-task-box :task="$task"/>
+                            @endforeach
+                        @endforeach
+                    </x-sprint-loading-board-card>
+                </div>
             @endforeach
         </div>
 
-        {{-- Create sprint input box --}}
-        <div class="border min-w-full overflow-x-auto rounded p-3 bg-gray-100 hidden" id="create-sprint">
+        {{-- Create sprint input box list view--}}
+        <div class="task-list-class border min-w-full overflow-x-auto rounded p-3 bg-gray-100 hidden" id="create-sprint">
+            <div class="flex justify-between mb-2">
+                <input class='border font-semibold text-xl' id="create-sprint-input" type="text" placeholder="Enter Sprint Name">
+                <x-secondary-button>Start Sprint</x-secondary-button>
+            </div>
+            <p class="text-sm">Add tasks here or from the product backlog</p>
+        </div>
+
+        {{-- Create sprint input box card view --}}
+        <div class="task-card-class border min-w-full overflow-x-auto rounded p-3 bg-gray-100 hidden" id="create-sprint">
             <div class="flex justify-between mb-2">
                 <input class='border font-semibold text-xl' id="create-sprint-input" type="text" placeholder="Enter Sprint Name">
                 <x-secondary-button>Start Sprint</x-secondary-button>
@@ -65,16 +86,22 @@
         <div class='flex justify-between mb-2'>
             <h1 id="issues">Issues: {{count($tasks)}}</h1>
             {{-- Add list to card view dropdown switch here --}}
-            <div>
+            <div class="flex space-x-5">
+
+                {{-- Change view switch --}}
+                <select id="viewButton" class="border rounded">
+                    <option value="list">List View</option>
+                    <option value="card">Card View</option>
+                </select>
+
+                {{-- Create sprint button --}}
                 <div id="create-sprint-button"><x-secondary-button>Create Sprint</x-secondary-button></div>
-                {{--  --}}
-                {{--  --}}
             </div>
         </div>
-        {{-- Product backlog main list --}}
-        <div id="task-list">
 
-            {{-- List view --}}
+        {{-- Product backlog ------------------------------------------------- --}}
+        {{-- List view --}}
+        <div class="task-list-class" id="task-list">
             {{-- DOES NOT SHOW BACKLOG FOR OTHER USERS SPRINTS --}}
             <x-task-list-board>
                 @foreach($backlog->columns as $column)
@@ -83,11 +110,20 @@
                     @endforeach
                 @endforeach
             </x-task-list-board>
-
-            {{-- Board view --}}
-            {{--  --}}
-            {{--  --}}
         </div>
+
+        {{-- Card View --}}
+        <div class="hidden task-card-class" id="task-list">
+            <x-task-board>
+                @foreach($backlog->columns as $column)
+                    @foreach($column->tasks as $task)
+                        <x-task-box :task="$task"/>
+                    @endforeach
+                @endforeach
+            </x-task-board>
+        </div>
+
+        {{-- ------------------------------------------------------------------ --}}
 
         {{-- Context Menu --}}
         <div class="hidden absolute z-30" id="task-context-menu">
@@ -124,6 +160,7 @@
     </div>
 
     <script>
+        var changeView = false;
         document.addEventListener('DOMContentLoaded', function () {
             var selectedTaskItems = [];
             const createTaskButton = document.getElementById('create-task-link');
