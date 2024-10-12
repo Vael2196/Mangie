@@ -142,12 +142,17 @@
         var task_id= Number("<?php echo "$task->id"?>");
         let saveButton = document.getElementById(`saveTaskButton${task_id}`);
         let xButton = document.getElementById(`xButton${task_id}`);
-        let taskDetail = document.getElementById(`task-list-detail-${task_id}`);
         let taskSuccess = document.getElementById(`task-success-${task_id}`);
         let taskFail = document.getElementById(`task-fail-${task_id}`);
-
         var initialStoryPoint = document.getElementById(`formStoryPoint${task_id}`).placeholder;
 
+        // Remove notif on clicking outside
+        document.addEventListener('click', e => {
+            taskSuccess.classList.add('hidden');
+            taskFail.classList.add('hidden');
+        });
+
+        // Save button functionality
         saveButton.addEventListener('click', e => {
             var inputTitle = document.getElementById(`formTitle${task_id}`).value;
             var inputDescription = document.getElementById(`formDescription${task_id}`).value;
@@ -185,10 +190,14 @@
             .then(data => {
                 if (data.success) {
                     console.log(data.task);
+
+                    // Success message
                     taskSuccess.classList.remove('hidden');
                     taskFail.classList.add('hidden');
                 } else {
                     console.error('Error updating task:', data.message);
+
+                    // Error message
                     taskSuccess.classList.add('hidden');
                     taskFail.classList.remove('hidden');
                     taskFail.innerHTML = data.message;
@@ -206,6 +215,7 @@
         //  xbutton click behaviour
         xButton.addEventListener('click', e => {
             // Close the task detail view
+            let taskDetail = document.getElementById(`task-list-detail-${task_id}`);
             taskDetail.classList.toggle('hidden');
 
             location.reload();
