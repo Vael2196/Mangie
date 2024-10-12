@@ -140,6 +140,8 @@
 </div>
 
 <script type="module">
+    import { getVisibleElements } from '/js/utils.js';
+
     document.addEventListener('DOMContentLoaded', function () {
         var task_id= Number("<?php echo "$task->id"?>");
         let saveButton = document.getElementById(`saveTaskButton${task_id}`);

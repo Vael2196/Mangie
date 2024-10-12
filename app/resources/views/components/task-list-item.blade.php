@@ -23,7 +23,9 @@
     </div>
 </tr>
 
-<script>
+<script type="module">
+    import { getVisibleElements } from '/js/utils.js';
+
     document.addEventListener('DOMContentLoaded', function () {
         var index = {!! json_encode($task->id, JSON_HEX_TAG) !!};
         task = document.getElementById(`task-list-item-${index}`);

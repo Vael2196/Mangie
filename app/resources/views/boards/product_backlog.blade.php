@@ -163,7 +163,9 @@
         </div>
     </div>
 
-    <script>
+    <script type="module">
+        import { getVisibleElements } from '/js/utils.js';
+
         // Globals
         let listViews = document.querySelectorAll('.task-list-class');
         let cardViews = document.querySelectorAll('.task-card-class');

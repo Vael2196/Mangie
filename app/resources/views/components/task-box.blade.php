@@ -20,7 +20,9 @@
     </div>
 </div>
 
-<script>
+<script type="module">
+    import { getVisibleElements } from '/js/utils.js';
+
     window.addEventListener('DOMContentLoaded', function () {
         var index = {!! json_encode($task->id, JSON_HEX_TAG) !!};
         taskMenu = document.getElementById(`task-box-${index}`);
