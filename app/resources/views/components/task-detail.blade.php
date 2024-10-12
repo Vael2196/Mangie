@@ -139,7 +139,7 @@
     </div>
 </div>
 
-<script>
+<script type="module">
     document.addEventListener('DOMContentLoaded', function () {
         var task_id= Number("<?php echo "$task->id"?>");
         let saveButton = document.getElementById(`saveTaskButton${task_id}`);
