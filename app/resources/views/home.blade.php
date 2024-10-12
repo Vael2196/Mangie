@@ -75,10 +75,21 @@
                     // Add the new board dynamically to the page
                     const grid = document.querySelector('.grid');
                     const newBoardCard = document.createElement('div');
-                    newBoardCard.classList.add('bg-white', 'shadow-lg', 'rounded-lg', 'p-4');
+                    // newBoardCard.classList.add('bg-white', 'shadow-lg', 'rounded-lg', 'p-4');
                     newBoardCard.innerHTML = `
-                        <h2 class="text-xl font-bold">${data.board.name}</h2>
-                        <a href="/boards/${data.board.id}" class="text-blue-500 hover:underline">View Board</a>
+                        <div class="bg-white px-6 shadow-lg rounded-lg dark:bg-gray-700 p-4">
+                            <div class="flex justify-between">
+                                <h2 class="text-xl font-bold dark:text-white">${data.board.name}</h2>
+                                <form method="POST" action="/boards/${data.board.id}" onsubmit="return confirm('Are you sure you want to delete this board?')">
+                                    @csrf
+                                    @method('delete')
+                                    <button class="bg-red-600 hover:bg-red-400 text-white text-sm py-1 px-2 rounded-full">
+                                        Delete
+                                    </button>
+                                </form>
+                            </div>
+                            <a href="/boards/${data.board.id}" class="text-blue-500 hover:underline">View</a>
+                        </div>
                     `;
                     grid.insertBefore(newBoardCard, form.closest('.bg-gray-100'));
 

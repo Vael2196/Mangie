@@ -1,6 +1,8 @@
 @props(['name','link'])
 
-<div {{ $attributes->merge(['class' => 'w-full px-4 py-2 text-start leading-5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-500 hover:cursor-pointer focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out rounded flex space-x-3']) }}>
-    <div class = "text-center">{{ $slot }}</div>
-    <a {{ $attributes->merge([ 'class' => "lg:block hidden text-sm", "href" => $link])}}>{{$name}}</a>
-</div>
+<a href = {{ $link }}>
+    <div {{ $attributes->merge(['class' => 'w-full px-4 py-2 text-start leading-5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-500 hover:cursor-pointer focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out rounded flex space-x-3']) }}>
+        <div class = "text-center">{{ $slot }}</div>
+        <div class = "lg:block hidden text-sm">{{ $name }}</div>
+    </div>
+</a>
