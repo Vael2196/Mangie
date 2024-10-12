@@ -63,7 +63,7 @@
         </div>
 
         {{-- Create sprint input box list view--}}
-        <div class="task-list-class border min-w-full overflow-x-auto rounded p-3 bg-gray-100 hidden" id="create-sprint">
+        <div class="border min-w-full overflow-x-auto rounded p-3 bg-gray-100 hidden" id="create-sprint">
             <div class="flex justify-between mb-2">
                 <input class='border font-semibold text-xl' id="create-sprint-input" type="text" placeholder="Enter Sprint Name">
                 <x-secondary-button>Start Sprint</x-secondary-button>
@@ -72,7 +72,7 @@
         </div>
 
         {{-- Create sprint input box card view --}}
-        <div class="task-card-class border min-w-full overflow-x-auto rounded p-3 bg-gray-100 hidden" id="create-sprint">
+        <div class="border min-w-full overflow-x-auto rounded p-3 bg-gray-100 hidden" id="create-sprint">
             <div class="flex justify-between mb-2">
                 <input class='border font-semibold text-xl' id="create-sprint-input" type="text" placeholder="Enter Sprint Name">
                 <x-secondary-button>Start Sprint</x-secondary-button>
@@ -160,7 +160,6 @@
     </div>
 
     <script>
-        var changeView = false;
         document.addEventListener('DOMContentLoaded', function () {
             var selectedTaskItems = [];
             const createTaskButton = document.getElementById('create-task-link');
@@ -186,6 +185,9 @@
             // View changer
             const viewButton = document.getElementById('viewButton');
 
+            let viewIndex = localStorage.getItem('viewIndex')
+            toggleViews(viewIndex);
+
             // Create task when clicking button ------------------------------------------
             createTaskButton.addEventListener('click', e => {
                 inputTaskField.classList.remove('hidden');
@@ -210,17 +212,27 @@
 
             // Card to list view
             viewButton.addEventListener('change', e => {
+                let viewIndex = viewButton.selectedIndex;
+                toggleViews(viewIndex);
+                localStorage.setItem('viewIndex', viewIndex);
+            });
+
+            // Toggle between card and list view
+            function toggleViews(viewIndex){
                 let listViews = document.querySelectorAll('.task-list-class');
                 let cardViews = document.querySelectorAll('.task-card-class');
-                let viewIndex = viewButton.selectedIndex;
                 if (viewIndex == 0){
                     listViews.forEach(view => view.classList.remove('hidden'));
                     cardViews.forEach(view => view.classList.add('hidden'));
-                }else if(viewIndex){
+
+                // Card view
+                }else if (viewIndex == 1){
                     listViews.forEach(view => view.classList.add('hidden'));
                     cardViews.forEach(view => view.classList.remove('hidden'));
+                }else{
+                    return;
                 }
-            });
+            }
 
             // Context Menu ---------------------------------------------------------------
             // Reset context menu on right click anywhere outside
