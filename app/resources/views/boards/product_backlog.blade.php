@@ -33,45 +33,38 @@
             @foreach($boards as $board)
 
                 {{-- List View --}}
-                <div id="sprint-loading-board-{{$board->id}}" class="mb-3 task-list-class">
-                    @if($board->id == 1)
-                        @continue
-                    @endif
-                    <x-sprint-loading-board :board="$board">
-                        @foreach($board->columns as $column)
-                            @foreach($column->tasks as $task)
-                                <x-task-list-item :task="$task"/>
+                <div id="sprint-loading-board-{{$board->id}}">
+                    <div class="mb-3 task-list-class">
+                        @if($board->id == 1)
+                            @continue
+                        @endif
+                        <x-sprint-loading-board :board="$board">
+                            @foreach($board->columns as $column)
+                                @foreach($column->tasks as $task)
+                                    <x-task-list-item :task="$task"/>
+                                @endforeach
                             @endforeach
-                        @endforeach
-                    </x-sprint-loading-board>
-                </div>
+                        </x-sprint-loading-board>
+                    </div>
 
-                {{-- Card View --}}
-                <div id="sprint-loading-board-{{$board->id}}" class="mb-3 hidden task-card-class">
-                    @if($board->id == 1)
-                        @continue
-                    @endif
-                    <x-sprint-loading-board-card :board="$board">
-                        @foreach($board->columns as $column)
-                            @foreach($column->tasks as $task)
-                                <x-task-box :task="$task"/>
+                    {{-- Card View --}}
+                    <div class="mb-3 hidden task-card-class">
+                        @if($board->id == 1)
+                            @continue
+                        @endif
+                        <x-sprint-loading-board-card :board="$board">
+                            @foreach($board->columns as $column)
+                                @foreach($column->tasks as $task)
+                                    <x-task-box :task="$task"/>
+                                @endforeach
                             @endforeach
-                        @endforeach
-                    </x-sprint-loading-board-card>
+                        </x-sprint-loading-board-card>
+                    </div>
                 </div>
             @endforeach
         </div>
 
         {{-- Create sprint input box list view--}}
-        <div class="border min-w-full overflow-x-auto rounded p-3 bg-gray-100 hidden" id="create-sprint">
-            <div class="flex justify-between mb-2">
-                <input class='border font-semibold text-xl' id="create-sprint-input" type="text" placeholder="Enter Sprint Name">
-                <x-secondary-button>Start Sprint</x-secondary-button>
-            </div>
-            <p class="text-sm">Add tasks here or from the product backlog</p>
-        </div>
-
-        {{-- Create sprint input box card view --}}
         <div class="border min-w-full overflow-x-auto rounded p-3 bg-gray-100 hidden" id="create-sprint">
             <div class="flex justify-between mb-2">
                 <input class='border font-semibold text-xl' id="create-sprint-input" type="text" placeholder="Enter Sprint Name">
@@ -101,26 +94,28 @@
 
         {{-- Product backlog ------------------------------------------------- --}}
         {{-- List view --}}
-        <div class="task-list-class" id="task-list">
-            {{-- DOES NOT SHOW BACKLOG FOR OTHER USERS SPRINTS --}}
-            <x-task-list-board>
-                @foreach($backlog->columns as $column)
-                    @foreach($column->tasks as $task)
-                        <x-task-list-item :task="$task"/>
+        <div id="task-list">
+            <div class="task-list-class">
+                {{-- DOES NOT SHOW BACKLOG FOR OTHER USERS SPRINTS --}}
+                <x-task-list-board>
+                    @foreach($backlog->columns as $column)
+                        @foreach($column->tasks as $task)
+                            <x-task-list-item :task="$task"/>
+                        @endforeach
                     @endforeach
-                @endforeach
-            </x-task-list-board>
-        </div>
+                </x-task-list-board>
+            </div>
 
-        {{-- Card View --}}
-        <div class="hidden task-card-class" id="task-list">
-            <x-task-board>
-                @foreach($backlog->columns as $column)
-                    @foreach($column->tasks as $task)
-                        <x-task-box :task="$task"/>
+            {{-- Card View --}}
+            <div class="hidden task-card-class">
+                <x-task-board>
+                    @foreach($backlog->columns as $column)
+                        @foreach($column->tasks as $task)
+                            <x-task-box :task="$task"/>
+                        @endforeach
                     @endforeach
-                @endforeach
-            </x-task-board>
+                </x-task-board>
+            </div>
         </div>
 
         {{-- ------------------------------------------------------------------ --}}
@@ -164,7 +159,7 @@
             var selectedTaskItems = [];
             const createTaskButton = document.getElementById('create-task-link');
             const inputTaskField = document.getElementById('input-task-field');
-            const taskColumn = document.getElementById('task-list').lastElementChild; // Hack
+            const taskColumn = document.getElementById('task-list').lastElementChild.lastElementChild; // Hack
 
             const issuesNo = document.getElementById('issues');
 
@@ -184,9 +179,8 @@
 
             // View changer
             const viewButton = document.getElementById('viewButton');
-
             let viewIndex = localStorage.getItem('viewIndex')
-            toggleViews(viewIndex);
+            toggleViews(viewIndex);               // Load previous state
 
             // Create task when clicking button ------------------------------------------
             createTaskButton.addEventListener('click', e => {
@@ -221,16 +215,15 @@
             function toggleViews(viewIndex){
                 let listViews = document.querySelectorAll('.task-list-class');
                 let cardViews = document.querySelectorAll('.task-card-class');
+
+                // List view
                 if (viewIndex == 0){
                     listViews.forEach(view => view.classList.remove('hidden'));
                     cardViews.forEach(view => view.classList.add('hidden'));
-
                 // Card view
                 }else if (viewIndex == 1){
                     listViews.forEach(view => view.classList.add('hidden'));
                     cardViews.forEach(view => view.classList.remove('hidden'));
-                }else{
-                    return;
                 }
             }
 
