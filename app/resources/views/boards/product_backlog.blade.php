@@ -183,6 +183,9 @@
             const contextSubMenu = document.getElementById(`contextBoardMenu`); // Context sub menu box
             const contextSubMenuChildren = contextSubMenu.children; // Context sub menu buttons
 
+            // View changer
+            const viewButton = document.getElementById('viewButton');
+
             // Create task when clicking button ------------------------------------------
             createTaskButton.addEventListener('click', e => {
                 inputTaskField.classList.remove('hidden');
@@ -205,6 +208,19 @@
                 createSprint.classList.add('hidden');
             });
 
+            // Card to list view
+            viewButton.addEventListener('change', e => {
+                let listViews = document.querySelectorAll('.task-list-class');
+                let cardViews = document.querySelectorAll('.task-card-class');
+                let viewIndex = viewButton.selectedIndex;
+                if (viewIndex == 0){
+                    listViews.forEach(view => view.classList.remove('hidden'));
+                    cardViews.forEach(view => view.classList.add('hidden'));
+                }else if(viewIndex){
+                    listViews.forEach(view => view.classList.add('hidden'));
+                    cardViews.forEach(view => view.classList.remove('hidden'));
+                }
+            });
 
             // Context Menu ---------------------------------------------------------------
             // Reset context menu on right click anywhere outside
