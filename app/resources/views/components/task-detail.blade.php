@@ -225,6 +225,4 @@
             location.reload();
         });
     });
-
-
 </script>

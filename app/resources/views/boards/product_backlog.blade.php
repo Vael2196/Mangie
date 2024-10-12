@@ -165,6 +165,7 @@
 
     <script type="module">
         import { getVisibleElements } from '/js/utils.js';
+        // CHANGE ALL getElementById to getVisibleElements
 
         // Globals
         let listViews = document.querySelectorAll('.task-list-class');
