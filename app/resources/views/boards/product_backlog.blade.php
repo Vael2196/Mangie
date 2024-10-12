@@ -29,25 +29,50 @@
     <div class="px-10 flex flex-col w-[80vw] overflow-auto max-h-[70vh]">
 
         {{-- Sprint loading list --}}
-        <div class="mb-7 space-y-3" id="sprint-loading-board-list">
+        <div class="mb-7" id="sprint-loading-board-list">
             @foreach($boards as $board)
-            <div id="sprint-loading-board-{{$board->id}}">
-                @if($board->id == 1)
-                    @continue
-                @endif
-                <x-sprint-loading-board :board="$board">
-                    @foreach($board->columns as $column)
-                        @foreach($column->tasks as $task)
-                            <x-task-list-item :task="$task"/>
+
+                {{-- List View --}}
+                <div id="sprint-loading-board-{{$board->id}}" class="mb-3 task-list-class">
+                    @if($board->id == 1)
+                        @continue
+                    @endif
+                    <x-sprint-loading-board :board="$board">
+                        @foreach($board->columns as $column)
+                            @foreach($column->tasks as $task)
+                                <x-task-list-item :task="$task"/>
+                            @endforeach
                         @endforeach
-                    @endforeach
-                </x-sprint-loading-board>
-            </div>
+                    </x-sprint-loading-board>
+                </div>
+
+                {{-- Card View --}}
+                <div id="sprint-loading-board-{{$board->id}}" class="mb-3 hidden task-card-class">
+                    @if($board->id == 1)
+                        @continue
+                    @endif
+                    <x-sprint-loading-board-card :board="$board">
+                        @foreach($board->columns as $column)
+                            @foreach($column->tasks as $task)
+                                <x-task-box :task="$task"/>
+                            @endforeach
+                        @endforeach
+                    </x-sprint-loading-board-card>
+                </div>
             @endforeach
         </div>
 
-        {{-- Create sprint input box --}}
-        <div class="border min-w-full overflow-x-auto rounded p-3 bg-gray-100 hidden" id="create-sprint">
+        {{-- Create sprint input box list view--}}
+        <div class="task-list-class border min-w-full overflow-x-auto rounded p-3 bg-gray-100 hidden" id="create-sprint">
+            <div class="flex justify-between mb-2">
+                <input class='border font-semibold text-xl' id="create-sprint-input" type="text" placeholder="Enter Sprint Name">
+                <x-secondary-button>Start Sprint</x-secondary-button>
+            </div>
+            <p class="text-sm">Add tasks here or from the product backlog</p>
+        </div>
+
+        {{-- Create sprint input box card view --}}
+        <div class="task-card-class border min-w-full overflow-x-auto rounded p-3 bg-gray-100 hidden" id="create-sprint">
             <div class="flex justify-between mb-2">
                 <input class='border font-semibold text-xl' id="create-sprint-input" type="text" placeholder="Enter Sprint Name">
                 <x-secondary-button>Start Sprint</x-secondary-button>
@@ -61,16 +86,23 @@
         <div class='flex justify-between mb-2'>
             <h1 id="issues">Issues: {{count($tasks)}}</h1>
             {{-- Add list to card view dropdown switch here --}}
-            <div>
+            <div class="flex space-x-5">
+
+                {{-- Change view switch --}}
+                <select id="viewButton" class="border rounded">
+                    <option value="list">List View</option>
+                    <option value="card">Card View</option>
+                </select>
+
+                {{-- Create sprint button --}}
                 <div id="create-sprint-button"><x-secondary-button>Create Sprint</x-secondary-button></div>
-                {{--  --}}
-                {{--  --}}
             </div>
         </div>
-        {{-- Product backlog main list --}}
-        <div id="task-list">
 
-            {{-- List view --}}
+        {{-- Product backlog ------------------------------------------------- --}}
+        {{-- List view --}}
+        <div class="task-list-class" id="task-list">
+            {{-- DOES NOT SHOW BACKLOG FOR OTHER USERS SPRINTS --}}
             <x-task-list-board>
                 @foreach($backlog->columns as $column)
                     @foreach($column->tasks as $task)
@@ -78,11 +110,20 @@
                     @endforeach
                 @endforeach
             </x-task-list-board>
-
-            {{-- Board view --}}
-            {{--  --}}
-            {{--  --}}
         </div>
+
+        {{-- Card View --}}
+        <div class="hidden task-card-class" id="task-list">
+            <x-task-board>
+                @foreach($backlog->columns as $column)
+                    @foreach($column->tasks as $task)
+                        <x-task-box :task="$task"/>
+                    @endforeach
+                @endforeach
+            </x-task-board>
+        </div>
+
+        {{-- ------------------------------------------------------------------ --}}
 
         {{-- Context Menu --}}
         <div class="hidden absolute z-30" id="task-context-menu">
@@ -119,6 +160,7 @@
     </div>
 
     <script>
+        var changeView = false;
         document.addEventListener('DOMContentLoaded', function () {
             var selectedTaskItems = [];
             const createTaskButton = document.getElementById('create-task-link');
@@ -254,27 +296,28 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        // Insert task into the task list of the first column
-                        const newTask = `<tr class = "px-4 py-2 text-start leading-5 dark:bg-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 hover:cursor-pointer focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out rounded" id = "task-list-item-${data.task.id}">
-                                        <td class="py-2 pl-5 border-b-2 min-w-20">${data.task.title}</td>
-                                        <td class="py-2 border-b-2 w-20">
+                        // // Insert task into the task list of the first column
+                        // const newTask = `<tr class = "px-4 py-2 text-start leading-5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 hover:cursor-pointer focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out rounded" id = "task-list-item-${data.task.id}">
+                        //                 <td class="py-2 pl-5 border-b-2 min-w-20">${data.task.title}</td>
+                        //                 <td class="py-2 border-b-2 w-20">
 
-                                        </td>
-                                        <td class="py-2 border-b-2 w-20">
+                        //                 </td>
+                        //                 <td class="py-2 border-b-2 w-20">
 
-                                        </td>
-                                        <td class="py-2 border-b-2 w-10">Pr</td>
-                                        <td class="py-2 border-b-2 w-10">As</td>
-                                        <td class="py-1 border-b-2 w-10">
-                                            <div id="task-list-menu-${data.task.id}" class="hover:cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 bg-opacity-10 list-none rounded">
-                                                <i class="fa-solid fa-ellipsis px-2 py-2"></i>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    `;
-                        taskColumn.insertAdjacentHTML('beforeend', newTask);
-                        issuesNo.innerHTML = `Issues: ${parseInt(issuesNo.innerHTML.split(":")[1]) + 1}`;
+                        //                 </td>
+                        //                 <td class="py-2 border-b-2 w-10">Pr</td>
+                        //                 <td class="py-2 border-b-2 w-10">As</td>
+                        //                 <td class="py-1 border-b-2 w-10">
+                        //                     <div id="task-list-menu-${data.task.id}" class="hover:cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 bg-opacity-10 list-none rounded">
+                        //                         <i class="fa-solid fa-ellipsis px-2 py-2"></i>
+                        //                     </div>
+                        //                 </td>
+                        //             </tr>
+                        //             `;
+                        // taskColumn.insertAdjacentHTML('beforeend', newTask);
+                        // issuesNo.innerHTML = `Issues: ${parseInt(issuesNo.innerHTML.split(":")[1]) + 1}`;
                         inputTaskField.value = '';
+                        location.reload();
                     } else {
                         console.error('Error adding task:', data.message);
                     }
@@ -302,25 +345,31 @@
                 })
                 .then(data => {
                     if (data.success) {
-                        // Get product backlog if endpoint is 1
-                        let endPointBoard;
-                        if(board_id == 1){
-                            endPointBoard = taskColumn;
-                        } else {
-                            // Get sprint loading board if endpoint is anything else
-                            // This is such a hack I dont even know what is happening
-                            endPointBoard = document.getElementById(`sprint-loading-board-${board_id}`).lastElementChild.lastElementChild.lastElementChild;
-                        }
-
-                        // Insert task into the task list of the first column
-                        for(let task of data.tasks){
-                            // Find task by ids
-                            let taskItem = document.getElementById(`task-list-item-${task.id}`);
-                            endPointBoard.appendChild(taskItem);
-                        }
+                        // // Get product backlog if endpoint is 1
+                        // let endPointBoard;
+                        // if(board_id == 1){
+                        //     endPointBoard = taskColumn;
+                        // } else {
+                        //     // Get sprint loading board if endpoint is anything else
+                        //     // This is such a hack I dont even know what is happening
+                        //     let sprintList = document.getElementById('sprint-loading-board-list');
+                        //     let loadingBoardPTag = document.getElementById(`sprint-loading-p-tag-${board_id}`);
+                        //     if (sprintList.contains(loadingBoardPTag)){
+                        //         loadingBoardPTag.classList.add('hidden');
+                        //     }
+                        //     let endPointBoard = document.getElementById(`sprint-loading-table-${board_id}`);
+                        // }
+                        // // Insert task into the task list of the first column
+                        // for(let task of data.tasks){
+                        //     // Find task by ids
+                        //     let taskItem = document.getElementById(`task-list-item-${task.id}`);
+                        //     endPointBoard.appendChild(taskItem);
+                        // }
 
                         // Reset Selected task items
                         selectedTaskItems = [];
+
+                        location.reload();
 
                     } else {
                         console.error('Error moving tasks:', data.message);
@@ -336,7 +385,6 @@
                 });
             }
 
-            // Stop here
             // Function to handle the creation of a new board
             createSprintInput.addEventListener('keypress', e => {
                 // Check if the key pressed is the Enter key
@@ -361,23 +409,23 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        const sprintList = document.getElementById('sprint-loading-board-list');
-                        // Add the new board dynamically to the page
-                        let new_sprint_board = `
-                                            <div id="sprint-loading-board-${data.board.id}">
-                                                <div class="border min-w-full overflow-x-auto rounded p-3 bg-gray-100">
-                                                    <div class="flex justify-between mb-2">
-                                                        <h1 class='font-semibold text-xl'>${data.board.name}</h1>
-                                                        <x-secondary-button>Start Sprint</x-secondary-button>
-                                                    </div>
-                                                    <p class="text-sm">Add tasks here or from the product backlog</p>
-                                                </div>
-                                            </div>
-                                            `;
-                        sprintList.insertAdjacentHTML('beforeend', new_sprint_board)
+                        // const sprintList = document.getElementById('sprint-loading-board-list');
+                        // // Add the new board dynamically to the page
+                        // let new_sprint_board = `
+                        //                     <div id="sprint-loading-board-${data.board.id}">
+                        //                         <div class="border min-w-full overflow-x-auto rounded p-3 bg-gray-100">
+                        //                             <div class="flex justify-between mb-2">
+                        //                                 <h1 class='font-semibold text-xl'>${data.board.name}</h1>
 
+                        //                             </div>
+                        //                             <p class="text-sm">Add tasks here or from the product backlog</p>
+                        //                         </div>
+                        //                     </div>
+                        //                     `;
+                        // sprintList.insertAdjacentHTML('beforeend', new_sprint_board)
                         // Clear the input field
                         createSprintInput.value = '';
+                        location.reload();
                     } else {
                         console.error('Error creating board:', data.message);
                     }

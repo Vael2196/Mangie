@@ -5,6 +5,7 @@ use App\Models\Board;
 use App\Models\Project;
 use App\Models\Column;
 use App\Models\Task;
+use App\Models\TaskUser;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -144,7 +145,6 @@ class BoardController extends Controller
         // Get All boards for a user, including the product backlog
         $user = Auth::user();
         $boards = Board::where('user_id', $user->id)->orWhere('id', 1)->get();
-
         $tasks = Task::all();
 
         // Pass the boards and tasks to the backlog view
@@ -181,6 +181,7 @@ class BoardController extends Controller
         $res = Task::whereIn('id', $task_id_num)->update([
             'column_id' => $todo_column->id,
             'position' => Task::where('column_id', $todo_column->id)->max('position') + 1,
+            'updated_at' => now()
         ]);
 
         // Check is update success
@@ -198,6 +199,52 @@ class BoardController extends Controller
         return response()->json([
             'success' => true,
             'tasks' => $tasks
+        ]);
+    }
+
+    public function updateTask(Request $request){
+        $request->validate([
+            'task_id' => 'required|exists:tasks,id',
+            'column_id' => 'required|exists:columns,id',
+            'title' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'assignee' => 'integer',
+            'labels' => 'nullable|string',
+            'storyPoint' => 'integer',
+        ]);
+
+        // Update the task
+        $res = Task::where('id', $request->task_id)->update([
+            'title' => $request->title,
+            'column_id' => $request->column_id,
+            'description' => $request->description,
+            'labels' => $request->labels,
+            'story_points' => $request->storyPoint,
+            'updated_at' => now()
+        ]);
+
+        // TaskUser::create([
+        //     'task_id' => $request->task_id,
+        //     'user_id' => $request->assignee,
+        //     'created_at' => now(),
+        //     'updated_at' => now()
+        // ]);
+
+        // Check is update success
+        if (!$res){
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to move tasks'
+            ]);
+        }
+
+        // Fetch the new task
+        $task = Task::where('id', $request->task_id)->get();
+
+        // Return the updated task as a JSON response
+        return response()->json([
+            'success' => true,
+            'task' => $task,
         ]);
     }
 }

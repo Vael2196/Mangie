@@ -1,6 +1,6 @@
 <div {{ $attributes->merge([ 'class' => 'rounded w-[15.5rem] min-h-20 max-h-40 bg-white dark:bg-gray-500 dark:text-white flex p-2 mb-3'])}}>
     <div class = "flex flex-col grow space-y-2 px-2 overflow-hidden mr-2">
-        <p>THIS IS A TASK</p>
+        <p>{{$task->title}}</p>
         <div class = "flex space-x-2">
             {{-- @foreach($task->status as $status) --}}
                 <x-status-icon name='Status'></x-status-icon>
