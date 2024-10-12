@@ -1,10 +1,16 @@
+<div id="task-success-{{$task->id}}" class="hidden absolute top-0 right-0 z-50 w-full bg-green-100 border border-green-400 text-gray-700 px-4 py-3 rounded mb-4">
+    Task has been Updated successfully
+</div>
+
+<div id="task-fail-{{$task->id}}" class="hidden absolute top-0 right-0 z-50 w-full bg-red-100 border border-red-400 text-gray-700 px-4 py-3 rounded mb-4"></div>
+
 <div class = "absolute top-0 right-0 h-full w-full p-5 flex justify-center items-center z-30 backdrop-blur-sm bg-black bg-opacity-30">
     <div class = "overflow-x-auto rounded lg:px-11 px-2 py-7 w-4/6 h-3/5 bg-white dark:bg-gradient-to-l from-slate-700 to-gray-900 border-2 flex flex-col">
         {{-- Top bar --}}
         <div class="flex justify-between items-center space-x-10 w-full mb-3">
 
             {{-- Task Title --}}
-            <input id="formTitle{{$task->id}}" type="text" placeholder="{{$task->title ? $task->title : "Enter a title"}}" value="{{$task->title}}" class="placeholder-slate-700 text-xl min-w-24 max-w-lg flex-grow">
+            <input id="formTitle{{$task->id}}" type="text" placeholder="{{$task->title ? $task->title : "Enter a title"}}" value="{{$task->title}}" class="placeholder-slate-700 text-2xl min-w-24 max-w-lg flex-grow">
 
             {{-- Select details --}}
             <button type="button" id="saveTaskButton{{$task->id}}" class='inline-flex items-center px-4 py-2 bg-blue-500 dark:bg-gray-800 border border-gray-300 dark:border-gray-500 rounded-md font-semibold text-xs text-white dark:text-gray-300 uppercase tracking-widest shadow-sm hover:bg-blue-600 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:opacity-25 transition ease-in-out duration-150'>
@@ -25,7 +31,7 @@
                 <!-- Task info -->
                 <div class="mb-10 flex flex-col">
                     <label for="formDescription{{$task->id}}" class="mb-2">Description</label>
-                    <textarea id="formDescription{{$task->id}}" rows="3" placeholder="{{$task->description ? $task->description : "Enter a description"}}" value="{{$task->description}}" class="placeholder-slate-700"></textarea>
+                    <textarea id="formDescription{{$task->id}}" rows="5" placeholder="Enter a description" value="{{$task->description}}" class="placeholder-slate-700">{{$task->description}}</textarea>
                 </div>
 {{--
                 <!-- Task activity -->
@@ -72,7 +78,7 @@
                     <div class = "flex justify-between w-full">
                         <p>Assignee</p>
                         <select class = "dark:bg-transparent rounded-md border-2 border-white focus:ring-blue-500 focus:border-blue-500 cursor-pointer" id="formAssignee{{$task->id}}">
-                            <option value="{{""}}">No one</option>
+                            <option value="" selected>No one</option>
                             @foreach ($users as $assignee)
                                 <option value="{{$assignee->id}}">{{$assignee->name}}</option>
                             @endforeach
@@ -131,17 +137,15 @@
     </div>
 </div>
 
-
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         var task_id= Number("<?php echo "$task->id"?>");
         let saveButton = document.getElementById(`saveTaskButton${task_id}`);
         let xButton = document.getElementById(`xButton${task_id}`);
+        let taskDetail = document.getElementById(`task-list-detail-${task_id}`);
+        let taskSuccess = document.getElementById(`task-success-${task_id}`);
+        let taskFail = document.getElementById(`task-fail-${task_id}`);
 
-        var initialInputTitle = document.getElementById(`formTitle${task_id}`).placeholder;
-        var initialInputDescription = document.getElementById(`formDescription${task_id}`).placeholder;
-        var initialAssignee = document.getElementById(`formAssignee${task_id}`).placeholder;
-        var initialLabels = document.getElementById(`formLabels${task_id}`).placeholder;
         var initialStoryPoint = document.getElementById(`formStoryPoint${task_id}`).placeholder;
 
         saveButton.addEventListener('click', e => {
@@ -181,8 +185,13 @@
             .then(data => {
                 if (data.success) {
                     console.log(data.task);
+                    taskSuccess.classList.remove('hidden');
+                    taskFail.classList.add('hidden');
                 } else {
                     console.error('Error updating task:', data.message);
+                    taskSuccess.classList.add('hidden');
+                    taskFail.classList.remove('hidden');
+                    taskFail.innerHTML = data.message;
                 }
                 // Print the response to the console
             }, function (rejectionReason) {
@@ -197,17 +206,9 @@
         //  xbutton click behaviour
         xButton.addEventListener('click', e => {
             // Close the task detail view
-            let taskDetail = document.getElementById(`task-list-detail-${task_id}`);
             taskDetail.classList.toggle('hidden');
 
-            // xButton.parentElement.parentElement.parentElement.parentElement.classList.toggle('hidden');
-
-            // Reset the form submission when closing without saving
-            document.getElementById(`formTitle${task_id}`).value = initialInputTitle;
-            document.getElementById(`formDescription${task_id}`).value = initialInputDescription;
-            document.getElementById(`formAssignee${task_id}`).value = initialAssignee;
-            document.getElementById(`formLabels${task_id}`).value = initialLabels;
-            document.getElementById(`formStoryPoint${task_id}`).value = initialStoryPoint;
+            location.reload();
         });
     });
 
