@@ -26,14 +26,14 @@
             </x-slot>
         </x-dropdown>
     </div>
-    <div class="px-10 flex flex-col w-[80vw] overflow-auto max-h-[70vh]">
+    <div class="px-10 flex flex-col w-[80vw] overflow-auto max-h-[70vh] invisible" id="entirePage">
 
         {{-- Sprint loading list --}}
         <div class="mb-7" id="sprint-loading-board-list">
             @foreach($boards as $board)
-
-                {{-- List View --}}
                 <div id="sprint-loading-board-{{$board->id}}">
+
+                    {{-- List View --}}
                     <div class="mb-3 task-list-class">
                         @if($board->id == 1)
                             @continue
@@ -71,9 +71,6 @@
                 <x-secondary-button>Start Sprint</x-secondary-button>
             </div>
             <p class="text-sm">Add tasks here or from the product backlog</p>
-        </div>
-
-        {{-- Somehow there is an extra div needed to make this work --}}
         </div>
 
         <div class='flex justify-between mb-2'>
@@ -155,7 +152,35 @@
     </div>
 
     <script>
+        let listViews = document.querySelectorAll('.task-list-class');
+        let cardViews = document.querySelectorAll('.task-card-class');
+
+        // Toggle between card and list view
+        function toggleViews(viewIndex){
+            // List view
+            if (viewIndex == 0){
+                listViews.forEach(view => view.classList.remove('hidden'));
+                cardViews.forEach(view => view.classList.add('hidden'));
+            // Card view
+            }else if (viewIndex == 1){
+                listViews.forEach(view => view.classList.add('hidden'));
+                cardViews.forEach(view => view.classList.remove('hidden'));
+            }
+        }
+
+        // Load previous state on document load
         document.addEventListener('DOMContentLoaded', function () {
+            let viewIndex = localStorage.getItem('viewIndex')
+            toggleViews(viewIndex);               // Load previous state
+        });
+
+        // Main loop
+        window.addEventListener('DOMContentLoaded', function () {
+            // Hack to make it look less jarring when reloading page
+            let entirePage = document.getElementById('entirePage');
+            entirePage.classList.remove('invisible');
+
+            // Variables
             var selectedTaskItems = [];
             const createTaskButton = document.getElementById('create-task-link');
             const inputTaskField = document.getElementById('input-task-field');
@@ -179,8 +204,6 @@
 
             // View changer
             const viewButton = document.getElementById('viewButton');
-            let viewIndex = localStorage.getItem('viewIndex')
-            toggleViews(viewIndex);               // Load previous state
 
             // Create task when clicking button ------------------------------------------
             createTaskButton.addEventListener('click', e => {
@@ -210,22 +233,6 @@
                 toggleViews(viewIndex);
                 localStorage.setItem('viewIndex', viewIndex);
             });
-
-            // Toggle between card and list view
-            function toggleViews(viewIndex){
-                let listViews = document.querySelectorAll('.task-list-class');
-                let cardViews = document.querySelectorAll('.task-card-class');
-
-                // List view
-                if (viewIndex == 0){
-                    listViews.forEach(view => view.classList.remove('hidden'));
-                    cardViews.forEach(view => view.classList.add('hidden'));
-                // Card view
-                }else if (viewIndex == 1){
-                    listViews.forEach(view => view.classList.add('hidden'));
-                    cardViews.forEach(view => view.classList.remove('hidden'));
-                }
-            }
 
             // Context Menu ---------------------------------------------------------------
             // Reset context menu on right click anywhere outside
