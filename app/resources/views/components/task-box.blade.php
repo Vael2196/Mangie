@@ -21,12 +21,22 @@
 </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
+    window.addEventListener('DOMContentLoaded', function () {
         var index = {!! json_encode($task->id, JSON_HEX_TAG) !!};
         taskMenu = document.getElementById(`task-box-${index}`);
+        taskListItem = document.getElementById(`task-list-item-${index}`);
+
         taskMenu.addEventListener('click', e => {
             const taskDetail = document.getElementById(`task-list-detail-${index}`);
             taskDetail.classList.toggle('hidden');
         });
+
+        taskListItem.addEventListener('contextmenu', e => {
+            console.log(e);
+            e.stopPropagation();
+            e.preventDefault();
+
+            return false;
+        }, false);
     });
 </script>
