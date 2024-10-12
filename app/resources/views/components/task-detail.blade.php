@@ -1,7 +1,9 @@
+{{-- Task Success notification --}}
 <div id="task-success-{{$task->id}}" class="hidden absolute top-0 right-0 z-50 w-full bg-green-100 border border-green-400 text-gray-700 px-4 py-3 rounded mb-4">
     Task has been Updated successfully
 </div>
 
+{{-- Task Fail notification --}}
 <div id="task-fail-{{$task->id}}" class="hidden absolute top-0 right-0 z-50 w-full bg-red-100 border border-red-400 text-gray-700 px-4 py-3 rounded mb-4"></div>
 
 <div class = "absolute top-0 right-0 h-full w-full p-5 flex justify-center items-center z-30 backdrop-blur-sm bg-black bg-opacity-30">

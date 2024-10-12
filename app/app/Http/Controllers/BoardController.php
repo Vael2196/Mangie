@@ -147,7 +147,6 @@ class BoardController extends Controller
         // Get All boards for a user, including the product backlog
         $user = Auth::user();
         $boards = Board::where('user_id', $user->id)->orWhere('id', 1)->get();
-
         $tasks = Task::all();
 
         // Pass the boards and tasks to the backlog view
