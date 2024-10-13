@@ -67,7 +67,7 @@
             <div class="flex space-x-5">
 
                 {{-- Change view switch --}}
-                <select id="viewButton" class="border rounded">
+                <select id="viewButton" class="border rounded dark:bg-gray-700 dark:text-white">
                     <option value="list">List View</option>
                     <option value="card" selected>Card View</option>
                 </select>
@@ -79,7 +79,7 @@
 
         {{-- Product backlog ------------------------------------------------- --}}
         {{-- Card view --}}
-        <div id="task-list">
+        <div id="task-list" class="dark:bg-gray-500">
             <x-task-board>
                 @foreach ($backlog->columns as $column)
                     @foreach ($column->tasks as $task)
