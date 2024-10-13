@@ -207,6 +207,48 @@ class BoardController extends Controller
         ]);
     }
 
+    public function moveColumnTasks(Request $request){
+        $request->validate([
+            'column_id' => 'required|exists:columns,id',
+        ]);
+
+        // Parse task_ids string to php array
+        $task_id_string = $request->task_ids;
+        $task_id_string = str_replace('[', '', $task_id_string);
+        $task_id_string = str_replace(']', '', $task_id_string);
+        $task_ids = explode(',', $task_id_string);
+
+        // Convert task_ids to integer
+        $task_id_num = [];
+        foreach ($task_ids as $task_id){
+            array_push($task_id_num, (int)$task_id);
+        }
+
+        // Updating the column id and positions of each task
+        $res = Task::whereIn('id', $task_id_num)->update([
+            'column_id' => $request->column_id,
+            'position' => Task::where('column_id', $request->column_id)->max('position') + 1,
+            'updated_at' => now()
+        ]);
+
+        // Check is update success
+        if (!$res){
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to move tasks'
+            ]);
+        }
+
+        // Fetch the new tasks
+        $tasks = Task::whereIn('id', $task_id_num)->get();
+
+        // Return the new tasks as a JSON response
+        return response()->json([
+            'success' => true,
+            'tasks' => $tasks
+        ]);
+    }
+
     public function updateTask(Request $request){
         $request->validate([
             'task_id' => 'required|exists:tasks,id',

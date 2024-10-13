@@ -37,12 +37,12 @@
                     </div>
 
                     {{-- Add task button --}}
-                    @if ($loop->first)
+                    {{-- @if ($loop->first)
                         <!-- Input field for adding a new task in the first column -->
                         <div class="mt-2">
                             <input type="text" id="new-task-input" class="bg-white shadow-inner rounded-lg p-2 w-full dark:bg-gray-500 dark:text-white" placeholder="Enter new task" />
                         </div>
-                    @endif
+                    @endif --}}
                 </x-task-column>
             @endforeach
 
@@ -56,6 +56,30 @@
                 <input id="new-column-input" type="text" class="hidden bg-white shadow-inner rounded-lg p-2 w-full" placeholder="Enter new column name" />
             </div>
         </div>
+
+        {{-- Context Menu --}}
+        <div class="hidden absolute z-30" id="task-context-menu">
+            <div class="2xl:flex 2xl:items-start">
+                {{-- "Move To" Button --}}
+                <div
+                    class='bg-white border px-4 py-2 items-center leading-5 dark:bg-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-500 hover:cursor-pointer focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out rounded flex space-x-3'>
+                    <div class = "text-center"
+                        onmouseover="document.getElementById('contextBoardMenu').classList.toggle('hidden')">Move To
+                    </div>
+                    <div class="text-center"><i class="fa-solid fa-angle-right"></i></div>
+                </div>
+
+                {{-- Context sub menu (Buttons for each sprint to move to) --}}
+                <div class="hidden shadow-lg" id="contextBoardMenu">
+                    @foreach ($board->columns as $column)
+                        <div class='bg-white border px-4 py-2 text-start leading-5 dark:bg-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-500 hover:cursor-pointer focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out flex space-x-3'
+                            id="context-board-menu-{{ $column->id }}">
+                            <h1>{{ $column->name }}</h1>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -66,6 +90,15 @@
             const newTaskInput = document.getElementById('new-task-input');
             const firstColumnTaskList = document.getElementById('task-list-{{ $board->columns->first()->id }}');
 
+            // Task Items
+            const taskItems = document.querySelectorAll(`[id*="task-list-item"]`); // Rows of the table -- change to be more general name
+
+            // Context Menu
+            var selectedTaskItems = [];
+            const taskContextMenu = document.getElementById(`task-context-menu`); // Context menu
+            const contextSubMenu = document.getElementById(`contextBoardMenu`); // Context sub menu box
+            const contextSubMenuChildren = contextSubMenu.children; // Context sub menu buttons
+
             // Add new column
             addColumnBtn.addEventListener('click', function () {
                 inputField.classList.remove('hidden');
@@ -73,6 +106,7 @@
                 addColumnBtn.style.marginLeft = '20px';
             });
 
+            // Create a new column
             inputField.addEventListener('keypress', function (e) {
                 if (e.key === 'Enter') {
                     const columnName = inputField.value.trim();
@@ -91,13 +125,14 @@
                         .then(response => response.json())
                         .then(data => {
                             if (data.success) {
-                                const newColumn = document.createElement('div');
-                                newColumn.classList.add('bg-gray-100', 'shadow-lg', 'rounded-lg', 'p-4', 'w-64');
-                                newColumn.innerHTML = `<h2 class="text-xl font-bold">${data.column.name}</h2>`;
-                                columnsContainer.insertBefore(newColumn, document.getElementById('add-column-section'));
+                                // const newColumn = document.createElement('div');
+                                // newColumn.classList.add('bg-gray-100', 'shadow-lg', 'rounded-lg', 'p-4', 'w-64');
+                                // newColumn.innerHTML = `<h2 class="text-xl font-bold">${data.column.name}</h2>`;
+                                // columnsContainer.insertBefore(newColumn, document.getElementById('add-column-section'));
                                 inputField.value = '';
                                 inputField.classList.add('hidden');
-                                addColumnBtn.style.marginLeft = '0';
+                                // addColumnBtn.style.marginLeft = '0';
+                                location.reload();
                             } else {
                                 console.error('Error adding column:', data.message);
                             }
@@ -108,36 +143,128 @@
             });
 
             // Add new task
-            newTaskInput.addEventListener('keypress', function (e) {
-                if (e.key === 'Enter') {
-                    const taskTitle = newTaskInput.value.trim();
-                    if (taskTitle !== '') {
-                        fetch('{{ route('tasks.store') }}', {
-                            method: 'POST',
-                            headers: {
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify({
-                                title: taskTitle,
-                                column_id: {{ $board->columns->first()->id }}
-                            })
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success) {
-                                // Insert task into the task list of the first column
-                                const newTask = `<div class="bg-white p-2 my-2 rounded-lg shadow">${data.task.title}</div>`;
-                                firstColumnTaskList.insertAdjacentHTML('beforeend', newTask);
-                                newTaskInput.value = '';
-                            } else {
-                                console.error('Error adding task:', data.message);
-                            }
-                        })
-                        .catch(error => console.error('Error:', error));
-                    }
-                }
+            // newTaskInput.addEventListener('keypress', function (e) {
+            //     if (e.key === 'Enter') {
+            //         const taskTitle = newTaskInput.value.trim();
+            //         if (taskTitle !== '') {
+            //             fetch('{{ route('tasks.store') }}', {
+            //                 method: 'POST',
+            //                 headers: {
+            //                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            //                     'Content-Type': 'application/json'
+            //                 },
+            //                 body: JSON.stringify({
+            //                     title: taskTitle,
+            //                     column_id: {{ $board->columns->first()->id }}
+            //                 })
+            //             })
+            //             .then(response => response.json())
+            //             .then(data => {
+            //                 if (data.success) {
+            //                     // Insert task into the task list of the first column
+            //                     // const newTask = `<div class="bg-white p-2 my-2 rounded-lg shadow">${data.task.title}</div>`;
+            //                     // firstColumnTaskList.insertAdjacentHTML('beforeend', newTask);
+            //                     newTaskInput.value = '';
+            //                     location.reload();
+            //                 } else {
+            //                     console.error('Error adding task:', data.message);
+            //                 }
+            //             })
+            //             .catch(error => console.error('Error:', error));
+            //         }
+            //     }
+            // });
+
+
+            // Context Menu ---------------------------------------------------------------
+            // Reset context menu on right click anywhere outside
+            document.addEventListener('contextmenu', e => {
+                taskContextMenu.classList.add('hidden');
+                contextSubMenu.classList.add('hidden');
+
+                // Clear temp arr
+                selectedTaskItems = [];
             });
+
+            // Reset context menu on left click anywhere outside
+            document.addEventListener('click', e => {
+                taskContextMenu.classList.add('hidden');
+                contextSubMenu.classList.add('hidden');
+
+                // Clear temp arr
+                selectedTaskItems = [];
+            });
+
+            // Right clicking functionality
+            for (let task of taskItems) {
+                task.addEventListener('contextmenu', e => {
+                    e.stopPropagation();
+                    // Show context menu when right-clicking
+                    if (!e.ctrlKey) {
+                        taskContextMenu.style.left = (e.pageX) + 'px';
+                        taskContextMenu.style.top = (e.pageY + 2) + 'px';
+                        taskContextMenu.classList.remove('hidden');
+
+                        // Set task as selected item
+                        if (selectedTaskItems.length <= 1) {
+                            selectedTaskItems = [Number(task.id.replace('task-list-item-', ''))];
+                        }
+                        return false;
+                    };
+
+                    // Add task to temp array when ctrl right clicking
+                    selectedTaskItems.push(Number(task.id.replace('task-list-item-', '')));
+                    return false;
+                }, false);
+            }
+
+            // Call moveTasks function when clicking on sub menu button
+            for (let child of contextSubMenuChildren) {
+                let subMenuId = Number(child.id.replace('context-board-menu-', ""));
+                child.addEventListener('click', e => {
+                    moveTasks(subMenuId);
+                });
+            }
+
+            // Bulk move tasks from backlog to sprint board
+            function moveTasks(column_id) {
+                fetch('{{ route('boards.moveTasks') }}', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute(
+                            'content'),
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        task_ids: JSON.stringify(selectedTaskItems),
+                        column_id: column_id // Num
+                    })
+                })
+                .then(response => {
+                    responseClone = response.clone();
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        // Reset Selected task items
+                        selectedTaskItems = [];
+
+                        location.reload();
+
+                    } else {
+                        console.error('Error moving tasks:', data.message);
+                    }
+
+                    // print response for debugging
+                }, function(rejectionReason) {
+                    console.log('Error parsing JSON from response:', rejectionReason, responseClone);
+                    responseClone.text()
+                        .then(function(bodyText) {
+                            console.log('Received the following instead of valid JSON:', bodyText);
+                        });
+                });
+            }
+
         });
     </script>
 

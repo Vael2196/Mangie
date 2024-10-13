@@ -25,7 +25,9 @@ Route::get('/dashboard', [BoardController::class, 'index'])->middleware(['auth',
 Route::get('/home', [BoardController::class, 'index'])->middleware('auth')->name('home');
 Route::post('/boards', [BoardController::class, 'store'])->name('boards.store');
 Route::get('/boards/{id}', [BoardController::class, 'show'])->middleware('auth')->name('boards.show');
+Route::post('/boards/move', [BoardController::class, 'moveColumnTasks'])->middleware('auth')->name('boards.moveTasks');
 Route::delete('/boards/{id}', [BoardController::class, 'destroy'])->middleware('auth')->name('boards.destroy');
+
 Route::post('/columns/store', [BoardController::class, 'storeColumn'])->name('columns.store');
 Route::post('/tasks/store', [BoardController::class, 'storeTask'])->name('tasks.store');
 Route::post('/tasks/update', [BoardController::class, 'updateTask'])->name('tasks.update');
