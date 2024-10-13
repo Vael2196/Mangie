@@ -59,7 +59,9 @@
                     @if($board->id == 1)
                         @continue
                     @endif
-                    <tr class="px-4 py-2 text-start leading-5 dark:bg-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-400 hover:cursor-pointer focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out rounded">
+                    <tr class="px-4 py-2 text-start leading-5 dark:bg-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-400 hover:cursor-pointer focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out rounded"
+                        id="sprintRow{{$board->id}}"
+                        onClick="location.href='{{ route('boards.show', $board->id) }}'">
                         <td class="py-2 pl-5 border-b-2 min-w-20 overflow-hidden">{{ $board->name }}</td>
                         <td class="py-2 border-b-2 w-20">
                             <form method="POST" action="{{ route('boards.destroy', $board->id) }}" onsubmit="return confirm('Are you sure you want to delete this board?')">
@@ -69,9 +71,6 @@
                                     Delete
                                 </button>
                             </form>
-                        </td>
-                        <td class="py-2 border-b-2 w-20">
-                            <a href="{{ route('boards.show', $board->id) }}" class="text-blue-500 hover:underline">View</a>
                         </td>
                     </tr>
                 @endforeach
@@ -158,13 +157,20 @@
             toggleView(view);
         })
 
+        window.addEventListener('DOMContentLoaded', e => {
+            const sprintRows = document.querySelectorAll('[id*="sprintRow"]');
 
-        window.addEventListener('DOMContentLoaded', function () {
             viewSelect.addEventListener('change', e => {
                 let viewItem = viewSelect.selectedIndex;
                 localStorage.setItem('view', viewItem);
                 toggleView(viewItem);
             });
+
+            // for(let element of sprintRows){
+            //     element.addEventListener('click', e => {
+            //         let boardId = element.id.replace('sprintRow', '');
+            //     });
+            // };
         });
     </script>
 
