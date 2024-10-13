@@ -9,7 +9,6 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
 use App\Models\User;
-use Illuminate\Support\Facades\Hash;
 
 class ProfileController extends Controller
 {
@@ -99,18 +98,14 @@ class ProfileController extends Controller
     /**
      * Add user to the project
      */
-    public function addUser(Request $request): RedirectResponse
+    public function addUser(ProfileUpdateRequest $request): RedirectResponse
     {
-        $request->validate([
-            'email' => ['required', 'email', 'unique:users'],
-            'name' => ['required', 'string'],
-            'password' => ['required', 'string', 'min:8'],
-        ]);
+        $password = bcrypt('admin123');
 
         User::create([
             'email' => $request->email,
             'name' => $request->name,
-            'password' => "admin123",
+            'password' => $password,
         ]);
 
         return Redirect::route('profile.add-user')->with('status', 'user-added');
