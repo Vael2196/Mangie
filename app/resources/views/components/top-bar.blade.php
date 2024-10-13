@@ -4,11 +4,10 @@
     <h1 class="text-3xl my-5 mx-2 dark:text-white font-bold">{{$title}}</h1>
     {{-- Create the icon such that when it is clicked, it will reveal a hidden extra information page about profile --}}
     <a class = "flex items-center hover:cursor-pointer"><i class="fa-solid fa-user fa-3x"></i></a>
-    <div class = "hidden" id="profile-detail">
-        <x-profile-detail :user="$user"/>
-    </div>
 </div>
-
+<div class = "hidden" id="profile-detail">
+    <x-profile-detail :user="$user"/>
+</div>
 
 <script>
     // when clicking anywhere else the popup disappears
