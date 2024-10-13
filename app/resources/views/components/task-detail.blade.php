@@ -219,6 +219,8 @@
         //  xbutton click behaviour
         xButton.addEventListener('click', e => {
             // Close the task detail view
+            // let taskDetail = getVisibleElements(`#task-list-detail-${task_id}`);
+
             let taskDetail = document.getElementById(`task-list-detail-${task_id}`);
             taskDetail.classList.toggle('hidden');
 

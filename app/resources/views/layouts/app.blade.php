@@ -27,7 +27,7 @@
                     <i class="fa-solid fa-home"></i>
                 </x-side-bar-link ></li>
 
-                <li><x-side-bar-link name="Product backlog" link="/backlog">
+                <li><x-side-bar-link name="Product backlog" link="{{ route('backlog.show', 'list')}}">
                     <i class="fa-solid fa-boxes-stacked"></i>
                 </x-side-bar-link ></li>
 
