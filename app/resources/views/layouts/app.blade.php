@@ -34,10 +34,6 @@
                 <li><x-side-bar-link name="Sprint backlog" link="/dashboard">
                     <i class="fa-solid fa-box-archive"></i>
                 </x-side-bar-link ></li>
-
-                <li><x-side-bar-link name="Task Board" link="/backlog">
-                    <i class="fa-solid fa-list-check"></i>
-                </x-side-bar-link ></li>
             </ul>
         </div>
 
