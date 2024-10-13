@@ -23,8 +23,19 @@
 <script>
     window.addEventListener('DOMContentLoaded', function () {
         var index = {!! json_encode($task->id, JSON_HEX_TAG) !!};
-        taskMenu = document.getElementById(`task-box-${index}`);
-        taskListItem = document.getElementById(`task-list-item-${index}`);
+        let taskMenu = document.getElementById(`task-box-${index}`);
+        let taskListItem = document.getElementById(`task-list-item-${index}`);
+
+        // Reset everything when clicking outside
+        document.addEventListener('click', e => {
+            const taskItem = document.getElementById(`task-list-item-${index}`);
+            taskItem.classList.remove("hover:bg-blue-100", "dark:hover:bg-blue-600", "bg-blue-300");
+        })
+
+        document.addEventListener('contextmenu', e => {
+            const taskItem = document.getElementById(`task-list-item-${index}`);
+            taskItem.classList.remove("hover:bg-blue-100", "dark:hover:bg-blue-600", "bg-blue-300");
+        })
 
         taskMenu.addEventListener('click', e => {
             const taskDetail = document.getElementById(`task-list-detail-${index}`);
@@ -32,10 +43,19 @@
         });
 
         taskListItem.addEventListener('contextmenu', e => {
-            console.log(e);
             e.stopPropagation();
             e.preventDefault();
 
+            // Do nothing when right clicking
+            if (!e.ctrlKey){return false;};
+
+            // Highlight task when ctrl-right-clicking
+            let toggleArr = [          // OFF
+                        "hover:bg-blue-100", "dark:hover:bg-blue-600", "bg-blue-300" // ON
+                        ];
+            for(toggleOption of toggleArr){
+                taskListItem.classList.toggle(toggleOption);
+            }
             return false;
         }, false);
     });

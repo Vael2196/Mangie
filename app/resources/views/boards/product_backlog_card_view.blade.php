@@ -34,10 +34,10 @@
         {{-- Sprint loading list --}}
         <div class="mb-7" id="sprint-loading-board-list">
             @foreach ($boards as $board)
-                <div id="sprint-loading-board-{{ $board->id }}">
-                    @if ($board->id == 1)
-                        @continue
-                    @endif
+                @if ($board->id == 1)
+                    @continue
+                @endif
+                <div id="sprint-loading-board-{{ $board->id }}" class="mb-3">
                     <x-sprint-loading-board-card :board="$board">
                         @foreach ($board->columns as $column)
                             @foreach ($column->tasks as $task)
