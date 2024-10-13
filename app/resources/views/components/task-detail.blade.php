@@ -116,6 +116,21 @@
                         </select>
                     </div>
 
+                    {{-- Priority --}}
+                    <div class = "flex justify-between w-full">
+                        <p>Priority</p>
+                        <select class = "dark:bg-transparent w-50 rounded-md border-2 border-white focus:ring-blue-500 focus:border-blue-500 cursor-pointer" id="formPriority{{$task->id}}">
+                            <option value="" selected>Select</option>
+                            @foreach (["Low", "Medium", "High"] as $priority)
+                                @if($task->priority == $priority)
+                                    <option value="{{$priority}}" selected>{{$priority}}</option>
+                                @else
+                                    <option value="{{$priority}}">{{$priority}}</option>
+                                @endif
+                            @endforeach
+                        </select>
+                    </div>
+
                     {{-- Sprint board --}}
                     <div class = "flex justify-between w-full">
                         <p>Sprint</p>
@@ -126,6 +141,12 @@
                     <div class = "flex justify-between w-full">
                         <p>SP ESTIMATE</p>
                         <input type="number" id="formStoryPoint{{$task->id}}" class = "text-end rounded-md w-10 dark:bg-transparent border-2 border-gray-300 focus:ring-blue-500 focus:border-blue-500 cursor-pointer placeholder-slate-700" placeholder="{{$task->story_points}}"/>
+                    </div>
+
+                    {{-- Time log --}}
+                    <div class = "flex justify-between w-full">
+                        <p>Time log</p>
+                        <input type="number" id="formTimeLog{{$task->id}}" class = "text-end rounded-md w-20 dark:bg-transparent border-2 border-gray-300 focus:ring-blue-500 focus:border-blue-500 cursor-pointer placeholder-slate-700" placeholder="{{$task->time_log}}"/>
                     </div>
                 </div>
 
@@ -149,6 +170,7 @@
         let taskSuccess = document.getElementById(`task-success-${task_id}`);
         let taskFail = document.getElementById(`task-fail-${task_id}`);
         var initialStoryPoint = document.getElementById(`formStoryPoint${task_id}`).placeholder;
+        var initialTimeLog = document.getElementById(`formStoryPoint${task_id}`).placeholder;
 
         // Remove notif on clicking outside
         document.addEventListener('click', e => {
@@ -163,11 +185,18 @@
             var assignee = document.getElementById(`formAssignee${task_id}`).value;
             var columnId = document.getElementById(`formColumn${task_id}`).value;
             var labels = document.getElementById(`formLabels${task_id}`).value;
+            var priority = document.getElementById(`formPriority${task_id}`).value;
             var storyPoint = document.getElementById(`formStoryPoint${task_id}`).value;
+            var timeLog = document.getElementById(`formTimeLog${task_id}`).value;
 
             // Get placeholder is story point not emitted
             if (!Number(storyPoint)){
                 storyPoint = initialStoryPoint;
+            }
+
+            if(!Number(timeLog)){
+                timeLog = initialTimeLog;
+
             }
 
             // Submit the form via AJAX (using Fetch API)
@@ -180,7 +209,9 @@
                     description: inputDescription,
                     assignee: Number(assignee),
                     labels: labels,
-                    storyPoint: Number(storyPoint)
+                    priority: priority,
+                    storyPoint: Number(storyPoint),
+                    timeLog: Number(timeLog),
                 }),
                 headers: {
                     'Content-Type': 'application/json',
@@ -188,7 +219,7 @@
                 }
             })
             .then(response => {
-                    responseClone = response.clone();
+                    let responseClone = response.clone();
                     return response.json();
                 })
             .then(data => {

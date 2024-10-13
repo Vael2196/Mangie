@@ -217,7 +217,9 @@ class BoardController extends Controller
             'description' => 'nullable|string',
             'assignee' => 'integer',
             'labels' => 'nullable|string',
+            'priority' => 'nullable|string',
             'storyPoint' => 'integer',
+            'timeLog' => 'integer',
         ]);
 
         // Update the task
@@ -226,7 +228,9 @@ class BoardController extends Controller
             'column_id' => $request->column_id,
             'description' => $request->description,
             'labels' => $request->labels,
+            'priority' => $request->priority,
             'story_points' => $request->storyPoint,
+            'time_log' => $request->timeLog,
             'updated_at' => now()
         ]);
 
