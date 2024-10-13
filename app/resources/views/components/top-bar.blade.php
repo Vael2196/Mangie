@@ -6,7 +6,7 @@
     <a class = "flex items-center hover:cursor-pointer"><i class="fa-solid fa-user fa-3x"></i></a>
 </div>
 <div class = "hidden" id="profile-detail">
-    <x-profile-detail :user="$user"/>
+    <x-profile-detail :user="$user" :user="$user"/>
 </div>
 
 <script>
