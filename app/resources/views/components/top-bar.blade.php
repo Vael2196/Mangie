@@ -1,11 +1,11 @@
-@props(["title"])
+@props(["title", "user"])
 
 <div class="bg-gray-100 dark:bg-gray-800 border-b-2 px-4 py-2 mb-7 flex justify-between">
     <h1 class="text-3xl my-5 mx-2 dark:text-white font-bold">{{$title}}</h1>
     {{-- Create the icon such that when it is clicked, it will reveal a hidden extra information page about profile --}}
     <a class = "flex items-center hover:cursor-pointer"><i class="fa-solid fa-user fa-3x"></i></a>
     <div class = "hidden" id="profile-detail">
-        <x-profile-detail/>
+        <x-profile-detail :user="$user"/>
     </div>
 </div>
 

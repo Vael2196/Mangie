@@ -2,7 +2,7 @@
 
     <!-- Meta tag for CSRF token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <x-top-bar :title="$board->name"/>
+    <x-top-bar :title="$board->name" :user="$user"/>
 
     <div class="container mx-auto mt-8">
         <div class="flex flex-col">
