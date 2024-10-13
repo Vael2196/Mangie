@@ -64,12 +64,54 @@
             <h1 id="issues">Issues: {{ count($tasks) }}</h1>
             {{-- Add list to card view dropdown switch here --}}
             <div class="flex space-x-5">
-
-                {{-- Change view switch --}}
-                <select id="viewButton" class="border rounded dark:bg-gray-700 dark:text-white">
+                 {{-- Change view switch --}}
+                 <select id="viewButton" class="border rounded dark:bg-gray-700 dark:text-white">
                     <option value="list" selected>List View</option>
                     <option value="card">Card View</option>
                 </select>
+
+                {{-- Context Menu --}}
+                <div class="border rounded px-2 items-center py-1 dark:bg-gray-700 dark:text-white">
+                    <p>Filter:</p>
+                </div>
+                <div class="hidden absolute z-30" id="task-context-menu">
+                    <div class="2xl:flex 2xl:items-start">
+                        {{-- "Move To" Button --}}
+                        <div
+                            class='bg-white border px-4 py-2 items-center leading-5 dark:bg-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-500 hover:cursor-pointer focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out rounded flex space-x-3'>
+                            <div class = "text-center"
+                                onmouseover="document.getElementById('filterPriorityMenu').classList.toggle('hidden')">priority
+                            </div>
+                            <div class="text-center"><i class="fa-solid fa-angle-right"></i></div>
+                        </div>
+                        <div
+                            class='bg-white border px-4 py-2 items-center leading-5 dark:bg-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-500 hover:cursor-pointer focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out rounded flex space-x-3'>
+                            <div class = "text-center"
+                                onmouseover="document.getElementById('filterLabelsMenu').classList.toggle('hidden')">labels
+                            </div>
+                            <div class="text-center"><i class="fa-solid fa-angle-right"></i></div>
+                        </div>
+
+                        {{-- Context sub menu (Buttons for each sprint to move to) --}}
+                        <div class="hidden shadow-lg" id="filterPriorityMenu">
+                            @foreach ($boards as $board)
+                                <div class='bg-white border px-4 py-2 text-start leading-5 dark:bg-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-500 hover:cursor-pointer focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out flex space-x-3'
+                                    >
+                                    <h1>{{ $board->name }}</h1>
+                                </div>
+                            @endforeach
+                        </div>
+
+                        <div class="hidden shadow-lg" id="filterLabelsMenu">
+                            @foreach ($boards as $board)
+                                <div class='bg-white border px-4 py-2 text-start leading-5 dark:bg-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-500 hover:cursor-pointer focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out flex space-x-3'
+                                    >
+                                    <h1>{{ $board->name }}</h1>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
 
                 {{-- Create sprint button --}}
                 <div id="create-sprint-button"><x-secondary-button>Create Sprint</x-secondary-button></div>
