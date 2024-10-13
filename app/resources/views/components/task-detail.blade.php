@@ -12,7 +12,7 @@
         <div class="flex justify-between items-center space-x-10 w-full mb-3">
 
             {{-- Task Title --}}
-            <input id="formTitle{{$task->id}}" type="text" placeholder="{{$task->title ? $task->title : "Enter a title"}}" value="{{$task->title}}" class="placeholder-slate-700 text-2xl min-w-24 max-w-lg flex-grow">
+            <input id="formTitle{{$task->id}}" type="text" placeholder="{{$task->title ? $task->title : "Enter a title"}}" value="{{$task->title}}" class="placeholder-slate-700 text-2xl min-w-24 max-w-lg flex-grow dark:bg-transparent dark:text-white">
 
             {{-- Select details --}}
             <button type="button" id="saveTaskButton{{$task->id}}" class='inline-flex items-center px-4 py-2 bg-blue-500 dark:bg-gray-800 border border-gray-300 dark:border-gray-500 rounded-md font-semibold text-xs text-white dark:text-gray-300 uppercase tracking-widest shadow-sm hover:bg-blue-600 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:opacity-25 transition ease-in-out duration-150'>
@@ -31,22 +31,22 @@
         <div class="flex justify-between w-full h-full overflow-y-hidden">
             <div class = "flex flex-col w-1/2 h-full min-w-64">
                 <!-- Task info -->
-                <div class="mb-10 flex flex-col">
+                <div class="mb-10 flex flex-col dark:bg-transparent dark:text-white">
                     <label for="formDescription{{$task->id}}" class="mb-2">Description</label>
-                    <textarea id="formDescription{{$task->id}}" rows="5" placeholder="Enter a description" value="{{$task->description}}" class="placeholder-slate-700">{{$task->description}}</textarea>
+                    <textarea id="formDescription{{$task->id}}" rows="5" placeholder="Enter a description dark:tex-white" value="{{$task->description}}" class="placeholder-slate-700 dark:bg-transparent dark:text-white">{{$task->description}}</textarea>
                 </div>
             </div>
 
             <!-- Task details -->
             <div class = "flex flex-col w-1/2 h-full items-center mb-2 min-w-64">
                 {{-- Details box --}}
-                <div class = "border-2 rounded-3 lg:w-3/4 w-10/12 h-3/4 flex flex-col justify-evenly px-3 py-1 mb-10">
+                <div class = "dark:text-white border-2 rounded-3 lg:w-3/4 w-10/12 h-3/4 flex flex-col justify-evenly px-3 py-1 mb-10">
                     <h1>Details</h1>
 
                     {{-- Assignee --}}
                     <div class = "flex justify-between w-full">
                         <p>Assignee</p>
-                        <select class = "dark:bg-transparent rounded-md border-2 border-white focus:ring-blue-500 focus:border-blue-500 cursor-pointer" id="formAssignee{{$task->id}}">
+                        <select class = "dark:bg-gray-700 dark:text-white rounded-md border-2 border-white focus:ring-blue-500 focus:border-blue-500 cursor-pointer" id="formAssignee{{$task->id}}">
                             <option value="" selected>No one</option>
                             @foreach ($users as $assignee)
                                 <option value="{{$assignee->id}}">{{$assignee->name}}</option>
@@ -57,7 +57,7 @@
                     {{-- Column --}}
                     <div class = "flex justify-between w-full">
                         <p>Status</p>
-                        <select class = "dark:bg-transparent w-50 rounded-md border-2 border-white focus:ring-blue-500 focus:border-blue-500 cursor-pointer" id="formColumn{{$task->id}}">
+                        <select class = "dark:bg-gray-700 dark:text-white w-50 rounded-md border-2 border-white focus:ring-blue-500 focus:border-blue-500 cursor-pointer" id="formColumn{{$task->id}}">
                             @foreach ($parent_board->columns as $column)
                                 @if($task->column_id == $column->id)
                                     <option value="{{$column->id}}" selected>{{$column->name}}</option>
@@ -71,7 +71,7 @@
                     {{-- Labels --}}
                     <div class = "flex justify-between w-full">
                         <p>Labels</p>
-                        <select class = "dark:bg-transparent w-50 rounded-md border-2 border-white focus:ring-blue-500 focus:border-blue-500 cursor-pointer" id="formLabels{{$task->id}}">
+                        <select class = "dark:bg-gray-700 dark:text-white w-50 rounded-md border-2 border-white focus:ring-blue-500 focus:border-blue-500 cursor-pointer" id="formLabels{{$task->id}}">
                             <option value="" selected>Select</option>
                             @foreach (["API", "Backend", "Frontend", "UI/UX", "Database"] as $label)
                                 @if($task->labels == $label)
@@ -86,7 +86,7 @@
                     {{-- Priority --}}
                     <div class = "flex justify-between w-full">
                         <p>Priority</p>
-                        <select class = "dark:bg-transparent w-50 rounded-md border-2 border-white focus:ring-blue-500 focus:border-blue-500 cursor-pointer" id="formPriority{{$task->id}}">
+                        <select class = "dark:bg-gray-700 dark:text-white w-50 rounded-md border-2 border-white focus:ring-blue-500 focus:border-blue-500 cursor-pointer" id="formPriority{{$task->id}}">
                             <option value="" selected>Select</option>
                             @foreach (["Low", "Medium", "High"] as $priority)
                                 @if($task->priority == $priority)
@@ -101,19 +101,19 @@
                     {{-- Sprint board --}}
                     <div class = "flex justify-between w-full">
                         <p>Sprint</p>
-                        <p class = "fw-bold px-2 cursor-default">{{$parent_board->name}}</p>
+                        <p class = "fw-bold px-2 cursor-default dark:text-white">{{$parent_board->name}}</p>
                     </div>
 
                     {{-- Story point estimate --}}
                     <div class = "flex justify-between w-full">
                         <p>SP ESTIMATE</p>
-                        <input type="number" id="formStoryPoint{{$task->id}}" class = "text-end rounded-md w-10 dark:bg-transparent border-2 border-gray-300 focus:ring-blue-500 focus:border-blue-500 cursor-pointer placeholder-slate-700" placeholder="{{$task->story_points}}"/>
+                        <input type="number" id="formStoryPoint{{$task->id}}" class = "text-end rounded-md w-10 dark:text-white dark:bg-transparent border-2 border-gray-300 focus:ring-blue-500 focus:border-blue-500 cursor-pointer placeholder-slate-700 dark:placeholder-white" placeholder="{{$task->story_points}}"/>
                     </div>
 
                     {{-- Time log --}}
-                    <div class = "flex justify-between w-full">
+                    <div class = "flex justify-between w-full dark:text-white">
                         <p>Time log</p>
-                        <input type="number" id="formTimeLog{{$task->id}}" class = "text-end rounded-md w-20 dark:bg-transparent border-2 border-gray-300 focus:ring-blue-500 focus:border-blue-500 cursor-pointer placeholder-slate-700" placeholder="{{$task->time_log}}"/>
+                        <input type="number" id="formTimeLog{{$task->id}}" class = "text-end rounded-md w-20 dark:text-white dark:bg-transparent border-2 border-gray-300 focus:ring-blue-500 focus:border-blue-500 cursor-pointer placeholder-slate-700 dark:placeholder-white" placeholder="{{$task->time_log}}"/>
                     </div>
                 </div>
 
