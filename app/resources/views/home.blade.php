@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-top-bar title="Project Boards"/>
 
-    <div class="container mx-auto mt-8">
+    <div class="container mx-auto mt-8 invisible" id="wholePage">
         {{-- <h1 class="text-3xl px-6 font-bold dark:text-white mb-4">Project Boards</h1> --}}
 
         <!-- Success message -->
@@ -44,7 +44,7 @@
 
             <!-- Create new board card -->
             <div class="bg-gray-100 dark:bg-gray-700 shadow-lg rounded-lg p-4 flex items-center justify-center">
-                <form id="new-board-form" action="{{ route('boards.store') }}" method="POST" onsubmit="createBoard(event)">
+                <form id="new-board-form" method="POST">
                     @csrf
                     <input type="hidden" name="project_id" value="{{ 1 }}">
                     <input type="text" name="name" id="board-name" class="bg-white dark:bg-gray-400 dark:placeholder-gray-700 shadow-inner rounded-lg p-2 w-full" placeholder="Create new board" required autocomplete="off">
@@ -97,18 +97,93 @@
         let cardView = document.querySelector('.card-view-sprint');
         let listView = document.querySelector('.list-view-sprint');
         let viewSelect = document.getElementById('sprintBoardSelect');
-        // Function to handle the creation of a new board
-        function createBoard(event) {
-            event.preventDefault(); // Prevent form from reloading the page
 
+        // Function to toggle between list and card view
+        function toggleView(viewOption) {
+            // Show list view
+            if (viewOption == 0) {
+                cardView.classList.add('hidden');
+                listView.classList.remove('hidden');
+                viewSelect.value = 'list';
+            // Show card view
+            } else if (viewOption == 1) {
+                listView.classList.add('hidden');
+                cardView.classList.remove('hidden');
+                viewSelect.value = 'card';
+            }
+        }
+
+        // Load previously selected view
+        document.addEventListener('DOMContentLoaded', e => {
+            let view = localStorage.getItem('view');
+            toggleView(view);
+        })
+
+        // Main function
+        window.addEventListener('DOMContentLoaded', e => {
+            // Hack to prevent flickering when reloading page
+            const wholePage = document.getElementById('wholePage');
+            wholePage.classList.remove('invisible');
+
+            const createSprintButton = document.getElementById('create-sprint-link');
+            const inputSprintField = document.getElementById('input-sprint-field');
+            const sprintRows = document.querySelectorAll('[id*="sprintRow"]');
             const form = document.getElementById('new-board-form');
+
+            viewSelect.addEventListener('change', e => {
+                let viewItem = viewSelect.selectedIndex;
+                localStorage.setItem('view', viewItem);
+                toggleView(viewItem);
+            });
+
+            form.addEventListener('submit', createSprintCard);
+
+            // Create task when clicking button ------------------------------------------
+            createSprintButton.addEventListener('click', e => {
+                inputSprintField.classList.remove('hidden');
+                inputSprintField.focus();
+                createSprintButton.classList.add("hidden");
+            });
+
+            inputSprintField.addEventListener('focusout', e => {
+                createSprintButton.classList.remove("hidden");
+                inputSprintField.classList.add('hidden');
+            });
+
+
+            // Add new task to the product backlog
+            inputSprintField.addEventListener('keypress', function(e) {
+                // Check if the key pressed is the Enter key
+                if (e.key !== 'Enter') {
+                    return;
+                }
+
+                // Check if the input field is not empty
+                const sprintTitle = inputSprintField.value.trim();
+                if (sprintTitle === '') {
+                    return;
+                }
+
+                // Create the task
+                createBoard(inputSprintField);
+            });
+
+        });
+
+        function createSprintCard(event){
+            event.preventDefault(); // Prevent form from reloading the page
             const boardNameInput = document.getElementById('board-name');
             const boardName = boardNameInput.value.trim();
-
             if (boardName === '') return; // Prevent empty submissions
+            createBoard(boardNameInput);
+        }
+
+        // Function to handle the creation of a new board
+        function createBoard(boardNameInput) {
+            const boardName = boardNameInput.value.trim();
 
             // Submit the form via AJAX (using Fetch API)
-            fetch(form.action, {
+            fetch('{{ route('boards.store') }}', {
                 method: 'POST',
                 headers: {
                     'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value,
@@ -152,67 +227,6 @@
             })
             .catch(error => console.error('Error:', error));
         }
-
-        function toggleView(viewSelect) {
-            // Show list view
-            if (viewSelect == 0) {
-                cardView.classList.add('hidden');
-                listView.classList.remove('hidden');
-                viewSelect.selectedIndex = 0;
-            // Show card view
-            } else if (viewSelect == 1) {
-                listView.classList.add('hidden');
-                cardView.classList.remove('hidden');
-                viewSelect.selectedIndex = 1;
-            }
-        }
-
-        document.addEventListener('DOMContentLoaded', e => {
-            let view = localStorage.getItem('view');
-            toggleView(view);
-        })
-
-        window.addEventListener('DOMContentLoaded', e => {
-            const createSprintButton = document.getElementById('create-sprint-link');
-            const inputSprintField = document.getElementById('input-sprint-field');
-            const sprintRows = document.querySelectorAll('[id*="sprintRow"]');
-
-            viewSelect.addEventListener('change', e => {
-                let viewItem = viewSelect.selectedIndex;
-                localStorage.setItem('view', viewItem);
-                toggleView(viewItem);
-            });
-
-
-            // Create task when clicking button ------------------------------------------
-            createSprintButton.addEventListener('click', e => {
-                inputSprintField.classList.remove('hidden');
-                inputSprintField.focus();
-                createSprintButton.classList.add("hidden");
-            });
-
-            inputSprintField.addEventListener('focusout', e => {
-                createSprintButton.classList.remove("hidden");
-                inputSprintField.classList.add('hidden');
-            });
-
-
-            // Add new task to the product backlog
-            inputSprintField.addEventListener('keypress', function(e) {
-                // Check if the key pressed is the Enter key
-                if (e.key !== 'Enter') {
-                    return;
-                }
-
-                // Check if the input field is not empty
-                const taskTitle = inputTaskField.value.trim();
-                if (taskTitle === '') {
-                    return;
-                }
-
-                // Submit the form via AJAX (using Fetch API)
-            });
-        });
     </script>
 
 </x-app-layout>
