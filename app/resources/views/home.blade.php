@@ -12,7 +12,7 @@
         @endif
 
         <div class="flex justify-end w-full px-7 py-4">
-            <select id="sprintBoardSelect" class="border rounded">
+            <select id="sprintBoardSelect" class="border rounded dark:bg-gray-600 dark:text-white">
                 <option value="list">List View</option>
                 <option value="card">Card View</option>
             </select>
