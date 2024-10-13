@@ -29,7 +29,7 @@
                     {{-- Only admins can see this button --}}
 
                     @if (Auth::user()->admin == 1)
-                        <form method="GET" action="{{ route('profile.add-user', $user->id)}}"
+                        <form method="GET" action="{{ route('profile.add-user')}}"
                             @csrf
                             <button class="bg-blue-600 hover:bg-blue-400 text-white text-sm py-1 px-2">
                                 Add User

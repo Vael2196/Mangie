@@ -24,7 +24,7 @@ Route::middleware('auth')->group(function () {
 Route::post('/login', [ProfileController::class, 'logout'])->middleware('auth')->name('logout');
 
 // Add User
-Route::get('/adduser/{id}', [ProfileController::class, 'showAddUsers'])->middleware('auth')->name('profile.add-user');
+Route::get('/adduser', [ProfileController::class, 'showAddUsers'])->middleware('auth')->name('profile.add-user');
 Route::post('/adduser', [ProfileController::class, 'addUser'])->middleware('auth')->name('profile.users.add');
 
 // Board
