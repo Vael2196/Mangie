@@ -171,6 +171,8 @@ class BoardController extends Controller
             // Pass the boards and tasks to the backlog view
             return view('boards.product_backlog_list_view', compact('backlog', 'tasks', 'boards', 'activeSprints'));
         }
+        // Pass the boards and tasks to the backlog view
+        return view('boards.product_backlog', compact('backlog', 'tasks', 'boards', 'user'));
     }
 
     public function moveTasks(Request $request){
