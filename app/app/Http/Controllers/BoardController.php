@@ -135,7 +135,7 @@ class BoardController extends Controller
         ]);
     }
 
-    public function showBacklog()
+    public function showBacklog($view)
     {
         // Fetch the board by ID with its columns and tasks, and sort columns by position
         $backlog = Board::with(['columns' => function ($query) {
@@ -147,8 +147,13 @@ class BoardController extends Controller
         $boards = Board::where('user_id', $user->id)->whereNot('id', 1)->get();
         $tasks = Task::all();
 
-        // Pass the boards and tasks to the backlog view
-        return view('boards.product_backlog', compact('backlog', 'tasks', 'boards'));
+        if ($view == 'card'){
+            // Pass the boards and tasks to the backlog view
+            return view('boards.product_backlog_card_view', compact('backlog', 'tasks', 'boards'));
+        } else if ($view == 'list'){
+            // Pass the boards and tasks to the backlog view
+            return view('boards.product_backlog_list_view', compact('backlog', 'tasks', 'boards'));
+        }
     }
 
     public function moveTasks(Request $request){

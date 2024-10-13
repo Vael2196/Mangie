@@ -31,7 +31,7 @@ Route::post('/tasks/store', [BoardController::class, 'storeTask'])->name('tasks.
 Route::post('/tasks/update', [BoardController::class, 'updateTask'])->name('tasks.update');
 
 // Backlog
-Route::get('/backlog', [BoardController::class, 'showBacklog'])->middleware('auth')->name('backlog.show');
+Route::get('/backlog/{view}', [BoardController::class, 'showBacklog'])->middleware('auth')->name('backlog.show');
 Route::post('/backlog/store', [BoardController::class, 'storeTask'])->middleware('auth')->name('backlog.store');
 Route::post('/backlog/move', [BoardController::class, 'moveTasks'])->middleware('auth')->name('backlog.moveTasks');
 

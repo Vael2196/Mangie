@@ -35,35 +35,16 @@
         <div class="mb-7" id="sprint-loading-board-list">
             @foreach ($boards as $board)
                 <div id="sprint-loading-board-{{ $board->id }}">
-
-                    {{-- List View --}}
-                    <div class="mb-3 task-list-class">
-                        @if ($board->id == 1)
-                            @continue
-                        @endif
-                        <x-sprint-loading-board :board="$board">
-                            @foreach ($board->columns as $column)
-                                @foreach ($column->tasks as $task)
-                                    <x-task-list-item :task="$task" />
-                                @endforeach
+                    @if ($board->id == 1)
+                        @continue
+                    @endif
+                    <x-sprint-loading-board :board="$board">
+                        @foreach ($board->columns as $column)
+                            @foreach ($column->tasks as $task)
+                                <x-task-list-item :task="$task" />
                             @endforeach
-                        </x-sprint-loading-board>
-                    </div>
-
-                    {{-- Card View --}}
-                    {{-- DOES NOT SHOW UP FOR SOME REASON --}}
-                    <div class="mb-3 hidden task-card-class">
-                        @if ($board->id == 1)
-                            @continue
-                        @endif
-                        <x-sprint-loading-board-card :board="$board">
-                            @foreach ($board->columns as $column)
-                                @foreach ($column->tasks as $task)
-                                    <x-task-box :task="$task" />
-                                @endforeach
-                            @endforeach
-                        </x-sprint-loading-board-card>
-                    </div>
+                        @endforeach
+                    </x-sprint-loading-board>
                 </div>
             @endforeach
 
@@ -76,8 +57,6 @@
                 </div>
                 <p class="text-sm">Add tasks here or from the product backlog</p>
             </div>
-
-
         </div>
 
         <div class='flex justify-between mb-2'>
@@ -87,7 +66,7 @@
 
                 {{-- Change view switch --}}
                 <select id="viewButton" class="border rounded">
-                    <option value="list">List View</option>
+                    <option value="list" selected>List View</option>
                     <option value="card">Card View</option>
                 </select>
 
@@ -99,27 +78,13 @@
         {{-- Product backlog ------------------------------------------------- --}}
         {{-- List view --}}
         <div id="task-list">
-            <div class="task-list-class">
-                {{-- DOES NOT SHOW BACKLOG FOR OTHER USERS SPRINTS --}}
-                <x-task-list-board>
-                    @foreach ($backlog->columns as $column)
-                        @foreach ($column->tasks as $task)
-                            <x-task-list-item :task="$task" />
-                        @endforeach
+            <x-task-list-board>
+                @foreach ($backlog->columns as $column)
+                    @foreach ($column->tasks as $task)
+                        <x-task-list-item :task="$task" />
                     @endforeach
-                </x-task-list-board>
-            </div>
-
-            {{-- Card View --}}
-            <div class="hidden task-card-class">
-                <x-task-board>
-                    @foreach ($backlog->columns as $column)
-                        @foreach ($column->tasks as $task)
-                            <x-task-box :task="$task" />
-                        @endforeach
-                    @endforeach
-                </x-task-board>
-            </div>
+                @endforeach
+            </x-task-list-board>
         </div>
 
         {{-- ------------------------------------------------------------------ --}}
@@ -163,42 +128,15 @@
         </div>
     </div>
 
-    <script type="module">
-        import { getVisibleElements } from '/js/utils.js';
-        // CHANGE ALL getElementById to getVisibleElements
-
+    <script>
         // Globals
         let listViews = document.querySelectorAll('.task-list-class');
         let cardViews = document.querySelectorAll('.task-card-class');
         let viewButton = document.getElementById('viewButton');
 
-        // Toggle between card and list view
-        function toggleViews(viewIndex) {
-            // List view
-            if (viewIndex == 0) {
-                listViews.forEach(view => view.classList.remove('hidden'));
-                cardViews.forEach(view => view.classList.add('hidden'));
-                viewButton.value = "list";
-                // Card view
-            } else if (viewIndex == 1) {
-                listViews.forEach(view => view.classList.add('hidden'));
-                cardViews.forEach(view => view.classList.remove('hidden'));
-                viewButton.value = "card";
-            }
-            // Else do nothing (Default is list view)
-        }
-
-        // Load previous state on document load
-        document.addEventListener('DOMContentLoaded', function() {
-            let viewIndex = localStorage.getItem('viewIndex')
-            toggleViews(viewIndex); // Load previous state
-        });
-
         // Main loop
         window.addEventListener('DOMContentLoaded', function() {
             // Hack to make it look less jarring when reloading page
-
-            // CHANGE ALL IDS TO BE CLASSES AND USE QUERY SELECTOR ALL TO GET ONLY VISIBLE ONESSS
             let entirePage = document.getElementById('entirePage');
             entirePage.classList.remove('invisible');
 
@@ -248,9 +186,15 @@
 
             // Card to list view
             viewButton.addEventListener('change', e => {
-                let viewIndex = viewButton.selectedIndex;
-                localStorage.setItem('viewIndex', viewIndex);
-                location.reload();
+                let view = viewButton.selectedIndex;
+                // List view
+                if (view == 0){
+                    window.location.href = `{{ route('backlog.show', 'list')}}`;
+
+                // Card view
+                }else if (view == 1){
+                    window.location.href = `{{ route('backlog.show', 'card')}}`;
+                }
             });
 
             // Context Menu ---------------------------------------------------------------
