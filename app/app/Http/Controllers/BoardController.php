@@ -137,6 +137,7 @@ class BoardController extends Controller
 
     public function showBacklog($view)
     {
+        // $_COOKIE['cookieName'];
         // Fetch the board by ID with its columns and tasks, and sort columns by position
         $backlog = Board::with(['columns' => function ($query) {
             $query->orderBy('position');
@@ -154,6 +155,35 @@ class BoardController extends Controller
             // Pass the boards and tasks to the backlog view
             return view('boards.product_backlog_list_view', compact('backlog', 'tasks', 'boards'));
         }
+    }
+
+    public function sortBacklog(Request $request){
+        $request->validate([
+            'param' => 'required|string',
+            'order' => 'required|string',
+        ]);
+
+        $tasks = Task::orderBy($request->param, $request->order)->get();
+
+        return response()->json([
+            'success' => true,
+            'tasks' => $tasks,
+        ]);
+    }
+
+    public function filterBacklog(Request $request){
+        $request->validate([
+            'param' => 'required|string',
+            'filter' => 'required|string',
+            'amount' => 'required|string',
+        ]);
+
+        $tasks = Task::where($request->param, $request->filter, $request->amount)->get();
+
+        return response()->json([
+            'success' => true,
+            'tasks' => $tasks,
+        ]);
     }
 
     public function moveTasks(Request $request){
@@ -296,35 +326,6 @@ class BoardController extends Controller
         return response()->json([
             'success' => true,
             'task' => $task,
-        ]);
-    }
-
-    public function sortTasks(Request $request){
-        $request->validate([
-            'param' => 'required|string',
-            'order' => 'required|string',
-        ]);
-
-        $tasks = Task::orderBy($request->param, $request->order)->get();
-
-        return response()->json([
-            'success' => true,
-            'tasks' => $tasks,
-        ]);
-    }
-
-    public function filterTasks(Request $request){
-        $request->validate([
-            'param' => 'required|string',
-            'filter' => 'required|string',
-            'amount' => 'required|string',
-        ]);
-
-        $tasks = Task::where($request->param, $request->filter, $request->amount)->get();
-
-        return response()->json([
-            'success' => true,
-            'tasks' => $tasks,
         ]);
     }
 }
