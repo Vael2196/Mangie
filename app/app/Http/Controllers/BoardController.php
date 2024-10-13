@@ -8,6 +8,7 @@ use App\Models\Task;
 use App\Models\TaskUser;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class BoardController extends Controller
 {
@@ -255,5 +256,77 @@ class BoardController extends Controller
             'success' => true,
             'task' => $task,
         ]);
+    }
+
+    // function to updates boards
+    public function updateStatus(Request $request)
+    {
+        // Validate the input
+        $request->validate([
+            'board_id' => 'required|exists:boards,id',   // Make sure the board exists
+            'status' => 'required|boolean',              // Status must be boolean (0 or 1)
+        ]);
+
+        Log::info('Request data:', $request->all());
+
+        // Find the board by ID
+        $board = Board::find($request->board_id);
+
+        // Check if the board exists
+        if (!$board) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Board not found'
+            ], 404);
+        }
+
+        // Update the status field only
+        // $updated = $board->update([
+        //     'status' => $request->status,      // Update the status (boolean)
+        //     'updated_at' => now()              // Update the timestamp
+        // ]);
+
+        // $board->save();
+
+        // // Check if the update was successful
+        // if ($updated) {
+        //     return response()->json([
+        //         'success' => true,
+        //         'message' => 'Board status updated successfullyyyyyy'
+        //     ]);
+        // } else {
+        //     return response()->json([
+        //         'success' => false,
+        //         'message' => 'Failed to update board status'
+        //     ], 500);
+        // }
+        try {
+            $updated = $board->update([
+                'status' => $request->status,    // Update the status
+                'updated_at' => now()             // Update the timestamp
+            ]);
+
+            // Check if the update was successful
+            if ($updated) {
+                Log::info('Board updated successfully', ['board_id' => $board->id, 'new_status' => $request->status]);
+                $board->save();
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Board status updated successfully'
+                ]);
+            } else {
+                Log::error('Failed to update board', ['board_id' => $board->id]);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to update board status'
+                ], 500);
+            }
+        } catch (\Exception $e) {
+            Log::error('Update failed: ' . $e->getMessage(), ['board_id' => $board->id]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to update board status'
+            ], 500);
+        }
     }
 }

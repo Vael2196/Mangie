@@ -10,6 +10,11 @@
             <div class="flex pr-10 items-start dark:text-white">
                 <p class="text-sm px-6 min-h-20 max-h-40 overflow-y-auto max-w-[65vw] grow">This is a description of the board.</p>
                 <div class="flex space-x-8 items-center">
+                    <select id="activateSprint" class="bg-white dark:bg-gray-500 dark:text-white rounded-lg p-2">
+                        <option>INACTIVE</option>
+                        <option>ACTIVE</option>
+                    </select>
+
                     <p class="lg:block hidden">X-days-left</p>
                     <x-secondary-button>Complete Board</x-secondary-button>
                     <a class="hover:cursor-pointer"><i class="fa-solid fa-ellipsis"></i></a>
@@ -59,6 +64,52 @@
     </div>
 
     <script>
+        let activeSprint = document.getElementById('activateSprint');
+
+        function toggleView(activateSprint) {
+            if (viewOption == 0) {
+                viewSelect.value = 'INACTIVE';
+            } else if (viewOption == 1) {
+                viewSelect.value = 'ACTIVE';
+            }
+        }
+
+        document.getElementById('activateSprint').addEventListener('change', function () {
+            var status = this.value;
+
+            if (status === "ACTIVE") {
+                status = true;
+            } else {
+                status = false;
+            }
+
+            const board_id = {{ $board->id }};
+
+            fetch('{{ route('boards.update')}}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    status: status,
+                    board_id: board_id
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    console.log('Board status updated successfully');
+                } else {
+                    console.error('Error updating board status:', data.message);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+
+        })
+
+
+
         document.addEventListener('DOMContentLoaded', function () {
             const addColumnBtn = document.getElementById('add-column-btn');
             const inputField = document.getElementById('new-column-input');
