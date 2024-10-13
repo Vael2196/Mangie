@@ -11,8 +11,15 @@
             </div>
         @endif
 
-        <!-- Display boards in card format -->
-        <div class="grid px-6 grid-cols-4 gap-4">
+        <div class="flex justify-end w-full px-7 py-4">
+            <select id="sprintBoardSelect" class="border rounded">
+                <option value="list">List View</option>
+                <option value="card">Card View</option>
+            </select>
+        </div>
+
+        {{-- Card View --}}
+        <div class="grid px-6 grid-cols-4 gap-4 card-view-sprint">
             <!-- Existing boards -->
             @foreach($boards as $board)
                 {{-- Skip product backlog board --}}
@@ -44,9 +51,38 @@
                 </form>
             </div>
         </div>
+
+        {{-- List View --}}
+        <table class="table-fixed border min-w-full overflow-x-auto hidden list-view-sprint">
+            <tbody>
+                @foreach($boards as $board)
+                    @if($board->id == 1)
+                        @continue
+                    @endif
+                    <tr class="px-4 py-2 text-start leading-5 dark:bg-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-400 hover:cursor-pointer focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out rounded">
+                        <td class="py-2 pl-5 border-b-2 min-w-20 overflow-hidden">{{ $board->name }}</td>
+                        <td class="py-2 border-b-2 w-20">
+                            <form method="POST" action="{{ route('boards.destroy', $board->id) }}" onsubmit="return confirm('Are you sure you want to delete this board?')">
+                                @csrf
+                                @method('delete')
+                                <button class="bg-red-600 hover:bg-red-400 text-white text-sm py-1 px-2 rounded-full">
+                                    Delete
+                                </button>
+                            </form>
+                        </td>
+                        <td class="py-2 border-b-2 w-20">
+                            <a href="{{ route('boards.show', $board->id) }}" class="text-blue-500 hover:underline">View</a>
+                        </td>
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
     </div>
 
     <script>
+        let cardView = document.querySelector('.card-view-sprint');
+        let listView = document.querySelector('.list-view-sprint');
+        let viewSelect = document.getElementById('sprintBoardSelect');
         // Function to handle the creation of a new board
         function createBoard(event) {
             event.preventDefault(); // Prevent form from reloading the page
@@ -72,35 +108,64 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    // Add the new board dynamically to the page
-                    const grid = document.querySelector('.grid');
-                    const newBoardCard = document.createElement('div');
-                    // newBoardCard.classList.add('bg-white', 'shadow-lg', 'rounded-lg', 'p-4');
-                    newBoardCard.innerHTML = `
-                        <div class="bg-white px-6 shadow-lg rounded-lg dark:bg-gray-700 p-4">
-                            <div class="flex justify-between">
-                                <h2 class="text-xl font-bold dark:text-white">${data.board.name}</h2>
-                                <form method="POST" action="/boards/${data.board.id}" onsubmit="return confirm('Are you sure you want to delete this board?')">
-                                    @csrf
-                                    @method('delete')
-                                    <button class="bg-red-600 hover:bg-red-400 text-white text-sm py-1 px-2 rounded-full">
-                                        Delete
-                                    </button>
-                                </form>
-                            </div>
-                            <a href="/boards/${data.board.id}" class="text-blue-500 hover:underline">View</a>
-                        </div>
-                    `;
-                    grid.insertBefore(newBoardCard, form.closest('.bg-gray-100'));
+                    // // Add the new board dynamically to the page
+                    // const grid = document.querySelector('.grid');
+                    // const newBoardCard = document.createElement('div');
+                    // // newBoardCard.classList.add('bg-white', 'shadow-lg', 'rounded-lg', 'p-4');
+                    // newBoardCard.innerHTML = `
+                    //     <div class="bg-white px-6 shadow-lg rounded-lg dark:bg-gray-700 p-4">
+                    //         <div class="flex justify-between">
+                    //             <h2 class="text-xl font-bold dark:text-white">${data.board.name}</h2>
+                    //             <form method="POST" action="/boards/${data.board.id}" onsubmit="return confirm('Are you sure you want to delete this board?')">
+                    //                 @csrf
+                    //                 @method('delete')
+                    //                 <button class="bg-red-600 hover:bg-red-400 text-white text-sm py-1 px-2 rounded-full">
+                    //                     Delete
+                    //                 </button>
+                    //             </form>
+                    //         </div>
+                    //         <a href="/boards/${data.board.id}" class="text-blue-500 hover:underline">View</a>
+                    //     </div>
+                    // `;
+                    // grid.insertBefore(newBoardCard, form.closest('.bg-gray-100'));
 
                     // Clear the input field
                     boardNameInput.value = '';
+                    location.reload();
                 } else {
                     console.error('Error creating board:', data.message);
                 }
             })
             .catch(error => console.error('Error:', error));
         }
+
+        function toggleView(viewSelect) {
+            // Show list view
+            if (viewSelect == 0) {
+                cardView.classList.add('hidden');
+                listView.classList.remove('hidden');
+                viewSelect.selectedIndex = 0;
+            // Show card view
+            } else if (viewSelect == 1) {
+                listView.classList.add('hidden');
+                cardView.classList.remove('hidden');
+                viewSelect.selectedIndex = 1;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', e => {
+            let view = localStorage.getItem('view');
+            toggleView(view);
+        })
+
+
+        window.addEventListener('DOMContentLoaded', function () {
+            viewSelect.addEventListener('change', e => {
+                let viewItem = viewSelect.selectedIndex;
+                localStorage.setItem('view', viewItem);
+                toggleView(viewItem);
+            });
+        });
     </script>
 
 </x-app-layout>
