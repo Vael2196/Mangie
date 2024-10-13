@@ -23,12 +23,23 @@
                         </button>
                     </form>
 
-                    <form method="GET" action="{{ route('profile.add-user', $user->id)}}"
+                    {{-- Only admins can see this button --}}
+
+                    @if (Auth::user()->admin == 1)
+                        <form method="GET" action="{{ route('profile.add-user', $user->id)}}"
+                            @csrf
+                            <button class="bg-blue-600 hover:bg-blue-400 text-white text-sm py-1 px-2">
+                                Add User
+                            </button>
+                        </form>
+                    @endif
+
+                    {{-- <form method="GET" action="{{ route('profile.add-user', $user->id)}}"
                         @csrf
                         <button class="bg-blue-600 hover:bg-blue-400 text-white text-sm py-1 px-2">
                             Add User
                         </button>
-                    </form>
+                    </form> --}}
 
                     <h3>Description</h3>
                     <p>This is a description of the profile and its purpose is to describe the profile and the reason for this is to fill up the word count and make a buffer layer so that the text can be sized correctly</p>

@@ -5,7 +5,7 @@
         </h2>
 
         <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
-            {{ __('Ensure the email is correct') }}
+            {{ __('Add a new user to the website') }}
         </p>
     </header>
 
