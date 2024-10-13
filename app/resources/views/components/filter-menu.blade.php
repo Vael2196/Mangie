@@ -51,6 +51,20 @@
 
 {{-- Script --}}
 <script>
+
+    document.addEventListener('DOMContentLoaded', e => {
+        let filters = localStorage.getStorageItem('filter');
+
+        // Adding cookies for filters
+        for(let filter of filters){
+            if (filter.priority){
+                document.cookie = `priority=${filter.priority}`;
+            }else if (filter.label){
+                document.cookie = `label=${filter.label}`;
+            }
+        }
+    });
+
     window.addEventListener('DOMContentLoaded', e => {
         // Filter Menu
         const taskFilterButton = document.getElementById('taskFilterButton');
@@ -87,8 +101,8 @@
         for(let item of filterPriorityMenuItems){
             item.addEventListener('click', e => {
                 console.log(item.id);
-                localStorage.setItem('filterType', 'priority');
-                localStorage.setItem('filter', item.id.replace('filterPriority', ''));
+
+                appendItem('filter', {'priority': item.id.replace('filterPriority', '')});
                 location.reload();
             });
         };
@@ -97,10 +111,22 @@
         for(let item of filterLabelsMenuItems){
             item.addEventListener('click', e => {
                 console.log(item.id);
-                localStorage.setItem('filterType', 'label');
-                localStorage.setItem('filter', item.id.replace('filterLabel', ''));
+
+                appendItem('filter', {'label': item.id.replace('filterLabel', '')});
                 location.reload();
             });
         };
+
+        function appendItem(field, item){
+            let data = localStorage.getItem(field);
+            data = data ? JSON.parse(data) : [];
+            data.push(item);
+            localStorage.setItem(field, JSON.stringify(data));
+        }
+
+        function getStorageItem(field){
+            let data = localStorage.getItem(field);
+            return data ? JSON.parse(data) : [];
+        }
     });
 </script>
