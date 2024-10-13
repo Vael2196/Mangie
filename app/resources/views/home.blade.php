@@ -53,29 +53,44 @@
         </div>
 
         {{-- List View --}}
-        <table class="table-fixed border min-w-full overflow-x-auto hidden list-view-sprint">
-            <tbody>
-                @foreach($boards as $board)
-                    @if($board->id == 1)
-                        @continue
-                    @endif
-                    <tr class="px-4 py-2 text-start leading-5 dark:bg-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-400 hover:cursor-pointer focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out rounded"
-                        id="sprintRow{{$board->id}}"
-                        onClick="location.href='{{ route('boards.show', $board->id) }}'">
-                        <td class="py-2 pl-5 border-b-2 min-w-20 overflow-hidden">{{ $board->name }}</td>
-                        <td class="py-2 border-b-2 w-20">
-                            <form method="POST" action="{{ route('boards.destroy', $board->id) }}" onsubmit="return confirm('Are you sure you want to delete this board?')">
-                                @csrf
-                                @method('delete')
-                                <button class="bg-red-600 hover:bg-red-400 text-white text-sm py-1 px-2 rounded-full">
-                                    Delete
-                                </button>
-                            </form>
-                        </td>
-                    </tr>
-                @endforeach
-            </tbody>
-        </table>
+        <div class="hidden list-view-sprint">
+            <table class="table-fixed border min-w-full overflow-x-auto">
+                <tbody>
+                    @foreach($boards as $board)
+                        @if($board->id == 1)
+                            @continue
+                        @endif
+                        <tr class="px-4 py-2 text-start leading-5 dark:bg-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-400 hover:cursor-pointer focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out rounded"
+                            id="sprintRow{{$board->id}}"
+                            onClick="location.href='{{ route('boards.show', $board->id) }}'">
+                            <td class="py-2 pl-5 border-b-2 min-w-20 overflow-hidden">{{ $board->name }}</td>
+                            <td class="py-2 border-b-2 w-20">
+                                <form method="POST" action="{{ route('boards.destroy', $board->id) }}" onsubmit="return confirm('Are you sure you want to delete this board?')">
+                                    @csrf
+                                    @method('delete')
+                                    <button class="bg-red-600 hover:bg-red-400 text-white text-sm py-1 px-2 rounded-full">
+                                        Delete
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+            {{-- Link to Form --}}
+            <div class="w-full text-start">
+                <div id="create-sprint-link" class="block">
+                    <div
+                        class = 'px-4 py-2 leading-5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:cursor-pointer focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out rounded flex space-x-3'>
+                        <div class = "text-center"><i class="fa-solid fa-plus"></i></div>
+                        <p class = "lg:block hidden text-sm">Create Sprint</p>
+                    </div>
+                </div>
+                {{-- Form for submitting  --}}
+                <input id="input-sprint-field" class="border hidden w-full dark:bg-gray-600 dark:text-white" type="text"
+                    placeholder="Enter Sprint Name" class="w-full" />
+            </div>
+        </div>
     </div>
 
     <script>
@@ -158,6 +173,8 @@
         })
 
         window.addEventListener('DOMContentLoaded', e => {
+            const createSprintButton = document.getElementById('create-sprint-link');
+            const inputSprintField = document.getElementById('input-sprint-field');
             const sprintRows = document.querySelectorAll('[id*="sprintRow"]');
 
             viewSelect.addEventListener('change', e => {
@@ -166,11 +183,35 @@
                 toggleView(viewItem);
             });
 
-            // for(let element of sprintRows){
-            //     element.addEventListener('click', e => {
-            //         let boardId = element.id.replace('sprintRow', '');
-            //     });
-            // };
+
+            // Create task when clicking button ------------------------------------------
+            createSprintButton.addEventListener('click', e => {
+                inputSprintField.classList.remove('hidden');
+                inputSprintField.focus();
+                createSprintButton.classList.add("hidden");
+            });
+
+            inputSprintField.addEventListener('focusout', e => {
+                createSprintButton.classList.remove("hidden");
+                inputSprintField.classList.add('hidden');
+            });
+
+
+            // Add new task to the product backlog
+            inputSprintField.addEventListener('keypress', function(e) {
+                // Check if the key pressed is the Enter key
+                if (e.key !== 'Enter') {
+                    return;
+                }
+
+                // Check if the input field is not empty
+                const taskTitle = inputTaskField.value.trim();
+                if (taskTitle === '') {
+                    return;
+                }
+
+                // Submit the form via AJAX (using Fetch API)
+            });
         });
     </script>
 
