@@ -64,48 +64,55 @@
             {{-- Add list to card view dropdown switch here --}}
             <div class="flex space-x-5">
                  {{-- Change view switch --}}
-                 <select id="viewButton" class="border rounded dark:bg-gray-700 dark:text-white">
+                 <select id="viewButton" class="border rounded dark:bg-gray-700 dark:text-white hover:cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-500">
                     <option value="list" selected>List View</option>
                     <option value="card">Card View</option>
                 </select>
 
                 {{-- Context Menu --}}
-                <div class="border rounded px-2 items-center py-1 dark:bg-gray-700 dark:text-white">
-                    <p>Filter:</p>
+                <div id="taskFilterButton" class="hover:cursor-pointer hover:bg-gray-100 border rounded px-2 items-center py-1 dark:bg-gray-700 dark:text-white">
+                    <p>Add Filter</p>
                 </div>
-                <div class="hidden absolute z-30" id="task-context-menu">
+                <div class="hidden absolute z-30" id="taskFilterMenu">
                     <div class="2xl:flex 2xl:items-start">
-                        {{-- "Move To" Button --}}
-                        <div
-                            class='bg-white border px-4 py-2 items-center leading-5 dark:bg-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-500 hover:cursor-pointer focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out rounded flex space-x-3'>
-                            <div class = "text-center"
-                                onmouseover="document.getElementById('filterPriorityMenu').classList.toggle('hidden')">priority
+                        <div class="flex flex-col">
+                            {{-- priority filtering Button --}}
+                            <div
+                                class='bg-white border px-4 py-2 items-center leading-5 dark:bg-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-500 hover:cursor-pointer focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out rounded flex space-x-3'>
+                                <div class = "text-center"
+                                    onmouseover="document.getElementById('filterPriorityMenu').classList.remove('hidden');
+                                                document.getElementById('filterLabelsMenu').classList.add('hidden');">priority
+                                </div>
+                                <div class="text-center"><i class="fa-solid fa-angle-right"></i></div>
                             </div>
-                            <div class="text-center"><i class="fa-solid fa-angle-right"></i></div>
-                        </div>
-                        <div
-                            class='bg-white border px-4 py-2 items-center leading-5 dark:bg-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-500 hover:cursor-pointer focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out rounded flex space-x-3'>
-                            <div class = "text-center"
-                                onmouseover="document.getElementById('filterLabelsMenu').classList.toggle('hidden')">labels
+
+                            {{-- labels filtering Button --}}
+                            <div
+                                class='bg-white border px-4 py-2 items-center leading-5 dark:bg-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-500 hover:cursor-pointer focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out rounded flex space-x-3'>
+                                <div class = "text-center"
+                                    onmouseover="document.getElementById('filterLabelsMenu').classList.remove('hidden');
+                                                document.getElementById('filterPriorityMenu').classList.add('hidden');">labels
+                                </div>
+                                <div class="text-center"><i class="fa-solid fa-angle-right"></i></div>
                             </div>
-                            <div class="text-center"><i class="fa-solid fa-angle-right"></i></div>
                         </div>
 
-                        {{-- Context sub menu (Buttons for each sprint to move to) --}}
+                        {{-- Priority filtering sub Menu--}}
                         <div class="hidden shadow-lg" id="filterPriorityMenu">
-                            @foreach ($boards as $board)
+                            @foreach (["Low", "Medium", "High"] as $priority)
                                 <div class='bg-white border px-4 py-2 text-start leading-5 dark:bg-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-500 hover:cursor-pointer focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out flex space-x-3'
-                                    >
-                                    <h1>{{ $board->name }}</h1>
+                                    id="filterPriority{{$priority}}">
+                                    <h1>{{ $priority }}</h1>
                                 </div>
                             @endforeach
                         </div>
 
+                        {{-- Labels filtering sub Menu --}}
                         <div class="hidden shadow-lg" id="filterLabelsMenu">
-                            @foreach ($boards as $board)
+                            @foreach (["API", "Backend", "Frontend", "UI/UX", "Database"] as $label)
                                 <div class='bg-white border px-4 py-2 text-start leading-5 dark:bg-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-500 hover:cursor-pointer focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out flex space-x-3'
-                                    >
-                                    <h1>{{ $board->name }}</h1>
+                                    id="filterLabel{{$label}}">
+                                    <h1>{{ $label }}</h1>
                                 </div>
                             @endforeach
                         </div>
@@ -204,6 +211,13 @@
             const contextSubMenu = document.getElementById(`contextBoardMenu`); // Context sub menu box
             const contextSubMenuChildren = contextSubMenu.children; // Context sub menu buttons
 
+
+            // Filter Menu
+            const taskFilterButton = document.getElementById('taskFilterButton');
+            const taskFilterMenu = document.getElementById('taskFilterMenu');
+            const filterPriorityMenu = document.getElementById('filterPriorityMenu');
+            const filterLabelsMenu = document.getElementById('filterLabelsMenu');
+
             // Create task when clicking button ------------------------------------------
             createTaskButton.addEventListener('click', e => {
                 inputTaskField.classList.remove('hidden');
@@ -244,6 +258,9 @@
             document.addEventListener('contextmenu', e => {
                 taskContextMenu.classList.add('hidden');
                 contextSubMenu.classList.add('hidden');
+                filterPriorityMenu.classList.add('hidden');
+                filterLabelsMenu.classList.add('hidden');
+                taskFilterMenu.classList.add('hidden');
 
                 // Clear temp arr
                 selectedTaskItems = [];
@@ -253,9 +270,20 @@
             document.addEventListener('click', e => {
                 taskContextMenu.classList.add('hidden');
                 contextSubMenu.classList.add('hidden');
+                filterPriorityMenu.classList.add('hidden');
+                filterLabelsMenu.classList.add('hidden');
+                taskFilterMenu.classList.add('hidden');
 
                 // Clear temp arr
                 selectedTaskItems = [];
+            });
+
+            taskFilterButton.addEventListener('click', e => {
+                e.stopPropagation();
+                const rect = taskFilterButton.getBoundingClientRect();
+                taskFilterMenu.style.left = (window.scrollX + rect.left) + 'px';
+                taskFilterMenu.style.top = (window.scrollY + rect.top + rect.height) + 'px';
+                taskFilterMenu.classList.remove('hidden');
             });
 
 
