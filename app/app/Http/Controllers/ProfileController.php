@@ -8,6 +8,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
+use App\Models\User;
+use Illuminate\Support\Facades\Hash;
 
 class ProfileController extends Controller
 {
@@ -69,5 +71,48 @@ class ProfileController extends Controller
         $request->session()->regenerateToken();
 
         return Redirect::to('/login');
+    }
+
+    /**
+     * show add users page (only admin)
+     */
+    public function showAddUsers($id): View
+    {
+
+    //     $request->validate([
+    //         'email' => ['required', 'email', 'unique:users'],
+    //         'name' => ['required', 'string'],
+    //         'password' => ['required', 'string', 'min:8'],
+    //     ]);
+
+    //     User::create([
+    //         'email' => $request->email,
+    //         'name' => $request->name,
+    //         'password' => Hash::make($request->password),
+    //     ]);
+
+    //     return Redirect::route('profile.edit')->with('status', 'user-added');
+        $user = User::findorFail($id);
+        return view('profile.add-user', compact('user'));
+    }
+
+    /**
+     * Add user to the project
+     */
+    public function addUser(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'email' => ['required', 'email', 'unique:users'],
+            'name' => ['required', 'string'],
+            'password' => ['required', 'string', 'min:8'],
+        ]);
+
+        User::create([
+            'email' => $request->email,
+            'name' => $request->name,
+            'password' => "admin123",
+        ]);
+
+        return Redirect::route('profile.add-user')->with('status', 'user-added');
     }
 }

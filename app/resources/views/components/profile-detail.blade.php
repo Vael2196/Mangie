@@ -19,7 +19,14 @@
                     <form method="GET" action={{ route('profile.edit') }}>
                         @csrf
                         <button class="bg-blue-600 hover:bg-blue-400 text-white text-sm py-1 px-2">
-                            Profile
+                            Edit Profile
+                        </button>
+                    </form>
+
+                    <form method="GET" action="{{ route('profile.add-user', $user->id)}}"
+                        @csrf
+                        <button class="bg-blue-600 hover:bg-blue-400 text-white text-sm py-1 px-2">
+                            Add User
                         </button>
                     </form>
 
