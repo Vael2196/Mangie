@@ -144,7 +144,7 @@ class BoardController extends Controller
 
         // Get All boards for a user, including the product backlog
         $user = Auth::user();
-        $boards = Board::where('user_id', $user->id)->whereNot('id', 1)->get();
+        $boards = Board::where('user_id', $user->id)->orWhere('id', 1)->get();
         $tasks = Task::all();
 
         if ($view == 'card'){
