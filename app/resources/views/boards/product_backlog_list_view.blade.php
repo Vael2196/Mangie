@@ -69,7 +69,10 @@
                     <option value="card">Card View</option>
                 </select>
                 {{-- Filter Menu --}}
-                <x-backlog-filter-menu />
+                <x-filter-menu />
+
+                {{-- Sort Menu --}}
+                <x-sort-menu />
 
                 {{-- Create sprint button --}}
                 <div id="create-sprint-button"><x-secondary-button>Create Sprint</x-secondary-button></div>
@@ -162,13 +165,6 @@
             const taskContextMenu = document.getElementById(`task-context-menu`); // Context menu
             const contextSubMenu = document.getElementById(`contextBoardMenu`); // Context sub menu box
             const contextSubMenuChildren = contextSubMenu.children; // Context sub menu buttons
-
-
-            // Filter Menu
-            const taskFilterButton = document.getElementById('taskFilterButton');
-            const taskFilterMenu = document.getElementById('taskFilterMenu');
-            const filterPriorityMenu = document.getElementById('filterPriorityMenu');
-            const filterLabelsMenu = document.getElementById('filterLabelsMenu');
 
             // Create task when clicking button
             createTaskButton.addEventListener('click', e => {
