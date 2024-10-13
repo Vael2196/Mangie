@@ -79,8 +79,10 @@ class BoardController extends Controller
             $query->orderBy('position');
         }, 'columns.tasks'])->findOrFail($id);
 
+        $user = Auth::user();
+
         // Pass the board to the sprint_board view
-        return view('boards.show', compact('board'));
+        return view('boards.show', compact('board', 'user'));
     }
 
     public function storeColumn(Request $request)
@@ -148,7 +150,7 @@ class BoardController extends Controller
         $tasks = Task::all();
 
         // Pass the boards and tasks to the backlog view
-        return view('boards.product_backlog', compact('backlog', 'tasks', 'boards'));
+        return view('boards.product_backlog', compact('backlog', 'tasks', 'boards', 'user'));
     }
 
     public function moveTasks(Request $request){
