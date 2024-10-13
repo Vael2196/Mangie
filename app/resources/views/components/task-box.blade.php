@@ -1,10 +1,17 @@
-<div {{ $attributes->merge([ 'class' => 'rounded w-[15.5rem] min-h-20 max-h-40 bg-white dark:bg-gray-500 dark:text-white flex p-2 mb-3'])}}>
+<div {{ $attributes->merge([ 'class' => 'rounded w-[15.5rem] min-h-20 max-h-40 bg-white dark:bg-gray-500 dark:text-white flex p-2 mb-3',
+                                "id" => "task-list-item-$task->id"])}}>
     <div class = "flex flex-col grow space-y-2 px-2 overflow-hidden mr-2">
         <p>{{$task->title}}</p>
         <div class = "flex space-x-2">
-            {{-- @foreach($task->status as $status) --}}
-                <x-status-icon name='Status'></x-status-icon>
-            {{-- @endforeach --}}
+            @if($task->labels != null)
+                <x-status-icon name="{{$task->labels}}"/>
+            @endif
+            @if($task->column_id != 1)
+                <x-status-icon name="{{$column->name}}"/>
+            @endif
+            @if($task->priority != null)
+                <x-status-icon name="{{$task->priority}}"/>
+            @endif
         </div>
     </div>
     <div class = "flex flex-col justify-between items-center">
@@ -20,12 +27,42 @@
 </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
+    window.addEventListener('DOMContentLoaded', function () {
         var index = {!! json_encode($task->id, JSON_HEX_TAG) !!};
-        taskMenu = document.getElementById(`task-box-${index}`);
+        let taskMenu = document.getElementById(`task-box-${index}`);
+        let taskListItem = document.getElementById(`task-list-item-${index}`);
+
+        // Reset everything when clicking outside
+        document.addEventListener('click', e => {
+            const taskItem = document.getElementById(`task-list-item-${index}`);
+            taskItem.classList.remove("hover:bg-blue-100", "dark:hover:bg-blue-600", "bg-blue-300");
+        })
+
+        document.addEventListener('contextmenu', e => {
+            const taskItem = document.getElementById(`task-list-item-${index}`);
+            taskItem.classList.remove("hover:bg-blue-100", "dark:hover:bg-blue-600", "bg-blue-300");
+        })
+
         taskMenu.addEventListener('click', e => {
             const taskDetail = document.getElementById(`task-list-detail-${index}`);
             taskDetail.classList.toggle('hidden');
         });
+
+        taskListItem.addEventListener('contextmenu', e => {
+            e.stopPropagation();
+            e.preventDefault();
+
+            // Do nothing when right clicking
+            if (!e.ctrlKey){return false;};
+
+            // Highlight task when ctrl-right-clicking
+            let toggleArr = [          // OFF
+                        "hover:bg-blue-100", "dark:hover:bg-blue-600", "bg-blue-300" // ON
+                        ];
+            for(toggleOption of toggleArr){
+                taskListItem.classList.toggle(toggleOption);
+            }
+            return false;
+        }, false);
     });
 </script>

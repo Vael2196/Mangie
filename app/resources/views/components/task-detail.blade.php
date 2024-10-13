@@ -35,39 +35,6 @@
                     <label for="formDescription{{$task->id}}" class="mb-2">Description</label>
                     <textarea id="formDescription{{$task->id}}" rows="5" placeholder="Enter a description" value="{{$task->description}}" class="placeholder-slate-700">{{$task->description}}</textarea>
                 </div>
-{{--
-                <!-- Task activity -->
-                <div>
-                    <h3 class = "mb-4">Activity</h3>
-
-                    <!-- Tab icons -->
-                    <div class = "flex justify-between w-100">
-                        <div class = "flex w-75"
-                            <h5 class = "py-1" >Show:</h5>
-                            <div class = "flex w-100 justify-center">
-                                <p class = "btn btn-outline-light btn-sm me-3">ALL</p>
-                                <p class = "btn btn-outline-light btn-sm me-3">Comments</p>
-                                <p class = "btn btn-outline-light btn-sm me-3">History</p>
-                            </div>
-                        </div>
-
-                        <div class = "flex">
-                            <p>Newest First</p>
-                            <p>^</p>
-                        </div>
-                    </div>
-                    <!-- To DO -->
-                    <div class = "flex justify-between mb-4">
-                        <p><span>XXXXXXXXX</span> changed the status</p>
-                        <p>(09/09/2024)</p>
-                    </div>
-
-                    <div>
-                        <h5>To DO: </h5>
-                        <p>This is a description and its purpose it to describe the task and the reason for this is to fill up the word count and make a buffer layer so that the text can be sized correctly</p>
-                    </div>
-                </div> --}}
-
             </div>
 
             <!-- Task details -->
@@ -116,6 +83,21 @@
                         </select>
                     </div>
 
+                    {{-- Priority --}}
+                    <div class = "flex justify-between w-full">
+                        <p>Priority</p>
+                        <select class = "dark:bg-transparent w-50 rounded-md border-2 border-white focus:ring-blue-500 focus:border-blue-500 cursor-pointer" id="formPriority{{$task->id}}">
+                            <option value="" selected>Select</option>
+                            @foreach (["Low", "Medium", "High"] as $priority)
+                                @if($task->priority == $priority)
+                                    <option value="{{$priority}}" selected>{{$priority}}</option>
+                                @else
+                                    <option value="{{$priority}}">{{$priority}}</option>
+                                @endif
+                            @endforeach
+                        </select>
+                    </div>
+
                     {{-- Sprint board --}}
                     <div class = "flex justify-between w-full">
                         <p>Sprint</p>
@@ -126,6 +108,12 @@
                     <div class = "flex justify-between w-full">
                         <p>SP ESTIMATE</p>
                         <input type="number" id="formStoryPoint{{$task->id}}" class = "text-end rounded-md w-10 dark:bg-transparent border-2 border-gray-300 focus:ring-blue-500 focus:border-blue-500 cursor-pointer placeholder-slate-700" placeholder="{{$task->story_points}}"/>
+                    </div>
+
+                    {{-- Time log --}}
+                    <div class = "flex justify-between w-full">
+                        <p>Time log</p>
+                        <input type="number" id="formTimeLog{{$task->id}}" class = "text-end rounded-md w-20 dark:bg-transparent border-2 border-gray-300 focus:ring-blue-500 focus:border-blue-500 cursor-pointer placeholder-slate-700" placeholder="{{$task->time_log}}"/>
                     </div>
                 </div>
 
@@ -139,7 +127,9 @@
     </div>
 </div>
 
-<script>
+<script type="module">
+    import { getVisibleElements } from '/js/utils.js';
+
     document.addEventListener('DOMContentLoaded', function () {
         var task_id= Number("<?php echo "$task->id"?>");
         let saveButton = document.getElementById(`saveTaskButton${task_id}`);
@@ -147,6 +137,7 @@
         let taskSuccess = document.getElementById(`task-success-${task_id}`);
         let taskFail = document.getElementById(`task-fail-${task_id}`);
         var initialStoryPoint = document.getElementById(`formStoryPoint${task_id}`).placeholder;
+        var initialTimeLog = document.getElementById(`formStoryPoint${task_id}`).placeholder;
 
         // Remove notif on clicking outside
         document.addEventListener('click', e => {
@@ -161,11 +152,18 @@
             var assignee = document.getElementById(`formAssignee${task_id}`).value;
             var columnId = document.getElementById(`formColumn${task_id}`).value;
             var labels = document.getElementById(`formLabels${task_id}`).value;
+            var priority = document.getElementById(`formPriority${task_id}`).value;
             var storyPoint = document.getElementById(`formStoryPoint${task_id}`).value;
+            var timeLog = document.getElementById(`formTimeLog${task_id}`).value;
 
             // Get placeholder is story point not emitted
             if (!Number(storyPoint)){
                 storyPoint = initialStoryPoint;
+            }
+
+            if(!Number(timeLog)){
+                timeLog = initialTimeLog;
+
             }
 
             // Submit the form via AJAX (using Fetch API)
@@ -178,7 +176,9 @@
                     description: inputDescription,
                     assignee: Number(assignee),
                     labels: labels,
-                    storyPoint: Number(storyPoint)
+                    priority: priority,
+                    storyPoint: Number(storyPoint),
+                    timeLog: Number(timeLog),
                 }),
                 headers: {
                     'Content-Type': 'application/json',
@@ -186,7 +186,7 @@
                 }
             })
             .then(response => {
-                    responseClone = response.clone();
+                    let responseClone = response.clone();
                     return response.json();
                 })
             .then(data => {
@@ -217,12 +217,12 @@
         //  xbutton click behaviour
         xButton.addEventListener('click', e => {
             // Close the task detail view
+            // let taskDetail = getVisibleElements(`#task-list-detail-${task_id}`);
+
             let taskDetail = document.getElementById(`task-list-detail-${task_id}`);
             taskDetail.classList.toggle('hidden');
 
             location.reload();
         });
     });
-
-
 </script>

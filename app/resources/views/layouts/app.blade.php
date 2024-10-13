@@ -27,16 +27,12 @@
                     <i class="fa-solid fa-home"></i>
                 </x-side-bar-link ></li>
 
-                <li><x-side-bar-link name="Product backlog" link="/backlog">
+                <li><x-side-bar-link name="Product backlog" link="{{ route('backlog.show', 'list')}}">
                     <i class="fa-solid fa-boxes-stacked"></i>
                 </x-side-bar-link ></li>
 
                 <li><x-side-bar-link name="Sprint backlog" link="/dashboard">
                     <i class="fa-solid fa-box-archive"></i>
-                </x-side-bar-link ></li>
-
-                <li><x-side-bar-link name="Task Board" link="/backlog">
-                    <i class="fa-solid fa-list-check"></i>
                 </x-side-bar-link ></li>
             </ul>
         </div>
@@ -50,5 +46,6 @@
 
     <!-- Add JS scripts if needed -->
     <script src="{{ asset('js/app.js') }}"></script>
+    @stack('scripts')
 </body>
 </html>
