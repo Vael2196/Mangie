@@ -218,7 +218,7 @@
             const filterPriorityMenu = document.getElementById('filterPriorityMenu');
             const filterLabelsMenu = document.getElementById('filterLabelsMenu');
 
-            // Create task when clicking button ------------------------------------------
+            // Create task when clicking button
             createTaskButton.addEventListener('click', e => {
                 inputTaskField.classList.remove('hidden');
                 inputTaskField.focus();
@@ -230,7 +230,7 @@
                 inputTaskField.classList.add('hidden');
             });
 
-            // Create sprint when clicking button ------------------------------------------
+            // Create sprint when clicking button
             createSprintButton.addEventListener('click', e => {
                 createSprint.classList.remove('hidden');
                 createSprintInput.focus();
@@ -253,8 +253,7 @@
                 }
             });
 
-            // Context Menu ---------------------------------------------------------------
-            // Reset context menu on right click anywhere outside
+            // Reset menus on right click anywhere outside
             document.addEventListener('contextmenu', e => {
                 taskContextMenu.classList.add('hidden');
                 contextSubMenu.classList.add('hidden');
@@ -266,7 +265,7 @@
                 selectedTaskItems = [];
             });
 
-            // Reset context menu on left click anywhere outside
+            // Reset menus on left click anywhere outside
             document.addEventListener('click', e => {
                 taskContextMenu.classList.add('hidden');
                 contextSubMenu.classList.add('hidden');
@@ -278,6 +277,7 @@
                 selectedTaskItems = [];
             });
 
+            // Show filter menu when clicking filter button
             taskFilterButton.addEventListener('click', e => {
                 e.stopPropagation();
                 const rect = taskFilterButton.getBoundingClientRect();
@@ -287,6 +287,7 @@
             });
 
 
+            // Context Menu ---------------------------------------------------------------
             // MAKE INTO ONE LOOP
             // Show context menu when clicking three dots
             for (let taskMenu of taskMenus) {
