@@ -37,12 +37,12 @@
                     </div>
 
                     {{-- Add task button --}}
-                    @if ($loop->first)
+                    {{-- @if ($loop->first)
                         <!-- Input field for adding a new task in the first column -->
                         <div class="mt-2">
                             <input type="text" id="new-task-input" class="bg-white shadow-inner rounded-lg p-2 w-full dark:bg-gray-500 dark:text-white" placeholder="Enter new task" />
                         </div>
-                    @endif
+                    @endif --}}
                 </x-task-column>
             @endforeach
 
@@ -143,37 +143,37 @@
             });
 
             // Add new task
-            newTaskInput.addEventListener('keypress', function (e) {
-                if (e.key === 'Enter') {
-                    const taskTitle = newTaskInput.value.trim();
-                    if (taskTitle !== '') {
-                        fetch('{{ route('tasks.store') }}', {
-                            method: 'POST',
-                            headers: {
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify({
-                                title: taskTitle,
-                                column_id: {{ $board->columns->first()->id }}
-                            })
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success) {
-                                // Insert task into the task list of the first column
-                                // const newTask = `<div class="bg-white p-2 my-2 rounded-lg shadow">${data.task.title}</div>`;
-                                // firstColumnTaskList.insertAdjacentHTML('beforeend', newTask);
-                                newTaskInput.value = '';
-                                location.reload();
-                            } else {
-                                console.error('Error adding task:', data.message);
-                            }
-                        })
-                        .catch(error => console.error('Error:', error));
-                    }
-                }
-            });
+            // newTaskInput.addEventListener('keypress', function (e) {
+            //     if (e.key === 'Enter') {
+            //         const taskTitle = newTaskInput.value.trim();
+            //         if (taskTitle !== '') {
+            //             fetch('{{ route('tasks.store') }}', {
+            //                 method: 'POST',
+            //                 headers: {
+            //                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            //                     'Content-Type': 'application/json'
+            //                 },
+            //                 body: JSON.stringify({
+            //                     title: taskTitle,
+            //                     column_id: {{ $board->columns->first()->id }}
+            //                 })
+            //             })
+            //             .then(response => response.json())
+            //             .then(data => {
+            //                 if (data.success) {
+            //                     // Insert task into the task list of the first column
+            //                     // const newTask = `<div class="bg-white p-2 my-2 rounded-lg shadow">${data.task.title}</div>`;
+            //                     // firstColumnTaskList.insertAdjacentHTML('beforeend', newTask);
+            //                     newTaskInput.value = '';
+            //                     location.reload();
+            //                 } else {
+            //                     console.error('Error adding task:', data.message);
+            //                 }
+            //             })
+            //             .catch(error => console.error('Error:', error));
+            //         }
+            //     }
+            // });
 
 
             // Context Menu ---------------------------------------------------------------

@@ -214,15 +214,6 @@ class BoardController extends Controller
             'column_id' => 'required|exists:columns,id',
         ]);
 
-        // // Get the column to move the tasks to
-        // if ($request->board_id == 1){
-        //     $todo_column = Column::where('board_id', 1)
-        //                     ->where('name', "Backlog")->get()[0];
-        // }else{
-        //     $todo_column = Column::where('board_id', $request->board_id)
-        //     ->where('name', "TO DO")->get()[0];
-        // }
-
         // Parse task_ids string to php array
         $task_id_string = $request->task_ids;
         $task_id_string = str_replace('[', '', $task_id_string);
