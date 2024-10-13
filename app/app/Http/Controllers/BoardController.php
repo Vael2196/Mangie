@@ -211,17 +211,17 @@ class BoardController extends Controller
 
     public function moveColumnTasks(Request $request){
         $request->validate([
-            'board_id' => 'required|exists:boards,id',
+            'column_id' => 'required|exists:columns,id',
         ]);
 
-        // Get the column to move the tasks to
-        if ($request->board_id == 1){
-            $todo_column = Column::where('board_id', 1)
-                            ->where('name', "Backlog")->get()[0];
-        }else{
-            $todo_column = Column::where('board_id', $request->board_id)
-            ->where('name', "TO DO")->get()[0];
-        }
+        // // Get the column to move the tasks to
+        // if ($request->board_id == 1){
+        //     $todo_column = Column::where('board_id', 1)
+        //                     ->where('name', "Backlog")->get()[0];
+        // }else{
+        //     $todo_column = Column::where('board_id', $request->board_id)
+        //     ->where('name', "TO DO")->get()[0];
+        // }
 
         // Parse task_ids string to php array
         $task_id_string = $request->task_ids;
@@ -237,8 +237,8 @@ class BoardController extends Controller
 
         // Updating the column id and positions of each task
         $res = Task::whereIn('id', $task_id_num)->update([
-            'column_id' => $todo_column->id,
-            'position' => Task::where('column_id', $todo_column->id)->max('position') + 1,
+            'column_id' => $request->column_id,
+            'position' => Task::where('column_id', $request->column_id)->max('position') + 1,
             'updated_at' => now()
         ]);
 
