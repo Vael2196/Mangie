@@ -65,7 +65,7 @@
             <div class="flex space-x-5">
 
                 {{-- Change view switch --}}
-                <select id="viewButton" class="border rounded">
+                <select id="viewButton" class="border rounded dark:bg-gray-700 dark:text-white">
                     <option value="list" selected>List View</option>
                     <option value="card">Card View</option>
                 </select>
