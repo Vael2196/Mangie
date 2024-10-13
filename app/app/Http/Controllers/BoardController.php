@@ -298,4 +298,33 @@ class BoardController extends Controller
             'task' => $task,
         ]);
     }
+
+    public function sortTasks(Request $request){
+        $request->validate([
+            'param' => 'required|string',
+            'order' => 'required|string',
+        ]);
+
+        $tasks = Task::orderBy($request->param, $request->order)->get();
+
+        return response()->json([
+            'success' => true,
+            'tasks' => $tasks,
+        ]);
+    }
+
+    public function filterTasks(Request $request){
+        $request->validate([
+            'param' => 'required|string',
+            'filter' => 'required|string',
+            'amount' => 'required|string',
+        ]);
+
+        $tasks = Task::where($request->param, $request->filter, $request->amount)->get();
+
+        return response()->json([
+            'success' => true,
+            'tasks' => $tasks,
+        ]);
+    }
 }
