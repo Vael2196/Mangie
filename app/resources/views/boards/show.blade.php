@@ -91,10 +91,10 @@
             const firstColumnTaskList = document.getElementById('task-list-{{ $board->columns->first()->id }}');
 
             // Task Items
-            const taskMenus = document.querySelectorAll(`[id*="task-list-menu"]`); // Three dots
             const taskItems = document.querySelectorAll(`[id*="task-list-item"]`); // Rows of the table -- change to be more general name
 
             // Context Menu
+            var selectedTaskItems = [];
             const taskContextMenu = document.getElementById(`task-context-menu`); // Context menu
             const contextSubMenu = document.getElementById(`contextBoardMenu`); // Context sub menu box
             const contextSubMenuChildren = contextSubMenu.children; // Context sub menu buttons
@@ -195,24 +195,6 @@
                 selectedTaskItems = [];
             });
 
-
-            // MAKE INTO ONE LOOP
-            // Show context menu when clicking three dots
-            for (let taskMenu of taskMenus) {
-                taskMenu.addEventListener('click', e => {
-                    e.stopPropagation();
-
-                    const rect = taskMenu.getBoundingClientRect();
-                    taskContextMenu.style.left = (window.scrollX + rect.left) + 'px';
-                    taskContextMenu.style.top = (window.scrollY + rect.top + rect.height) + 'px';
-                    taskContextMenu.classList.remove('hidden');
-
-                    // Set task as selected item
-                    selectedTaskItems = [Number(taskMenu.parentElement.parentElement.id.replace(
-                        'task-list-item-', ''))];
-                });
-            }
-
             // Right clicking functionality
             for (let task of taskItems) {
                 task.addEventListener('contextmenu', e => {
@@ -245,8 +227,8 @@
             }
 
             // Bulk move tasks from backlog to sprint board
-            function moveTasks(board_id) {
-                fetch('{{ route('backlog.moveTasks') }}', {
+            function moveTasks(column_id) {
+                fetch('{{ route('boards.moveTasks') }}', {
                     method: 'POST',
                     headers: {
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute(
@@ -255,7 +237,7 @@
                     },
                     body: JSON.stringify({
                         task_ids: JSON.stringify(selectedTaskItems),
-                        board_id: board_id // Num
+                        column_id: column_id // Num
                     })
                 })
                 .then(response => {
