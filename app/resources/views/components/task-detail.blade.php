@@ -35,39 +35,6 @@
                     <label for="formDescription{{$task->id}}" class="mb-2">Description</label>
                     <textarea id="formDescription{{$task->id}}" rows="5" placeholder="Enter a description" value="{{$task->description}}" class="placeholder-slate-700">{{$task->description}}</textarea>
                 </div>
-{{--
-                <!-- Task activity -->
-                <div>
-                    <h3 class = "mb-4">Activity</h3>
-
-                    <!-- Tab icons -->
-                    <div class = "flex justify-between w-100">
-                        <div class = "flex w-75"
-                            <h5 class = "py-1" >Show:</h5>
-                            <div class = "flex w-100 justify-center">
-                                <p class = "btn btn-outline-light btn-sm me-3">ALL</p>
-                                <p class = "btn btn-outline-light btn-sm me-3">Comments</p>
-                                <p class = "btn btn-outline-light btn-sm me-3">History</p>
-                            </div>
-                        </div>
-
-                        <div class = "flex">
-                            <p>Newest First</p>
-                            <p>^</p>
-                        </div>
-                    </div>
-                    <!-- To DO -->
-                    <div class = "flex justify-between mb-4">
-                        <p><span>XXXXXXXXX</span> changed the status</p>
-                        <p>(09/09/2024)</p>
-                    </div>
-
-                    <div>
-                        <h5>To DO: </h5>
-                        <p>This is a description and its purpose it to describe the task and the reason for this is to fill up the word count and make a buffer layer so that the text can be sized correctly</p>
-                    </div>
-                </div> --}}
-
             </div>
 
             <!-- Task details -->
