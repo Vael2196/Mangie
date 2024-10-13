@@ -58,6 +58,9 @@
         const filterPriorityMenu = document.getElementById('filterPriorityMenu');
         const filterLabelsMenu = document.getElementById('filterLabelsMenu');
 
+        const filterPriorityMenuItems = filterPriorityMenu.children;
+        const filterLabelsMenuItems = filterLabelsMenu.children
+
         // Reset menus on right click anywhere outside
         document.addEventListener('contextmenu', e => {
             filterPriorityMenu.classList.add('hidden');
@@ -71,7 +74,6 @@
             taskFilterMenu.classList.add('hidden');
         });
 
-
         // Show filter menu when clicking filter button
         taskFilterButton.addEventListener('click', e => {
             e.stopPropagation();
@@ -80,5 +82,25 @@
             taskFilterMenu.style.top = (window.scrollY + rect.top + rect.height) + 'px';
             taskFilterMenu.classList.remove('hidden');
         });
+
+        // Priority sub menus
+        for(let item of filterPriorityMenuItems){
+            item.addEventListener('click', e => {
+                console.log(item.id);
+                localStorage.setItem('filterType', 'priority');
+                localStorage.setItem('filter', item.id.replace('filterPriority', ''));
+                location.reload();
+            });
+        };
+
+        // Labels sub menus
+        for(let item of filterLabelsMenuItems){
+            item.addEventListener('click', e => {
+                console.log(item.id);
+                localStorage.setItem('filterType', 'label');
+                localStorage.setItem('filter', item.id.replace('filterLabel', ''));
+                location.reload();
+            });
+        };
     });
 </script>
