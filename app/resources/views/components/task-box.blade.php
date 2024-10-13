@@ -3,9 +3,15 @@
     <div class = "flex flex-col grow space-y-2 px-2 overflow-hidden mr-2">
         <p>{{$task->title}}</p>
         <div class = "flex space-x-2">
-            {{-- @foreach($task->status as $status) --}}
-                <x-status-icon name='Status'></x-status-icon>
-            {{-- @endforeach --}}
+            @if($task->labels != null)
+                <x-status-icon name="{{$task->labels}}"/>
+            @endif
+            @if($task->column_id != 1)
+                <x-status-icon name="{{$column->name}}"/>
+            @endif
+            @if($task->priority != null)
+                <x-status-icon name="{{$task->priority}}"/>
+            @endif
         </div>
     </div>
     <div class = "flex flex-col justify-between items-center">

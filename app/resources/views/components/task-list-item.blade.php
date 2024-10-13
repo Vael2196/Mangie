@@ -1,6 +1,6 @@
 <tr {{ $attributes->merge(["class" => "px-4 py-2 text-start leading-5 dark:bg-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-400 hover:cursor-pointer focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out rounded",
                             "id" => "task-list-item-$task->id"])}}>
-    <td class="py-2 pl-5 border-b-2 min-w-20">{{$task->title}}</td>
+    <td class="py-2 pl-5 border-b-2 min-w-20 overflow-hidden">{{$task->title}}</td>
     <td class="py-2 border-b-2 w-20">
         @if($task->column_id != 1)
             <x-status-icon name="{{$column->name}}"/>
@@ -9,6 +9,9 @@
     <td class="py-2 border-b-2 w-20">
         @if($task->labels != null)
             <x-status-icon name="{{$task->labels}}"/>
+        @endif
+        @if($task->priority != null)
+            <x-status-icon name="{{$task->priority}}"/>
         @endif
     </td>
     <td class="py-2 border-b-2 w-10">Pr</td>
