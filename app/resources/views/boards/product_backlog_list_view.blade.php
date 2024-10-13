@@ -277,11 +277,24 @@
                 selectedTaskItems = [];
             });
 
+            // Reset menus on scroll page
+            entirePage.addEventListener('scroll', e => {
+                taskContextMenu.classList.add('hidden');
+                contextSubMenu.classList.add('hidden');
+                filterPriorityMenu.classList.add('hidden');
+                filterLabelsMenu.classList.add('hidden');
+                taskFilterMenu.classList.add('hidden');
+
+                // Clear temp arr
+                selectedTaskItems = [];
+            });
+
+
             // Show filter menu when clicking filter button
             taskFilterButton.addEventListener('click', e => {
                 e.stopPropagation();
                 const rect = taskFilterButton.getBoundingClientRect();
-                taskFilterMenu.style.left = (window.scrollX + rect.left) + 'px';
+                taskFilterMenu.style.left = (window.scrollX + rect.left - 20) + 'px';
                 taskFilterMenu.style.top = (window.scrollY + rect.top + rect.height) + 'px';
                 taskFilterMenu.classList.remove('hidden');
             });
