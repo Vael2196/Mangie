@@ -92,8 +92,10 @@ class BoardController extends Controller
         // boolean on whether there are any active sprints
         $activeSprints = Board::where('status', 1)->count() > 0;
 
+        $user = Auth::user();
+
         // Pass the board to the sprint_board view
-        return view('boards.show', compact('board', 'daysLeft', 'activeSprints'));
+        return view('boards.show', compact('board', 'daysLeft', 'activeSprints', 'user'));
     }
 
     public function storeColumn(Request $request)
@@ -164,10 +166,10 @@ class BoardController extends Controller
 
         if ($view == 'card'){
             // Pass the boards and tasks to the backlog view
-            return view('boards.product_backlog_card_view', compact('backlog', 'tasks', 'boards', 'activeSprints'));
+            return view('boards.product_backlog_card_view', compact('backlog', 'tasks', 'boards', 'activeSprints', 'user'));
         } else if ($view == 'list'){
             // Pass the boards and tasks to the backlog view
-            return view('boards.product_backlog_list_view', compact('backlog', 'tasks', 'boards', 'activeSprints'));
+            return view('boards.product_backlog_list_view', compact('backlog', 'tasks', 'boards', 'activeSprints', 'user'));
         }
     }
 
@@ -381,8 +383,7 @@ class BoardController extends Controller
         // Validate the input
         $request->validate([
             'board_id' => 'required|exists:boards,id',
-            'start_date' => 'required|date',
-            'end_date' => 'required|date|after_or_equal:start_date',
+            'end_date' => 'required|date|after_or_equal:today',
             'sprint_goal' => 'required|string|max:255',
         ]);
 
@@ -403,7 +404,7 @@ class BoardController extends Controller
 
         try {
             // Update the board with the new data
-            $board->start_date = $request->start_date;
+            $board->start_date = now();
             $board->end_date = $request->end_date;
             $board->duration = $duration;
             $board->sprint_goal = $request->sprint_goal;

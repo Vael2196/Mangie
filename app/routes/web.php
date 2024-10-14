@@ -20,6 +20,13 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
+// Logout
+Route::post('/login', [ProfileController::class, 'logout'])->middleware('auth')->name('logout');
+
+// Add User
+Route::get('/adduser', [ProfileController::class, 'showAddUsers'])->middleware('auth')->name('profile.add-user');
+Route::post('/adduser', [ProfileController::class, 'addUser'])->middleware('auth')->name('profile.users.add');
+
 // Board
 Route::get('/dashboard', [BoardController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
 Route::get('/home', [BoardController::class, 'index'])->middleware('auth')->name('home');

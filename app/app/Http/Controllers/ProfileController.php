@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
+use App\Models\User;
 
 class ProfileController extends Controller
 {
@@ -56,5 +57,42 @@ class ProfileController extends Controller
         $request->session()->regenerateToken();
 
         return Redirect::to('/');
+    }
+
+    /**
+     * Logout the user
+     */
+    public function logout(Request $request): RedirectResponse
+    {
+        Auth::logout();
+
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return Redirect::to('/login');
+    }
+
+    /**
+     * show add users page (only admin)
+     */
+    public function showAddUsers(): View
+    {
+        return view('profile.add-user');
+    }
+
+    /**
+     * Add user to the project
+     */
+    public function addUser(ProfileUpdateRequest $request): RedirectResponse
+    {
+        $password = bcrypt('admin123');
+
+        User::create([
+            'email' => $request->email,
+            'name' => $request->name,
+            'password' => $password,
+        ]);
+
+        return Redirect::route('profile.add-user')->with('status', 'user-added');
     }
 }

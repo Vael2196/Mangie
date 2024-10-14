@@ -1,6 +1,6 @@
 <x-app-layout>
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <x-top-bar title="Product Backlog" />
+    <x-top-bar title="Product Backlog" :user="$user" />
     <div class="hidden sm:flex sm:items-center sm:ms-6">
         <x-dropdown align="right" width="48">
             <x-slot name="trigger">
@@ -303,7 +303,21 @@
 
                         //                 </td>
                         //                 <td class="py-2 border-b-2 w-20">
+                        //                 </td>
+                        //                 <td class="py-2 border-b-2 w-20">
 
+                        //                 </td>
+                        //                 <td class="py-2 border-b-2 w-10">Pr</td>
+                        //                 <td class="py-2 border-b-2 w-10">As</td>
+                        //                 <td class="py-1 border-b-2 w-10">
+                        //                     <div id="task-list-menu-${data.task.id}" class="hover:cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 bg-opacity-10 list-none rounded">
+                        //                         <i class="fa-solid fa-ellipsis px-2 py-2"></i>
+                        //                     </div>
+                        //                 </td>
+                        //             </tr>
+                        //             `;
+                        // taskColumn.insertAdjacentHTML('beforeend', newTask);
+                        // issuesNo.innerHTML = `Issues: ${parseInt(issuesNo.innerHTML.split(":")[1]) + 1}`;
                         //                 </td>
                         //                 <td class="py-2 border-b-2 w-10">Pr</td>
                         //                 <td class="py-2 border-b-2 w-10">As</td>

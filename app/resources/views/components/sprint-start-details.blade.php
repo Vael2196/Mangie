@@ -43,11 +43,11 @@
                 <input type="text" name="sprint_goal" id="goal" required class="mt-1 block w-full p-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 rounded-md">
             </div>
 
-            <!-- Start Date -->
+            {{-- <!-- Start Date -->
             <div class="mb-4 dark:text-white">
                 <label for="start_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Start Date</label>
                 <input type="date" name="start_date" id="start_date" required class="mt-1 block w-full p-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 rounded-md">
-            </div>
+            </div> --}}
 
             <!-- End Date -->
             <div class="mb-4 dark:text-white">
