@@ -51,17 +51,26 @@
 
 {{-- Script --}}
 <script>
+    function appendStorageItem(field, key, value){
+        let data = localStorage.getItem(field);
+        data = data ? JSON.parse(data) : {};
+        data[key] = value;
+        localStorage.setItem(field, JSON.stringify(data));
+    }
+
+    function getStorageItem(field){
+        let data = localStorage.getItem(field);
+        return data ? JSON.parse(data) : {};
+    }
 
     document.addEventListener('DOMContentLoaded', e => {
-        let filters = localStorage.getStorageItem('filter');
+        localStorage.clear();
+        let filters = getStorageItem('filter');
+        console.log(filters);
 
         // Adding cookies for filters
-        for(let filter of filters){
-            if (filter.priority){
-                document.cookie = `priority=${filter.priority}`;
-            }else if (filter.label){
-                document.cookie = `label=${filter.label}`;
-            }
+        for(let [label, filter] in Object.entries(filters)){
+            document.cookie = `${label}=${filter};`;
         }
     });
 
@@ -102,7 +111,7 @@
             item.addEventListener('click', e => {
                 console.log(item.id);
 
-                appendItem('filter', {'priority': item.id.replace('filterPriority', '')});
+                appendStorageItem('filter', 'priority', item.id.replace('filterPriority', ''));
                 location.reload();
             });
         };
@@ -112,21 +121,9 @@
             item.addEventListener('click', e => {
                 console.log(item.id);
 
-                appendItem('filter', {'label': item.id.replace('filterLabel', '')});
+                appendStorageItem('filter', 'label', item.id.replace('filterLabel', ''));
                 location.reload();
             });
         };
-
-        function appendItem(field, item){
-            let data = localStorage.getItem(field);
-            data = data ? JSON.parse(data) : [];
-            data.push(item);
-            localStorage.setItem(field, JSON.stringify(data));
-        }
-
-        function getStorageItem(field){
-            let data = localStorage.getItem(field);
-            return data ? JSON.parse(data) : [];
-        }
     });
 </script>

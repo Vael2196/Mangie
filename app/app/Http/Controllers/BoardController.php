@@ -151,7 +151,10 @@ class BoardController extends Controller
 
     public function showBacklog($view)
     {
-        // $_COOKIE['cookieName'];
+        $priority = '';
+        if(isset($_COOKIE['priority'])){
+            $priority = $_COOKIE['priority'];
+        }
         // Fetch the board by ID with its columns and tasks, and sort columns by position
         $backlog = Board::with(['columns' => function ($query) {
             $query->orderBy('position');
