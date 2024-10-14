@@ -5,7 +5,7 @@
         class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-0 z-50"
         x-cloak
     >
-        <div class="absolute top-24 right-0 w-10 max-w-xs bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-lg shadow-lg">
+        <div class="absolute top-24 right-0 w-64 max-w-xs bg-white dark:bg-gray-800 rounded-lg p-6 shadow-lg">
             <div class="flex justify-between items-center pb-4 border-b">
                 <h2 class="text-lg font-bold text-gray-800 dark:text-gray-100">Profile Details</h2>
                 <button @click="isProfileModalOpen = false" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
