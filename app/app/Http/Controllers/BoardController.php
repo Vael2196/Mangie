@@ -24,11 +24,13 @@ class BoardController extends Controller
             return redirect()->route('login'); // Redirect to login page if not authenticated
         }
 
+        $activeSprints = Board::where('status', 1)->count() > 0;
+
         // Fetch boards that belong to this user (for example)
         $boards = Board::where('user_id', $user->id)->get();
 
         // Pass the user and boards to the home view
-        return view('home', compact('user', 'boards'));
+        return view('home', compact('user', 'boards', 'activeSprints'));
     }
 
 
