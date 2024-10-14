@@ -30,7 +30,6 @@
         </x-dropdown>
     </div>
     <div class="px-10 flex flex-col w-[80vw] overflow-auto max-h-[70vh] invisible" id="entirePage">
-
         {{-- Sprint loading list --}}
         <div class="mb-7" id="sprint-loading-board-list">
             @foreach ($boards as $board)
@@ -38,20 +37,22 @@
                     @continue
                 @endif
                 <div id="sprint-loading-board-{{ $board->id }}" class="mb-3">
-                    <x-sprint-loading-board :board="$board">
-                        @foreach ($board->columns as $column)
-                            @foreach ($column->tasks as $task)
-                                <x-task-list-item :task="$task" />
+                    @if ($board->completed == 0)
+                        <x-sprint-loading-board :board="$board" :activeSprints="$activeSprints">
+                            @foreach ($board->columns as $column)
+                                @foreach ($column->tasks as $task)
+                                    <x-task-list-item :task="$task" />
+                                @endforeach
                             @endforeach
-                        @endforeach
-                    </x-sprint-loading-board>
+                        </x-sprint-loading-board>
+                    @endif
                 </div>
             @endforeach
 
             {{-- Create sprint input box list view --}}
-            <div class="border min-w-full overflow-x-auto rounded p-3 bg-gray-100 hidden" id="create-sprint">
+            <div class="border min-w-full overflow-x-auto rounded p-3 bg-gray-100 hidden dark:bg-gray-700 dark:text-white" id="create-sprint">
                 <div class="flex justify-between mb-2">
-                    <input class='border font-semibold text-xl' id="create-sprint-input" type="text"
+                    <input class='border font-semibold text-xl dark:bg-gray-700 dark:text-white dark:placeholder-white' id="create-sprint-input" type="text"
                         placeholder="Enter Sprint Name"/>
                     <x-secondary-button>Start Sprint</x-secondary-button>
                 </div>

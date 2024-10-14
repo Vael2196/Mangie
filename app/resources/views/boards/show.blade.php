@@ -8,10 +8,55 @@
         <div class="flex flex-col">
 
             <div class="flex pr-10 items-start dark:text-white">
-                <p class="text-sm px-6 min-h-20 max-h-40 overflow-y-auto max-w-[65vw] grow">This is a description of the board.</p>
+
+                @if ($board->status == 1 || $board->completed == 1)
+                    <p class="text-sm px-6 min-h-20 max-h-40 overflow-y-auto max-w-[65vw] grow">{{$board->sprint_goal}}</p>
+                @else
+                    <p class="text-sm px-6 min-h-20 max-h-40 overflow-y-auto max-w-[65vw] grow">Sprint Goal Area</p>
+                @endif
+
                 <div class="flex space-x-8 items-center">
-                    <p class="lg:block hidden">X-days-left</p>
-                    <x-secondary-button>Complete Board</x-secondary-button>
+
+                    @if ($board->completed == 0)
+                        <x-sprint-start-details :board="$board" :daysLeft="$daysLeft"/>
+                    @endif
+
+
+                    {{-- <select id="activateSprint" class="bg-white dark:bg-gray-700 dark:text-white rounded-lg p-2">
+                        @foreach (['INACTIVE', 'ACTIVE'] as $status)
+                            @if ($board->status == 1) {
+                                <option value={{$status}} selected>{{ $status }}</option>
+                            } @else {
+                                <option value={{$status}}>{{$status}}</option>
+                            }
+                            @endif
+                        @endforeach
+                    </select> --}}
+
+                    @if ($board->status == 1)
+                        <p class="lg:block">
+                            @if($daysLeft != null && $daysLeft > 0)
+                                {{ $daysLeft }} days left
+                            @elseif($daysLeft == 0)
+                                Sprint ends today
+                            @else
+                                Sprint has ended
+                            @endif
+                        </p>
+                    @elseif ($board->completed == 1)
+                        <p class="lg:block hidden">Sprint is completed</p>
+                    @else
+                        <p class="lg:block hidden">Sprint is not active</p>
+                    @endif
+
+                    @if ($board->completed == 0 && $board->status == 1)
+                        <form method="POST" action="{{ route('boards.complete', $board->id) }}" onsubmit="return confirm('Are you sure you want to complete the sprint early?')">
+                            @csrf
+                            <button type="submit" class="inline-flex items-center px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-500 rounded-md font-semibold text-xs text-gray-700 dark:text-gray-300 uppercase tracking-widest shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:opacity-25 transition ease-in-out duration-150">
+                                Complete Sprint
+                            </button>
+                        </form>
+                    @endif
                     <a class="hover:cursor-pointer"><i class="fa-solid fa-ellipsis"></i></a>
                 </div>
             </div>
@@ -83,6 +128,58 @@
     </div>
 
     <script>
+        // Show sprint details view when clicking on the activate sprint button
+        document.getElementById('activateSprint').addEventListener('click', function () {
+            document.getElementById('boardDetailsModal').classList.toggle('hidden');
+        });
+
+        // let activeSprint = document.getElementById('activateSprint');
+
+        // // function toggleView(activateSprint) {
+        // //     if (viewOption == 0) {
+        // //         viewSelect.value = 'INACTIVE';
+        // //     } else if (viewOption == 1) {
+        // //         viewSelect.value = 'ACTIVE';
+        // //     }
+        // // }
+
+        // document.getElementById('activateSprint').addEventListener('change', function () {
+        //     var status = this.value;
+
+        //     if (status === "ACTIVE") {
+        //         status = 1;
+        //     } else {
+        //         status = 0;
+        //     }
+
+        //     const board_id = {{ $board->id }};
+
+        //     fetch('{{ route('boards.updateStatus')}}', {
+        //         method: 'POST',
+        //         headers: {
+        //             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+        //             'Content-Type': 'application/json'
+        //         },
+        //         body: JSON.stringify({
+        //             status: status,
+        //             board_id: board_id
+        //         })
+        //     })
+        //     .then(response => {
+        //             let responseClone = response.clone();
+        //             return response.json();
+        //         })
+        //     .then(data => {
+        //         if (data.success) {
+        //             console.log('Board status updated successfully');
+        //         } else {
+        //             console.error('Error updating board status:', data.message);
+        //         }
+        //     })
+        //     .catch(error => console.error('Error:', error));
+
+        // })
+
         document.addEventListener('DOMContentLoaded', function () {
             const addColumnBtn = document.getElementById('add-column-btn');
             const inputField = document.getElementById('new-column-input');

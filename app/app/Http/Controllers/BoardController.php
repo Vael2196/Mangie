@@ -8,9 +8,11 @@ use App\Models\Task;
 use App\Models\TaskUser;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class BoardController extends Controller
 {
+    const PRODUCT_BACKLOG_ID = 1;
 
     public function index()
     {
@@ -22,11 +24,13 @@ class BoardController extends Controller
             return redirect()->route('login'); // Redirect to login page if not authenticated
         }
 
+        $activeSprints = Board::where('status', 1)->count() > 0;
+
         // Fetch boards that belong to this user (for example)
         $boards = Board::where('user_id', $user->id)->get();
 
         // Pass the user and boards to the home view
-        return view('home', compact('user', 'boards'));
+        return view('home', compact('user', 'boards', 'activeSprints'));
     }
 
 
@@ -80,8 +84,16 @@ class BoardController extends Controller
             $query->orderBy('position');
         }, 'columns.tasks'])->findOrFail($id);
 
+        $end = \Carbon\Carbon::parse($board->end_date);
+        $now = \Carbon\Carbon::now();
+
+        $daysLeft = ceil($now->diffInDays($end));
+
+        // boolean on whether there are any active sprints
+        $activeSprints = Board::where('status', 1)->count() > 0;
+
         // Pass the board to the sprint_board view
-        return view('boards.show', compact('board'));
+        return view('boards.show', compact('board', 'daysLeft', 'activeSprints'));
     }
 
     public function storeColumn(Request $request)
@@ -147,12 +159,15 @@ class BoardController extends Controller
         $boards = Board::where('user_id', $user->id)->orWhere('id', 1)->get();
         $tasks = Task::all();
 
+        // boolean on whether there are any active sprints
+        $activeSprints = Board::where('status', 1)->count() > 0;
+
         if ($view == 'card'){
             // Pass the boards and tasks to the backlog view
-            return view('boards.product_backlog_card_view', compact('backlog', 'tasks', 'boards'));
+            return view('boards.product_backlog_card_view', compact('backlog', 'tasks', 'boards', 'activeSprints'));
         } else if ($view == 'list'){
             // Pass the boards and tasks to the backlog view
-            return view('boards.product_backlog_list_view', compact('backlog', 'tasks', 'boards'));
+            return view('boards.product_backlog_list_view', compact('backlog', 'tasks', 'boards', 'activeSprints'));
         }
     }
 
@@ -297,5 +312,160 @@ class BoardController extends Controller
             'success' => true,
             'task' => $task,
         ]);
+    }
+
+    // function to updates boards
+    public function updateStatus(Request $request)
+    {
+        // Validate the input
+        $request->validate([
+            'board_id' => 'required|exists:boards,id',   // Make sure the board exists
+            'status' => 'required|boolean',              // Status must be boolean (0 or 1)
+        ]);
+
+        Log::info('Request data:', $request->all());
+
+        // Find the board by ID
+        $board = Board::find($request->board_id);
+
+        Log::info('Found board:', ['board' => $board]);
+
+        // Check if the board exists
+        if (!$board) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Board not found'
+            ], 404);
+        }
+
+        try {
+            $updated = $board->update([
+                'status' => $request->status,    // Update the status
+                'updated_at' => now()             // Update the timestamp
+            ]);
+
+            $board->status = $request->status;
+            $board->updated_at = now();
+            $board->save();
+
+            Log::info('Board updated:', ['board' => $board]);
+
+            // Check if the update was successful
+            if ($updated) {
+                Log::info('Board updated successfully', ['board_id' => $board->id, 'new_status' => $request->status]);
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Board status updated successfully'
+                ]);
+            } else {
+                Log::error('Failed to update board', ['board_id' => $board->id]);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to update board status'
+                ], 500);
+            }
+        } catch (\Exception $e) {
+            Log::error('Update failed: ' . $e->getMessage(), ['board_id' => $board->id]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to update board status',
+                'board' => $board,
+            ], 500);
+        }
+    }
+
+    public function startSprint(Request $request)
+    {
+        Log::info('startSprint called:', $request->all());
+
+        // Validate the input
+        $request->validate([
+            'board_id' => 'required|exists:boards,id',
+            'start_date' => 'required|date',
+            'end_date' => 'required|date|after_or_equal:start_date',
+            'sprint_goal' => 'required|string|max:255',
+        ]);
+
+        Log::info('Request data:', $request->all());
+
+        // Find the board by ID
+        $board = Board::find($request->board_id);
+
+        // Convert dates to Carbon
+        $start = \Carbon\Carbon::parse($request->start_date);
+        $end = \Carbon\Carbon::parse($request->end_date);
+
+        $duration = $start->diffInDays($end);
+
+        if (!$board) {
+            return redirect()->back()->with('error', 'Board not found.');
+        }
+
+        try {
+            // Update the board with the new data
+            $board->start_date = $request->start_date;
+            $board->end_date = $request->end_date;
+            $board->duration = $duration;
+            $board->sprint_goal = $request->sprint_goal;
+            $board->status = 1;
+            $board->updated_at = now();
+            $board->save();
+
+            Log::info('Board updated:', ['board' => $board]);
+
+            return redirect()->back()->with('success', 'Board activated and updated successfully.');
+        } catch (\Exception $e) {
+            Log::error('Failed to update board: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Failed to update board.');
+        }
+    }
+
+    public function completeBoard($id)
+    {
+        // Find the board by ID
+        $board = Board::findOrFail($id);
+
+        if (!$board) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Board not found'
+            ], 404);
+        }
+
+        // $incompleteTasks = Task::where('position', $id)
+        // @foreach ($board->columns as $column)
+        //     @foreach ($column->tasks as $task)
+        //         if ($task->position == 1){
+        //             return redirect()->back()->with('error', 'Board cannot be completed with incomplete tasks.');
+        //         }
+        //     @endforeach
+        // @endforeach
+
+        foreach ($board->columns as $column) {
+            // Check if the column is NOT the "DONE" column
+            if ($column->name !== "DONE") {
+                // Move all tasks from this column back to the product backlog
+                foreach ($column->tasks as $task) {
+                    // Move task to product backlog
+                    $task->column_id = self::PRODUCT_BACKLOG_ID;
+                    $task->save();
+                }
+            }
+        }
+
+        try {
+            // Update the board with the new data
+            $board->completed = 1;
+            $board->status = 0;
+            $board->updated_at = now();
+            $board->save();
+
+            return redirect("/home")->with('success', 'Board completed successfully');
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to complete board'
+            ], 500);
+        }
     }
 }
