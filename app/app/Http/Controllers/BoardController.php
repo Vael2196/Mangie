@@ -6,9 +6,11 @@ use App\Models\Project;
 use App\Models\Column;
 use App\Models\Task;
 use App\Models\TaskUser;
+use Carbon\CarbonPeriod;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use IcehouseVentures\LaravelChartsjs\Facades\Charts;
 
 class BoardController extends Controller
 {
@@ -279,6 +281,15 @@ class BoardController extends Controller
             'timeLog' => 'integer',
         ]);
 
+        $column = Column::find($request->column_id);
+
+        if ($column && $column->name == "DONE") {
+            $this->competeTask($request->task_id, $request->column_id);
+        }
+
+
+        Log::info('Request data:', $request->all());
+
         // Update the task
         $res = Task::where('id', $request->task_id)->update([
             'title' => $request->title,
@@ -314,6 +325,21 @@ class BoardController extends Controller
             'success' => true,
             'task' => $task,
         ]);
+    }
+
+    protected function competeTask($task_id, $column_id){
+        $task = Task::findOrFail($task_id);
+        $column = Column::findOrFail($column_id);
+
+        if ($column && $column->name == "DONE") {
+            Log::info('Task moved to DONE column:', [
+                'task_id' => $task_id,
+                'column_id' => $column_id,
+            ]);
+
+            $task->completed_at = now();
+            $task->save();
+        }
     }
 
     // function to updates boards
@@ -468,5 +494,37 @@ class BoardController extends Controller
                 'message' => 'Failed to complete board'
             ], 500);
         }
+    }
+
+    public function showBurndownChart($board_id)
+    {
+        $board = Board::findOrFail($board_id);
+        $tasks = [];
+
+        $start = \Carbon\Carbon::parse($board->start_date);
+        $end = now();
+
+        foreach ($board->columns as $column) {
+            foreach ($column->tasks as $task) {
+                $tasks[] = $task;
+            }
+        }
+
+        $totalStoryPoints = 0;
+
+        foreach ($tasks as $task) {
+            $totalStoryPoints += $task->story_points;
+        }
+
+        $now = \Carbon\Carbon::now();
+        $labels = [];
+        $dateRange = [];
+
+        for ($date = $start->copy(); $date->lte($now); $date->addDay()) {
+            $dateRange[] = $date->format('Y-m-d');
+            $labels[] = $date->format('Y-m-d');
+        }
+
+        Log::info('Date range:', $dateRange);
     }
 }
