@@ -38,7 +38,7 @@
                     @continue
                 @endif
                 <div id="sprint-loading-board-{{ $board->id }}" class="mb-3">
-                    <x-sprint-loading-board-card :board="$board">
+                    <x-sprint-loading-board-card :board="$board" :activeSprints="$activeSprints">
                         @foreach ($board->columns as $column)
                             @foreach ($column->tasks as $task)
                                 <x-task-box :task="$task" />

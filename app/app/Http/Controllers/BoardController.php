@@ -84,7 +84,7 @@ class BoardController extends Controller
         $end = \Carbon\Carbon::parse($board->end_date);
         $now = \Carbon\Carbon::now();
 
-        $daysLeft = floor($now->diffInDays($end));
+        $daysLeft = ceil($now->diffInDays($end));
 
         // Pass the board to the sprint_board view
         return view('boards.show', compact('board', 'daysLeft'));
@@ -153,12 +153,15 @@ class BoardController extends Controller
         $boards = Board::where('user_id', $user->id)->orWhere('id', 1)->get();
         $tasks = Task::all();
 
+        // boolean on whether there are any active sprints
+        $activeSprints = Board::where('status', 1)->count() > 0;
+
         if ($view == 'card'){
             // Pass the boards and tasks to the backlog view
-            return view('boards.product_backlog_card_view', compact('backlog', 'tasks', 'boards'));
+            return view('boards.product_backlog_card_view', compact('backlog', 'tasks', 'boards', 'activeSprints'));
         } else if ($view == 'list'){
             // Pass the boards and tasks to the backlog view
-            return view('boards.product_backlog_list_view', compact('backlog', 'tasks', 'boards'));
+            return view('boards.product_backlog_list_view', compact('backlog', 'tasks', 'boards', 'activeSprints'));
         }
     }
 
