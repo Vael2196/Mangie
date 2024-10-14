@@ -6,7 +6,7 @@
             @if ($board->status == 1)
                 <x-sprint-start-details :board="$board"/>
             @endif
-        @else
+        @elseif ($board->completed == 0)
             <x-sprint-start-details :board="$board"/>
         @endif
     </div>

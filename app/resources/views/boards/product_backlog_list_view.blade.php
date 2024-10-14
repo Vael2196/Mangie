@@ -37,13 +37,15 @@
                     @continue
                 @endif
                 <div id="sprint-loading-board-{{ $board->id }}" class="mb-3">
-                    <x-sprint-loading-board :board="$board" :activeSprints="$activeSprints">
-                        @foreach ($board->columns as $column)
-                            @foreach ($column->tasks as $task)
-                                <x-task-list-item :task="$task" />
+                    @if ($board->completed == 0)
+                        <x-sprint-loading-board :board="$board" :activeSprints="$activeSprints">
+                            @foreach ($board->columns as $column)
+                                @foreach ($column->tasks as $task)
+                                    <x-task-list-item :task="$task" />
+                                @endforeach
                             @endforeach
-                        @endforeach
-                    </x-sprint-loading-board>
+                        </x-sprint-loading-board>
+                    @endif
                 </div>
             @endforeach
 
