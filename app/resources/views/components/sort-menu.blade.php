@@ -64,33 +64,13 @@
         let sortMenuDirections = document.getElementById('sortDirection').children;
         let sortBySubmit = document.getElementById('sortSubmit');
 
-        const resetDocument = () => {
-            console.log('hidden');
-            taskSortMenu.classList.add('hidden');
-
-            // Remove other selected items
-            for(let sortItem of sortMenuItems){
-                sortItem.classList.remove('bg-slate-600');
-                sortItem.classList.remove('hover:bg-slate-500');
-                sortItem.classList.remove('text-white');
-            }
-
-            // Remove other selected items
-            for(let sortItem of sortMenuDirections){
-                sortItem.classList.remove('bg-slate-600');
-                sortItem.classList.remove('hover:bg-slate-500');
-                sortItem.classList.remove('text-white');
-            }
-            // Reset sort dictionary
-            form_dict = {};
-        }
-
         // Reset menus on right click anywhere outside
         document.addEventListener('contextmenu', e => {resetDocument()});
 
         // Reset menus on right click anywhere outside
         document.addEventListener('click', e => {resetDocument()});
 
+        // Show sort menu
         taskSortButton.addEventListener('click', e => {
             e.stopPropagation();
             const rect = taskSortButton.getBoundingClientRect();
@@ -99,39 +79,25 @@
             taskSortMenu.classList.remove('hidden');
         });
 
-        const clickMenuItem = (event, item, field, sortMenuItems) => {
-            event.stopPropagation();
-            // Toggle selected item
-            item.classList.toggle('bg-slate-600');
-            item.classList.toggle('hover:bg-slate-500');
-            item.classList.toggle('text-white');
-
-            // Append sort value to form dictionary
-            let sort = item.id.replace(field, '');
-            form_dict[field] = form_dict[field] === sort ? "" : sort;
-            console.log(form_dict);
-
-            // Remove other selected items
-            for(let sortItem of sortMenuItems){
-                if(sortItem.id != item.id){
-                    sortItem.classList.remove('bg-slate-600');
-                    sortItem.classList.remove('hover:bg-slate-500');
-                    sortItem.classList.remove('text-white');
-                }
-            }
-        }
-
-        // Sort sub menus
+        // Sort type sub menus
         for(let item of sortMenuItems){
             // Clicking on sort menu item
-            item.addEventListener('click', e => {clickMenuItem(e, item, 'sortBy', sortMenuItems)});
+            item.addEventListener('click', e => {
+                e.stopPropagation();
+                clickMenuItem(item, 'sortBy', sortMenuItems)
+            });
         };
 
+        // Sort direction sub menus
         for(let item of sortMenuDirections){
             // Clicking on sort direction menu item
-            item.addEventListener('click', e => {clickMenuItem(e, item, 'sortWith', sortMenuDirections)});
+            item.addEventListener('click', e => {
+                e.stopPropagation();
+                clickMenuItem(item, 'sortWith', sortMenuDirections)
+            });
         }
 
+        // Submit sort query
         sortBySubmit.addEventListener('click', e => {
             // Break if either a sorting option and direction are not chosen
             if(!(form_dict['sortBy'] && form_dict['sortWith'])){return;}
@@ -145,6 +111,52 @@
             console.log(getCookie('sort'));
             console.log(getCookie('direction'));
             location.reload();
-        })
+        });
+
+        // Helper FUNCTIONS ---------------------------------------------------------------
+        const resetDocument = () => {
+            console.log('hidden');
+            taskSortMenu.classList.add('hidden');
+
+            // Remove other selected items
+            for(let sortItem of sortMenuItems){
+                removeItemStyles(sortItem);
+            }
+
+            // Remove other selected items
+            for(let sortItem of sortMenuDirections){
+                removeItemStyles(sortItem);
+            }
+            // Reset sort dictionary
+            form_dict = {};
+        }
+
+        // Remove on click styles from item
+        const removeItemStyles = (item) => {
+            item.classList.remove('bg-slate-600');
+            item.classList.remove('hover:bg-slate-500');
+            item.classList.remove('text-white');
+        }
+
+        // Clicking on sort menu item
+        const clickMenuItem = (item, field, sortMenuItems) => {
+            // Toggle selected item
+            item.classList.toggle('bg-slate-600');
+            item.classList.toggle('hover:bg-slate-500');
+            item.classList.toggle('text-white');
+
+            // Append sort value to form dictionary
+            let sort = item.id.replace(field, '');
+            form_dict[field] = form_dict[field] === sort ? "" : sort;
+            console.log(form_dict);
+
+            // Remove other selected items
+            for(let sortItem of sortMenuItems){
+                if(sortItem.id != item.id){
+                    removeItemStyles(sortItem);
+                }
+            }
+        }
+
     });
 </script>
