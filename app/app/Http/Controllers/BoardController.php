@@ -381,4 +381,29 @@ class BoardController extends Controller
             ], 500);
         }
     }
+
+    // activate sprint button
+    public function activateSprint($id)
+    {
+        // Find the board by ID
+        $board = Board::find($id);
+
+        // Check if the board exists
+        if (!$board) {
+            return redirect()->back()->with('error', 'Board not found.');
+        }
+
+        // Check if the board is already active
+        if ($board->status == 1) {
+            return redirect()->back()->with('error', 'Board is already active.');
+        }
+
+        // Set the status to active (1)
+        $board->status = 1;
+        $board->updated_at = now();
+        $board->save();
+
+        // Redirect back with success message
+        return redirect()->back()->with('success', 'Board activated successfully.');
+    }
 }

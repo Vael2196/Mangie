@@ -38,7 +38,8 @@ Route::delete('/boards/{id}', [BoardController::class, 'destroy'])->middleware('
 Route::post('/columns/store', [BoardController::class, 'storeColumn'])->name('columns.store');
 Route::post('/tasks/store', [BoardController::class, 'storeTask'])->name('tasks.store');
 Route::post('/tasks/update', [BoardController::class, 'updateTask'])->name('tasks.update');
-Route::post('/boards/update', [BoardController::class, 'updateStatus'])->name('boards.update');
+Route::post('/boards/updateStatus', [BoardController::class, 'updateStatus'])->name('boards.updateStatus');
+Route::post('/boards/{id}/activateSprint', [BoardController::class, 'activateSprint'])->name('boards.activateSprint');
 
 
 // Backlog
