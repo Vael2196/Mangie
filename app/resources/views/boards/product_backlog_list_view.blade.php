@@ -69,6 +69,10 @@
                     <option value="list" selected>List View</option>
                     <option value="card">Card View</option>
                 </select>
+
+                {{-- Sort Menu --}}
+                <x-sort-menu/>
+
                 {{-- Filter Menu --}}
                 <x-filter-menu />
                 @foreach($cookies as $key => $value)
@@ -76,10 +80,6 @@
                         <x-cookie-tag key="{{ $key }}" tag="{{ $value }}" />
                     @endif
                 @endforeach
-
-                {{-- Sort Menu --}}
-                <x-sort-menu />
-
                 {{-- Create sprint button --}}
                 <div id="create-sprint-button"><x-secondary-button>Create Sprint</x-secondary-button></div>
             </div>

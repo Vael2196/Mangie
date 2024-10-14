@@ -75,7 +75,7 @@
                 </select>
 
                 {{-- Filter Menu --}}
-                <x-filter-menu />
+                <x-filter-menu/>
                 @foreach($cookies as $key => $value)
                     @if($value)
                         <x-cookie-tag key="{{ $key }}" tag="{{ $value }}" />

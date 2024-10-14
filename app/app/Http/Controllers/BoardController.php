@@ -92,16 +92,34 @@ class BoardController extends Controller
             $label = $_COOKIE['label'];
         }
 
+        // Get sort type
+        $sortBy = '';
+        if(isset($_COOKIE['sort'])){
+            $sortBy = $_COOKIE['sort'];
+        }
+
+        // Get sort direction
+        $sortDirection = '';
+        if(isset($_COOKIE['direction'])){
+            $sortDirection = $_COOKIE['direction'];
+        }
+
         // Fetch the board by ID with its columns and tasks, and sort columns by position
         $board = Board::with(['columns' => function ($query) {
             $query->orderBy('position');
-        }, 'columns.tasks' => function ($query) use ($label, $priority){
+        }, 'columns.tasks' => function ($query) use ($label, $priority, $sortBy, $sortDirection){
+            // Filtering
             if($priority){ $query->Where('priority', $priority); }
             if($label){ $query->Where('labels', $label); }
-            $query->orderBy('position');
+
+            // Sort
+            if($sortBy && $sortDirection){$query->orderBy($sortBy, $sortDirection);}
+            else{$query->orderBy('position');}
+
         }])->findOrFail($id);
 
-        $cookies = array('label' => $label, 'priority' => $priority);
+        // Get cookies array
+        $cookies = array('label' => $label, 'priority' => $priority, 'sort' => $sortBy);
 
         $end = \Carbon\Carbon::parse($board->end_date);
         $now = \Carbon\Carbon::now();
