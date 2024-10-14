@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Log;
 
 class BoardController extends Controller
 {
+    const PRODUCT_BACKLOG_ID = 1;
 
     public function index()
     {
@@ -385,6 +386,27 @@ class BoardController extends Controller
                 'success' => false,
                 'message' => 'Board not found'
             ], 404);
+        }
+
+        // $incompleteTasks = Task::where('position', $id)
+        // @foreach ($board->columns as $column)
+        //     @foreach ($column->tasks as $task)
+        //         if ($task->position == 1){
+        //             return redirect()->back()->with('error', 'Board cannot be completed with incomplete tasks.');
+        //         }
+        //     @endforeach
+        // @endforeach
+
+        foreach ($board->columns as $column) {
+            // Check if the column is NOT the "DONE" column
+            if ($column->name !== "DONE") {
+                // Move all tasks from this column back to the product backlog
+                foreach ($column->tasks as $task) {
+                    // Move task to product backlog
+                    $task->column_id = self::PRODUCT_BACKLOG_ID;
+                    $task->save();
+                }
+            }
         }
 
         try {
