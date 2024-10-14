@@ -10,18 +10,7 @@
             <div class="flex pr-10 items-start dark:text-white">
                 <p class="text-sm px-6 min-h-20 max-h-40 overflow-y-auto max-w-[65vw] grow">This is a description of the board.</p>
                 <div class="flex space-x-8 items-center">
-                    @if($board->status == 0)
-                        <form method="POST" action="{{route('boards.activateSprint', $board->id)}}" onsubmit="return confirm('Are you sure you want to activate this sprint?')">
-                            @csrf
-                            <button type="submit" class="inline-flex items-center px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-500 rounded-md font-semibold text-xs text-gray-700 dark:text-gray-300 uppercase tracking-widest shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:opacity-25 transition ease-in-out duration-150">
-                                Activate Sprint
-                            </button>
-                        </form>
-                    @else
-                        <button type="button" class="inline-flex items-center px-4 py-2 bg-green-600 dark:bg-green-600 border border-gray-300 dark:border-gray-500 rounded-md font-semibold text-xs text-white dark:text-white uppercase tracking-widest shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150" disabled>
-                            Board is Active
-                        </button>
-                    @endif
+                    <x-sprint-start-details :board="$board"/>
 
 
                     <select id="activateSprint" class="bg-white dark:bg-gray-700 dark:text-white rounded-lg p-2">
@@ -35,7 +24,19 @@
                         @endforeach
                     </select>
 
-                    <p class="lg:block hidden">X-days-left</p>
+                    @if ($board->status == 1)
+                        <p class="lg:block">
+                            @if($daysLeft !== null && $daysLeft > 0)
+                                {{ $daysLeft }} days left
+                            @elseif($daysLeft === 0)
+                                Sprint ends today
+                            @else
+                                Sprint has ended
+                            @endif
+                        </p>
+                    @else
+                        <p class="lg:block hidden">Sprint is inactive</p>
+                    @endif
                     <x-secondary-button>Complete Board</x-secondary-button>
                     <a class="hover:cursor-pointer"><i class="fa-solid fa-ellipsis"></i></a>
                 </div>
@@ -84,6 +85,11 @@
     </div>
 
     <script>
+        // Show sprint details view when clicking on the activate sprint button
+        document.getElementById('activateSprint').addEventListener('click', function () {
+            document.getElementById('boardDetailsModal').classList.toggle('hidden');
+        });
+
         let activeSprint = document.getElementById('activateSprint');
 
         // function toggleView(activateSprint) {
