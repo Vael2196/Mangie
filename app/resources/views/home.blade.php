@@ -20,6 +20,9 @@
 
         {{-- Card View --}}
         <div class="grid px-6 grid-cols-4 gap-4 card-view-sprint">
+            @if ($activeSprints < 1 && Str::contains(url()->current(), '/home'))
+                <h>There are no active sprints</h>
+            @endif
             <!-- Existing boards -->
             @foreach($boards as $board)
                 {{-- Skip product backlog board --}}
@@ -29,70 +32,66 @@
                 {{-- Show sprint boards --}}
                 @if (Str::contains(url()->current(), '/dashboard'))
                     <x-show-sprint-board :board="$board"/>
-                @else
-                    @if ($board->completed == 0)
+                @elseif (Str::contains(url()->current(), '/home'))
+                    @if ($activeSprints >= 1 && $board->status == 1)
+                        <x-show-sprint-board :board="$board"/>
+                    @elseif ($activeSprints < 1 && $board->completed == 0)
                         <x-show-sprint-board :board="$board"/>
                     @endif
                 @endif
             @endforeach
 
             <!-- Create new board card -->
-            <div class="bg-gray-100 dark:bg-gray-700 shadow-lg rounded-lg p-4 flex items-center justify-center">
-                <form id="new-board-form" method="POST">
-                    @csrf
-                    <input type="hidden" name="project_id" value="{{ 1 }}">
-                    <input type="text" name="name" id="board-name" class="bg-white dark:bg-gray-400 dark:placeholder-gray-700 shadow-inner rounded-lg p-2 w-full" placeholder="Create new board" required autocomplete="off">
-                </form>
-            </div>
+            @if (Str::contains(url()->current(), '/dashboard'))
+                <div class="bg-gray-100 dark:bg-gray-700 shadow-lg rounded-lg p-4 flex items-center justify-center">
+                    <form id="new-board-form" method="POST">
+                        @csrf
+                        <input type="hidden" name="project_id" value="{{ 1 }}">
+                        <input type="text" name="name" id="board-name" class="bg-white dark:bg-gray-400 dark:placeholder-gray-700 shadow-inner rounded-lg p-2 w-full" placeholder="Create new board" required autocomplete="off">
+                    </form>
+                </div>
+            @endif
         </div>
 
         {{-- List View --}}
         <div class="hidden list-view-sprint">
+            @if ($activeSprints < 1 && Str::contains(url()->current(), '/home'))
+                <h>There are no active sprints</h>
+            @endif
             <table class="table-fixed border min-w-full overflow-x-auto">
                 <tbody>
                     @foreach($boards as $board)
                         @if($board->id == 1)
                             @continue
                         @endif
-                        <tr class="px-4 py-2 text-start leading-5 dark:bg-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-400 hover:cursor-pointer focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out rounded"
-                            id="sprintRow{{$board->id}}"
-                            onClick="location.href='{{ route('boards.show', $board->id) }}'">
-                            <td class="py-2 pl-5 border-b-2 min-w-20 overflow-hidden">{{ $board->name }}</td>
-                            <td class="py-2 border-b-2 w-20">
-                                @if ($board->completed == 1)
-                                    <span class="text-green-500">Completed</span>
-                                @elseif ($board->status == 1)
-                                    <span class="text-blue-500">Active</span>
-                                @else
-                                    <span class="text-red-500">Not Started</span>
-                                @endif
-                            </td>
-                            <td class="py-2 border-b-2 w-20">
-                                <form method="POST" action="{{ route('boards.destroy', $board->id) }}" onsubmit="return confirm('Are you sure you want to delete this board?')">
-                                    @csrf
-                                    @method('delete')
-                                    <button class="bg-red-600 hover:bg-red-400 text-white text-sm py-1 px-2 rounded-full">
-                                        Delete
-                                    </button>
-                                </form>
-                            </td>
-                        </tr>
+                        {{-- Show sprint boards --}}
+                        @if (Str::contains(url()->current(), '/dashboard'))
+                            <x-show-sprint-board-list :board="$board"/>
+                        @elseif (Str::contains(url()->current(), '/home'))
+                            @if ($activeSprints >= 1 && $board->status == 1)
+                                <x-show-sprint-board-list :board="$board"/>
+                            @elseif ($activeSprints < 1 && $board->completed == 0)
+                                <x-show-sprint-board-list :board="$board"/>
+                            @endif
+                        @endif
                     @endforeach
                 </tbody>
             </table>
             {{-- Link to Form --}}
-            <div class="w-full text-start">
-                <div id="create-sprint-link" class="block">
-                    <div
-                        class = 'px-4 py-2 leading-5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:cursor-pointer focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out rounded flex space-x-3'>
-                        <div class = "text-center"><i class="fa-solid fa-plus"></i></div>
-                        <p class = "lg:block hidden text-sm">Create Sprint</p>
+            @if (Str::contains(url()->current(), '/dashboard'))
+                <div class="w-full text-start">
+                    <div id="create-sprint-link" class="block">
+                        <div
+                            class = 'px-4 py-2 leading-5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:cursor-pointer focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out rounded flex space-x-3'>
+                            <div class = "text-center"><i class="fa-solid fa-plus"></i></div>
+                            <p class = "lg:block hidden text-sm">Create Sprint</p>
+                        </div>
                     </div>
+                    {{-- Form for submitting  --}}
+                    <input id="input-sprint-field" class="border hidden w-full dark:bg-gray-600 dark:text-white" type="text"
+                        placeholder="Enter Sprint Name" class="w-full" />
                 </div>
-                {{-- Form for submitting  --}}
-                <input id="input-sprint-field" class="border hidden w-full dark:bg-gray-600 dark:text-white" type="text"
-                    placeholder="Enter Sprint Name" class="w-full" />
-            </div>
+            @endif
         </div>
     </div>
 
