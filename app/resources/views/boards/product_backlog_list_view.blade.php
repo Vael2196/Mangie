@@ -30,9 +30,6 @@
         </x-dropdown>
     </div>
     <div class="px-10 flex flex-col w-[80vw] overflow-auto max-h-[70vh] invisible" id="entirePage">
-
-    <h>{{ $activeSprints }}</h>
-
         {{-- Sprint loading list --}}
         <div class="mb-7" id="sprint-loading-board-list">
             @foreach ($boards as $board)

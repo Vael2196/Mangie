@@ -37,6 +37,12 @@
                 <input type="text" class="form-control dark:bg-transparent dark:text-white" id="board_id" name="board_id" value="{{ $board->id }}" readonly>
             </div>
 
+            {{-- Sprint Goal --}}
+            <div class="mb-4 dark:text-white">
+                <label for="goal" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Sprint Goal</label>
+                <input type="text" name="sprint_goal" id="goal" required class="mt-1 block w-full p-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 rounded-md">
+            </div>
+
             <!-- Start Date -->
             <div class="mb-4 dark:text-white">
                 <label for="start_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Start Date</label>
