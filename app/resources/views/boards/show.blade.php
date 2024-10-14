@@ -8,9 +8,22 @@
         <div class="flex flex-col">
 
             <div class="flex pr-10 items-start dark:text-white">
-                <p class="text-sm px-6 min-h-20 max-h-40 overflow-y-auto max-w-[65vw] grow">This is a description of the board.</p>
+                
+                @if ($board->status == 1)
+                    <p class="text-sm px-6 min-h-20 max-h-40 overflow-y-auto max-w-[65vw] grow">{{$board->sprint_goal}}</p>
+                @else
+                    <p class="text-sm px-6 min-h-20 max-h-40 overflow-y-auto max-w-[65vw] grow">Sprint Goal Area</p>
+                @endif
+
                 <div class="flex space-x-8 items-center">
-                    <x-sprint-start-details :board="$board"/>
+
+                    @if ($activeSprints >= 1)
+                        @if ($board->status == 1)
+                            <x-sprint-start-details :board="$board"/>
+                        @endif
+                    @else
+                        <x-sprint-start-details :board="$board"/>
+                    @endif
 
 
                     <select id="activateSprint" class="bg-white dark:bg-gray-700 dark:text-white rounded-lg p-2">

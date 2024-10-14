@@ -86,8 +86,11 @@ class BoardController extends Controller
 
         $daysLeft = ceil($now->diffInDays($end));
 
+        // boolean on whether there are any active sprints
+        $activeSprints = Board::where('status', 1)->count() > 0;
+
         // Pass the board to the sprint_board view
-        return view('boards.show', compact('board', 'daysLeft'));
+        return view('boards.show', compact('board', 'daysLeft', 'activeSprints'));
     }
 
     public function storeColumn(Request $request)
@@ -335,6 +338,7 @@ class BoardController extends Controller
             'board_id' => 'required|exists:boards,id',
             'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date',
+            'sprint_goal' => 'required|string|max:255',
         ]);
 
         Log::info('Request data:', $request->all());
@@ -357,6 +361,7 @@ class BoardController extends Controller
             $board->start_date = $request->start_date;
             $board->end_date = $request->end_date;
             $board->duration = $duration;
+            $board->sprint_goal = $request->sprint_goal;
             $board->status = 1;
             $board->updated_at = now();
             $board->save();
