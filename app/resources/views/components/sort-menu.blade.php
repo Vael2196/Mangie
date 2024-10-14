@@ -5,7 +5,7 @@
 <div class="hidden absolute z-30" id="taskSortMenu">
     <div class="flex items-start flex-wrap bg-gray-100 px-1 py-0.5">
         <div class="flex flex-col pr-2 border-r-2 border-gray-300 h-full" id="sortChildren">
-            @foreach (['title', 'description', 'priority', 'labels', 'story points', 'time log'] as $label)
+            @foreach (['title', 'description', 'priority', 'labels', 'story_points', 'time_log'] as $label)
             <div class='bg-white border px-4 py-2 text-start leading-5 dark:bg-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-500 hover:cursor-pointer focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out flex space-x-3'
                 id="sortBy{{$label}}">
                 <h1>{{ $label }}</h1>
@@ -16,17 +16,17 @@
         <div class="flex flex-col justify-between pl-2">
             <div id="sortDirection">
                 <div class='bg-white border px-4 py-2 text-start leading-5 dark:bg-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-500 hover:cursor-pointer focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out flex space-x-3'
-                    id="sortByasc">
+                    id="sortWithasc">
                     <h1>Ascending</h1>
                 </div>
 
                 <div class='bg-white border px-4 py-2 text-start leading-5 dark:bg-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-500 hover:cursor-pointer focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out flex space-x-3'
-                    id="sortBydesc">
+                    id="sortWithdesc">
                     <h1>Descending</h1>
                 </div>
             </div>
             <div class='bg-slate-600 border px-4 py-2 text-start leading-5 dark:bg-gray-600 text-white dark:text-gray-300 hover:bg-slate-500 dark:hover:bg-gray-500 hover:cursor-pointer focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out flex space-x-3'
-                id="sortBySubmit">
+                id="sortSubmit">
                 <h1>Submit</h1>
             </div>
         </div>
@@ -49,8 +49,8 @@
     document.addEventListener('DOMContentLoaded', e => {
         let sort_obj = JSON.parse(localStorage.getItem('sort'));
 
-        document.cookie = `sort=${sort_obj['sort']};`;
-        document.cookie = `direction=${sort_obj['direction']};`;
+        document.cookie = `sort=${sort_obj['sortBy']};`;
+        document.cookie = `direction=${sort_obj['sortWith']};`;
 
         console.log(getCookie('sort'));
         console.log(getCookie('direction'));
@@ -62,23 +62,34 @@
         let taskSortMenu = document.getElementById('taskSortMenu');
         let sortMenuItems = document.getElementById('sortChildren').children;
         let sortMenuDirections = document.getElementById('sortDirection').children;
-        let sortBySubmit = document.getElementById('sortBySubmit');
+        let sortBySubmit = document.getElementById('sortSubmit');
 
-        // Reset menus on right click anywhere outside
-        document.addEventListener('contextmenu', e => {
+        const resetDocument = () => {
+            console.log('hidden');
             taskSortMenu.classList.add('hidden');
 
+            // Remove other selected items
+            for(let sortItem of sortMenuItems){
+                sortItem.classList.remove('bg-slate-600');
+                sortItem.classList.remove('hover:bg-slate-500');
+                sortItem.classList.remove('text-white');
+            }
+
+            // Remove other selected items
+            for(let sortItem of sortMenuDirections){
+                sortItem.classList.remove('bg-slate-600');
+                sortItem.classList.remove('hover:bg-slate-500');
+                sortItem.classList.remove('text-white');
+            }
             // Reset sort dictionary
             form_dict = {};
-        });
+        }
 
         // Reset menus on right click anywhere outside
-        document.addEventListener('click', e => {
-            taskSortMenu.classList.add('hidden');
+        document.addEventListener('contextmenu', e => {resetDocument()});
 
-            // Reset sort dictionary
-            form_dict = {};
-        });
+        // Reset menus on right click anywhere outside
+        document.addEventListener('click', e => {resetDocument()});
 
         taskSortButton.addEventListener('click', e => {
             e.stopPropagation();
@@ -88,34 +99,49 @@
             taskSortMenu.classList.remove('hidden');
         });
 
+        const clickMenuItem = (event, item, field, sortMenuItems) => {
+            event.stopPropagation();
+            // Toggle selected item
+            item.classList.toggle('bg-slate-600');
+            item.classList.toggle('hover:bg-slate-500');
+            item.classList.toggle('text-white');
+
+            // Append sort value to form dictionary
+            let sort = item.id.replace(field, '');
+            form_dict[field] = form_dict[field] === sort ? "" : sort;
+            console.log(form_dict);
+
+            // Remove other selected items
+            for(let sortItem of sortMenuItems){
+                if(sortItem.id != item.id){
+                    sortItem.classList.remove('bg-slate-600');
+                    sortItem.classList.remove('hover:bg-slate-500');
+                    sortItem.classList.remove('text-white');
+                }
+            }
+        }
+
         // Sort sub menus
         for(let item of sortMenuItems){
-            item.addEventListener('click', e => {
-                e.stopPropagation();
-                let sort = item.id.replace('sortBy', '');
-                console.log(sort);
-
-                form_dict['sort'] = sort;
-            });
+            // Clicking on sort menu item
+            item.addEventListener('click', e => {clickMenuItem(e, item, 'sortBy', sortMenuItems)});
         };
 
         for(let item of sortMenuDirections){
-            item.addEventListener('click', e => {
-                e.stopPropagation();
-                let direction = item.id.replace('sortBy', '');
-                console.log(direction);
-                form_dict['direction'] = direction;
-            })
+            // Clicking on sort direction menu item
+            item.addEventListener('click', e => {clickMenuItem(e, item, 'sortWith', sortMenuDirections)});
         }
 
         sortBySubmit.addEventListener('click', e => {
             // Break if either a sorting option and direction are not chosen
-            if(!(form_dict['sort'] && form_dict['direction'])){return;}
+            if(!(form_dict['sortBy'] && form_dict['sortWith'])){return;}
 
+            // Set cookies
             localStorage.setItem('sort', JSON.stringify(form_dict));
-            document.cookie = `sort=${form_dict['sort']};`;
-            document.cookie = `direction=${form_dict['direction']};`;
+            document.cookie = `sort=${form_dict['sortBy']};`;
+            document.cookie = `direction=${form_dict['sortWith']};`;
 
+            // Log cookies
             console.log(getCookie('sort'));
             console.log(getCookie('direction'));
             location.reload();
