@@ -81,10 +81,15 @@ class BoardController extends Controller
             $query->orderBy('position');
         }, 'columns.tasks'])->findOrFail($id);
 
+        $end = \Carbon\Carbon::parse($board->end_date);
+        $now = \Carbon\Carbon::now();
+
+        $daysLeft = floor($now->diffInDays($end));
+
         $user = Auth::user();
 
         // Pass the board to the sprint_board view
-        return view('boards.show', compact('board', 'user'));
+        return view('boards.show', compact('board', 'daysLeft', 'user'));
     }
 
     public function storeColumn(Request $request)
@@ -326,26 +331,6 @@ class BoardController extends Controller
             ], 404);
         }
 
-        // Update the status field only
-        // $updated = $board->update([
-        //     'status' => $request->status,      // Update the status (boolean)
-        //     'updated_at' => now()              // Update the timestamp
-        // ]);
-
-        // $board->save();
-
-        // // Check if the update was successful
-        // if ($updated) {
-        //     return response()->json([
-        //         'success' => true,
-        //         'message' => 'Board status updated successfullyyyyyy'
-        //     ]);
-        // } else {
-        //     return response()->json([
-        //         'success' => false,
-        //         'message' => 'Failed to update board status'
-        //     ], 500);
-        // }
         try {
             $updated = $board->update([
                 'status' => $request->status,    // Update the status
@@ -382,28 +367,47 @@ class BoardController extends Controller
         }
     }
 
-    // activate sprint button
-    public function activateSprint($id)
+    public function startSprint(Request $request)
     {
-        // Find the board by ID
-        $board = Board::find($id);
+        Log::info('startSprint called:', $request->all());
 
-        // Check if the board exists
+        // Validate the input
+        $request->validate([
+            'board_id' => 'required|exists:boards,id',
+            'start_date' => 'required|date',
+            'end_date' => 'required|date|after_or_equal:start_date',
+        ]);
+
+        Log::info('Request data:', $request->all());
+
+        // Find the board by ID
+        $board = Board::find($request->board_id);
+
+        // Convert dates to Carbon
+        $start = \Carbon\Carbon::parse($request->start_date);
+        $end = \Carbon\Carbon::parse($request->end_date);
+
+        $duration = $start->diffInDays($end);
+
         if (!$board) {
             return redirect()->back()->with('error', 'Board not found.');
         }
 
-        // Check if the board is already active
-        if ($board->status == 1) {
-            return redirect()->back()->with('error', 'Board is already active.');
+        try {
+            // Update the board with the new data
+            $board->start_date = $request->start_date;
+            $board->end_date = $request->end_date;
+            $board->duration = $duration;
+            $board->status = 1;
+            $board->updated_at = now();
+            $board->save();
+
+            Log::info('Board updated:', ['board' => $board]);
+
+            return redirect()->back()->with('success', 'Board activated and updated successfully.');
+        } catch (\Exception $e) {
+            Log::error('Failed to update board: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Failed to update board.');
         }
-
-        // Set the status to active (1)
-        $board->status = 1;
-        $board->updated_at = now();
-        $board->save();
-
-        // Redirect back with success message
-        return redirect()->back()->with('success', 'Board activated successfully.');
     }
 }
