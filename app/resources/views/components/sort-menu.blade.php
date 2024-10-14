@@ -60,8 +60,8 @@
         let form_dict = {};
         let taskSortButton = document.getElementById('taskSortButton');
         let taskSortMenu = document.getElementById('taskSortMenu');
-        let sortMenuItems = document.getElementById('sortChildren').children;
-        let sortMenuDirections = document.getElementById('sortDirection').children;
+        let sortMenuItems = Array.prototype.slice.call(document.getElementById('sortChildren').children, 0);
+        let sortMenuDirections = Array.prototype.slice.call(document.getElementById('sortDirection').children, 0);
         let sortBySubmit = document.getElementById('sortSubmit');
 
         // Reset menus on right click anywhere outside
@@ -115,16 +115,10 @@
 
         // Helper FUNCTIONS ---------------------------------------------------------------
         const resetDocument = () => {
-            console.log('hidden');
             taskSortMenu.classList.add('hidden');
 
             // Remove other selected items
-            for(let sortItem of sortMenuItems){
-                removeItemStyles(sortItem);
-            }
-
-            // Remove other selected items
-            for(let sortItem of sortMenuDirections){
+            for(let sortItem of sortMenuItems.concat(sortMenuDirections)){
                 removeItemStyles(sortItem);
             }
             // Reset sort dictionary
@@ -148,7 +142,6 @@
             // Append sort value to form dictionary
             let sort = item.id.replace(field, '');
             form_dict[field] = form_dict[field] === sort ? "" : sort;
-            console.log(form_dict);
 
             // Remove other selected items
             for(let sortItem of sortMenuItems){
