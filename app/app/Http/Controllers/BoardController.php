@@ -374,4 +374,31 @@ class BoardController extends Controller
             return redirect()->back()->with('error', 'Failed to update board.');
         }
     }
+
+    public function completeBoard($id)
+    {
+        // Find the board by ID
+        $board = Board::findOrFail($id);
+
+        if (!$board) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Board not found'
+            ], 404);
+        }
+
+        try {
+            // Update the board with the new data
+            $board->completed = 1;
+            $board->updated_at = now();
+            $board->save();
+
+            return redirect("/home")->with('success', 'Board completed successfully');
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to complete board'
+            ], 500);
+        }
+    }
 }

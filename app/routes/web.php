@@ -30,7 +30,8 @@ Route::post('/columns/store', [BoardController::class, 'storeColumn'])->name('co
 Route::post('/tasks/store', [BoardController::class, 'storeTask'])->name('tasks.store');
 Route::post('/tasks/update', [BoardController::class, 'updateTask'])->name('tasks.update');
 Route::post('/boards/updateStatus', [BoardController::class, 'updateStatus'])->name('boards.updateStatus');
-Route::post('boards/startSprint', [BoardController::class, 'startSprint'])->name('boards.startSprint');
+Route::post('/boards/startSprint', [BoardController::class, 'startSprint'])->name('boards.startSprint');
+Route::post('/boards/{id}/endSprint', [BoardController::class, 'completeBoard'])->name('boards.complete');
 
 
 // Backlog
