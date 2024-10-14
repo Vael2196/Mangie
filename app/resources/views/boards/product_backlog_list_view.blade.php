@@ -49,9 +49,9 @@
             @endforeach
 
             {{-- Create sprint input box list view --}}
-            <div class="border min-w-full overflow-x-auto rounded p-3 bg-gray-100 hidden" id="create-sprint">
+            <div class="border min-w-full overflow-x-auto rounded p-3 bg-gray-100 hidden dark:bg-gray-700 dark:text-white" id="create-sprint">
                 <div class="flex justify-between mb-2">
-                    <input class='border font-semibold text-xl' id="create-sprint-input" type="text"
+                    <input class='border font-semibold text-xl dark:bg-gray-700 dark:text-white dark:placeholder-white' id="create-sprint-input" type="text"
                         placeholder="Enter Sprint Name"/>
                     <x-secondary-button>Start Sprint</x-secondary-button>
                 </div>
