@@ -1,6 +1,6 @@
 @props(['key', 'tag'])
 
-<div {{ $attributes->merge([ 'class' => 'bg-gray-100 rounded-md text-nowrap flex items-center space-x-1 px-1'])}}>
+<div {{ $attributes->merge([ 'class' => 'bg-gray-100 rounded-md text-nowrap flex items-center space-x-1 pl-1 pr-2'])}}>
     <i id="cookieTag{{$key}}" class="fa-solid fa-x fa-xs hover:cursor-pointer hover:bg-gray-200 py-3 px-2 rounded-md"></i>
     <h1 class="text-base">{{ $tag }}</h1>
 </div>

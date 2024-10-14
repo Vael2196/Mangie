@@ -79,10 +79,29 @@ class BoardController extends Controller
      */
     public function show($id)
     {
+
+        // Get Priority
+        $priority = '';
+        if(isset($_COOKIE['priority'])){
+            $priority = $_COOKIE['priority'];
+        }
+
+        // Get Label
+        $label = '';
+        if(isset($_COOKIE['label'])){
+            $label = $_COOKIE['label'];
+        }
+
         // Fetch the board by ID with its columns and tasks, and sort columns by position
         $board = Board::with(['columns' => function ($query) {
             $query->orderBy('position');
-        }, 'columns.tasks'])->findOrFail($id);
+        }, 'columns.tasks' => function ($query) use ($label, $priority){
+            if($priority){ $query->Where('priority', $priority); }
+            if($label){ $query->Where('labels', $label); }
+            $query->orderBy('position');
+        }])->findOrFail($id);
+
+        $cookies = array('label' => $label, 'priority' => $priority);
 
         $end = \Carbon\Carbon::parse($board->end_date);
         $now = \Carbon\Carbon::now();
@@ -95,7 +114,7 @@ class BoardController extends Controller
         $user = Auth::user();
 
         // Pass the board to the sprint_board view
-        return view('boards.show', compact('board', 'daysLeft', 'activeSprints', 'user'));
+        return view('boards.show', compact('board', 'daysLeft', 'activeSprints', 'user', 'cookies'));
     }
 
     public function storeColumn(Request $request)

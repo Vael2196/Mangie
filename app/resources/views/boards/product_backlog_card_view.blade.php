@@ -74,6 +74,14 @@
                     <option value="card" selected>Card View</option>
                 </select>
 
+                {{-- Filter Menu --}}
+                <x-filter-menu />
+                @foreach($cookies as $key => $value)
+                    @if($value)
+                        <x-cookie-tag key="{{ $key }}" tag="{{ $value }}" />
+                    @endif
+                @endforeach
+
                 {{-- Create sprint button --}}
                 <div id="create-sprint-button"><x-secondary-button>Create Sprint</x-secondary-button></div>
             </div>

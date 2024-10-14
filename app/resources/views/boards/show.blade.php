@@ -60,13 +60,22 @@
                     <a class="hover:cursor-pointer"><i class="fa-solid fa-ellipsis"></i></a>
                 </div>
             </div>
+            <div class="flex space-x-3">
+                <ul class="flex space-x-2 px-6">
+                    <!-- Display users here -->
+                    <li class="text-orange-500"><i class="fa-solid fa-circle-user fa-2x"></i></li>
+                    <li class="text-purple-500"><i class="fa-solid fa-circle-user fa-2x"></i></li>
+                    <li class="text-red-500"><i class="fa-solid fa-circle-user fa-2x"></i></li>
+                </ul>
 
-            <ul class="flex space-x-2 px-6">
-                <!-- Display users here -->
-                <li class="text-orange-500"><i class="fa-solid fa-circle-user fa-2x"></i></li>
-                <li class="text-purple-500"><i class="fa-solid fa-circle-user fa-2x"></i></li>
-                <li class="text-red-500"><i class="fa-solid fa-circle-user fa-2x"></i></li>
-            </ul>
+                {{-- Filter Menu --}}
+                <x-filter-menu />
+                @foreach($cookies as $key => $value)
+                    @if($value)
+                        <x-cookie-tag key="{{ $key }}" tag="{{ $value }}" />
+                    @endif
+                @endforeach
+            </div>
         </div>
 
         <div class="flex flex-nowrap space-x-5 h-4/6 p-5 overflow-auto max-w-[80vw] max-h-[70vh]" id="columns-container">
