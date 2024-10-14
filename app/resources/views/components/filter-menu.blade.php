@@ -51,6 +51,12 @@
 
 {{-- Script --}}
 <script>
+    function getCookie(name) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(';').shift();
+    }
+
     function appendStorageItem(field, key, value){
         let data = localStorage.getItem(field);
         data = data ? JSON.parse(data) : {};
@@ -64,14 +70,14 @@
     }
 
     document.addEventListener('DOMContentLoaded', e => {
-        localStorage.clear();
         let filters = getStorageItem('filter');
-        console.log(filters);
 
         // Adding cookies for filters
-        for(let [label, filter] in Object.entries(filters)){
+        for(const [label, filter] of Object.entries(filters)){
             document.cookie = `${label}=${filter};`;
         }
+        console.log(getCookie('label'));
+        console.log(getCookie('priority'));
     });
 
     window.addEventListener('DOMContentLoaded', e => {
@@ -110,8 +116,10 @@
         for(let item of filterPriorityMenuItems){
             item.addEventListener('click', e => {
                 console.log(item.id);
+                let filter = item.id.replace('filterPriority', '');
 
-                appendStorageItem('filter', 'priority', item.id.replace('filterPriority', ''));
+                appendStorageItem('filter', 'priority', filter);
+                document.cookie = `priority=${filter};`;
                 location.reload();
             });
         };
@@ -120,8 +128,9 @@
         for(let item of filterLabelsMenuItems){
             item.addEventListener('click', e => {
                 console.log(item.id);
-
-                appendStorageItem('filter', 'label', item.id.replace('filterLabel', ''));
+                let filter = item.id.replace('filterLabel', '')
+                appendStorageItem('filter', 'label', filter);
+                document.cookie = `label=${filter};`;
                 location.reload();
             });
         };

@@ -151,14 +151,29 @@ class BoardController extends Controller
 
     public function showBacklog($view)
     {
+
+        // Get Priority
         $priority = '';
         if(isset($_COOKIE['priority'])){
             $priority = $_COOKIE['priority'];
         }
+
+        // Get Label
+        $label = '';
+        if(isset($_COOKIE['label'])){
+            $label = $_COOKIE['label'];
+        }
+
         // Fetch the board by ID with its columns and tasks, and sort columns by position
-        $backlog = Board::with(['columns' => function ($query) {
+        $backlog = Board::with(['columns' => function ($query){
             $query->orderBy('position');
-        }, 'columns.tasks'])->findOrFail(1);
+        }, 'columns.tasks' => function ($query) use ($label, $priority){
+            if($priority){ $query->Where('priority', $priority); }
+            if($label){ $query->Where('labels', $label); }
+            $query->orderBy('position');
+        }])->findOrFail(1);
+
+        $cookies = array('label' => $label, 'priority' => $priority);
 
         // Get All boards for a user, including the product backlog
         $user = Auth::user();
@@ -170,10 +185,10 @@ class BoardController extends Controller
 
         if ($view == 'card'){
             // Pass the boards and tasks to the backlog view
-            return view('boards.product_backlog_card_view', compact('backlog', 'tasks', 'boards', 'activeSprints', 'user'));
+            return view('boards.product_backlog_card_view', compact('backlog', 'tasks', 'boards', 'activeSprints', 'user', 'cookies'));
         } else if ($view == 'list'){
             // Pass the boards and tasks to the backlog view
-            return view('boards.product_backlog_list_view', compact('backlog', 'tasks', 'boards', 'activeSprints', 'user'));
+            return view('boards.product_backlog_list_view', compact('backlog', 'tasks', 'boards', 'activeSprints', 'user', 'cookies'));
         }
     }
 
