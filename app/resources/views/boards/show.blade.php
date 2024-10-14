@@ -28,7 +28,7 @@
                         <p class="lg:block">
                             @if($daysLeft !== null && $daysLeft > 0)
                                 {{ $daysLeft }} days left
-                            @elseif($daysLeft === 0)
+                            @elseif($daysLeft == 0)
                                 Sprint ends today
                             @else
                                 Sprint has ended

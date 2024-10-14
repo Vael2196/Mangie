@@ -31,6 +31,8 @@
     </div>
     <div class="px-10 flex flex-col w-[80vw] overflow-auto max-h-[70vh] invisible" id="entirePage">
 
+    <h>{{ $activeSprints }}</h>
+
         {{-- Sprint loading list --}}
         <div class="mb-7" id="sprint-loading-board-list">
             @foreach ($boards as $board)
@@ -38,7 +40,7 @@
                     @continue
                 @endif
                 <div id="sprint-loading-board-{{ $board->id }}" class="mb-3">
-                    <x-sprint-loading-board :board="$board">
+                    <x-sprint-loading-board :board="$board" :activeSprints="$activeSprints">
                         @foreach ($board->columns as $column)
                             @foreach ($column->tasks as $task)
                                 <x-task-list-item :task="$task" />

@@ -9,12 +9,14 @@ use Illuminate\View\Component;
 class sprintLoadingBoardCard extends Component
 {
     public $board;
+    public $activeSprints;
     /**
      * Create a new component instance.
      */
-    public function __construct($board)
+    public function __construct($board, $activeSprints)
     {
         $this->board = $board;
+        $this->activeSprints = $activeSprints;
     }
 
     /**
