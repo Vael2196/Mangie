@@ -11,8 +11,14 @@
                 <p class="text-sm px-6 min-h-20 max-h-40 overflow-y-auto max-w-[65vw] grow">This is a description of the board.</p>
                 <div class="flex space-x-8 items-center">
                     <select id="activateSprint" class="bg-white dark:bg-gray-500 dark:text-white rounded-lg p-2">
-                        <option>INACTIVE</option>
-                        <option>ACTIVE</option>
+                        @foreach (['INACTIVE', 'ACTIVE'] as $status)
+                            @if ($board->status == 1) {
+                                <option value={{$status}} selected>{{ $status }}</option>
+                            } @else {
+                                <option value={{$status}}>{{$status}}</option>
+                            }
+                            @endif
+                        @endforeach
                     </select>
 
                     <p class="lg:block hidden">X-days-left</p>
@@ -102,9 +108,9 @@
             var status = this.value;
 
             if (status === "ACTIVE") {
-                status = true;
+                status = 1;
             } else {
-                status = false;
+                status = 0;
             }
 
             const board_id = {{ $board->id }};
@@ -120,7 +126,10 @@
                     board_id: board_id
                 })
             })
-            .then(response => response.json())
+            .then(response => {
+                    let responseClone = response.clone();
+                    return response.json();
+                })
             .then(data => {
                 if (data.success) {
                     console.log('Board status updated successfully');

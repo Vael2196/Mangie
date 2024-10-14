@@ -316,6 +316,8 @@ class BoardController extends Controller
         // Find the board by ID
         $board = Board::find($request->board_id);
 
+        Log::info('Found board:', ['board' => $board]);
+
         // Check if the board exists
         if (!$board) {
             return response()->json([
@@ -350,10 +352,15 @@ class BoardController extends Controller
                 'updated_at' => now()             // Update the timestamp
             ]);
 
+            $board->status = $request->status;
+            $board->updated_at = now();
+            $board->save();
+
+            Log::info('Board updated:', ['board' => $board]);
+
             // Check if the update was successful
             if ($updated) {
                 Log::info('Board updated successfully', ['board_id' => $board->id, 'new_status' => $request->status]);
-                $board->save();
                 return response()->json([
                     'success' => true,
                     'message' => 'Board status updated successfully'
@@ -369,7 +376,8 @@ class BoardController extends Controller
             Log::error('Update failed: ' . $e->getMessage(), ['board_id' => $board->id]);
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to update board status'
+                'message' => 'Failed to update board status',
+                'board' => $board,
             ], 500);
         }
     }
