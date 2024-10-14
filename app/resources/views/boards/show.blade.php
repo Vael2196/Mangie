@@ -17,7 +17,9 @@
 
                 <div class="flex space-x-8 items-center">
 
-                    <x-sprint-start-details :board="$board" :daysLeft="$daysLeft"/>
+                    @if ($board->completed == 0)
+                        <x-sprint-start-details :board="$board" :daysLeft="$daysLeft"/>
+                    @endif
 
 
                     {{-- <select id="activateSprint" class="bg-white dark:bg-gray-700 dark:text-white rounded-lg p-2">
