@@ -39,6 +39,17 @@
                         </form>
                     </div>
                     <a href="{{ route('boards.show', $board->id) }}" class="text-blue-500 hover:underline">View</a>
+                    <div class="mt-auto flex items-end justify-end">
+                        <td class="py-2 border-b-2 w-20 flex justify-items-end">
+                            @if ($board->completed == 1)
+                                <span class="text-green-500">Completed</span>
+                            @elseif ($board->status == 1)
+                                <span class="text-green-500">Active</span>
+                            @else
+                                <span class="text-red-500">Inactive</span>
+                            @endif
+                        </td>
+                    </div>
                 </div>
             @endforeach
 
@@ -64,6 +75,15 @@
                             id="sprintRow{{$board->id}}"
                             onClick="location.href='{{ route('boards.show', $board->id) }}'">
                             <td class="py-2 pl-5 border-b-2 min-w-20 overflow-hidden">{{ $board->name }}</td>
+                            <td class="py-2 border-b-2 w-20">
+                                @if ($board->completed == 1)
+                                    <span class="text-green-500">Completed</span>
+                                @elseif ($board->status == 1)
+                                    <span class="text-blue-500">Active</span>
+                                @else
+                                    <span class="text-red-500">Not Started</span>
+                                @endif
+                            </td>
                             <td class="py-2 border-b-2 w-20">
                                 <form method="POST" action="{{ route('boards.destroy', $board->id) }}" onsubmit="return confirm('Are you sure you want to delete this board?')">
                                     @csrf

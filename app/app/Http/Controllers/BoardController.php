@@ -390,6 +390,7 @@ class BoardController extends Controller
         try {
             // Update the board with the new data
             $board->completed = 1;
+            $board->status = 0;
             $board->updated_at = now();
             $board->save();
 
