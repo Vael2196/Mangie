@@ -226,7 +226,7 @@ class BoardController extends Controller
             else{$query->orderBy('position');}
         }])->findOrFail(1);
 
-        // remove _ from sortBy
+        // parse sort by text to tag names
         $sortByDict = ['title' => 'Title',
                         'description' => 'Description',
                         'priority' => 'Priority',
