@@ -8,8 +8,9 @@
         </button>
     </form>
 
-
-    {!! $chart->container() !!}
+    <div id="chart-container" style="width: 800px; height: 500px;">
+        {!! $chart->container() !!}
+    </div>
     {!! $chart->script() !!}
 
 
