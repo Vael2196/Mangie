@@ -276,6 +276,7 @@ class BoardController extends Controller
         // Get All boards for a user, including the product backlog
         $user = Auth::user();
         $boards = Board::where('user_id', $user->id)->orWhere('id', 1)->get();
+        $inactive_boards = Board::where('user_id', $user->id)->where('status', 0)->orWhere('id', 1)->get();
         $tasks = Task::all();
 
         // boolean on whether there are any active sprints
@@ -283,10 +284,10 @@ class BoardController extends Controller
 
         if ($view == 'card'){
             // Pass the boards and tasks to the backlog view
-            return view('boards.product_backlog_card_view', compact('backlog', 'tasks', 'boards', 'activeSprints', 'user', 'cookies'));
+            return view('boards.product_backlog_card_view', compact('backlog', 'tasks', 'boards', 'inactive_boards', 'activeSprints', 'user', 'cookies'));
         } else if ($view == 'list'){
             // Pass the boards and tasks to the backlog view
-            return view('boards.product_backlog_list_view', compact('backlog', 'tasks', 'boards', 'activeSprints', 'user', 'cookies'));
+            return view('boards.product_backlog_list_view', compact('backlog', 'tasks', 'boards', 'inactive_boards', 'activeSprints', 'user', 'cookies'));
         }
     }
 

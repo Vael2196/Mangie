@@ -36,7 +36,7 @@
                 @if ($board->id == 1)
                     @continue
                 @endif
-                <div id="sprint-loading-board-{{ $board->id }}" class="mb-3">
+                <div id="sprint-loading-board-{{ $board->id }}" class="mb-3 sprint-board-status-{{$board->status}}"+++>
                     @if ($board->completed == 0)
                         <x-sprint-loading-board :board="$board" :activeSprints="$activeSprints">
                             @foreach ($board->columns as $column)
@@ -54,7 +54,6 @@
                 <div class="flex justify-between mb-2">
                     <input class='border font-semibold text-xl dark:bg-gray-700 dark:text-white dark:placeholder-white' id="create-sprint-input" type="text"
                         placeholder="Enter Sprint Name"/>
-                    <x-secondary-button>Start Sprint</x-secondary-button>
                 </div>
                 <p class="text-sm">Add tasks here or from the product backlog</p>
             </div>
@@ -119,7 +118,7 @@
 
                 {{-- Context sub menu (Buttons for each sprint to move to) --}}
                 <div class="hidden shadow-lg" id="contextBoardMenu">
-                    @foreach ($boards as $board)
+                    @foreach ($inactive_boards as $board)
                         <div class='bg-white border px-4 py-2 text-start leading-5 dark:bg-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-500 hover:cursor-pointer focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out flex space-x-3'
                             id="context-board-menu-{{ $board->id }}">
                             <h1>{{ $board->name }}</h1>
@@ -231,11 +230,30 @@
                 selectedTaskItems = [];
             });
 
+            // Function to check if task is part of an active sprint
+            function checkStatus(task){
+                // Get closest sprint board element
+                let parentElm = task.closest("div[class*='sprint-board-status-'],div[class^='sprint-board-status-']");
+
+                // If no parent element, then it is not part of a sprint
+                if (!parentElm){return false;}
+
+                // Get status of sprint board
+                let status = Array.from(parentElm.classList).filter(cls => cls.includes("sprint-board-status-"))[0];
+                status = Number(status.replace('sprint-board-status-', ''));
+
+                // If status is 1, then it is part of an active sprint
+                if (status == 1){
+                    return true;
+                }
+                return false;
+            }
 
             // Context Menu ---------------------------------------------------------------
             // MAKE INTO ONE LOOP
             // Show context menu when clicking three dots
             for (let taskMenu of taskMenus) {
+                if (checkStatus(taskMenu)){continue;}
                 taskMenu.addEventListener('click', e => {
                     e.stopPropagation();
 
@@ -252,6 +270,7 @@
 
             // Right clicking functionality
             for (let task of taskItems) {
+                if (checkStatus(task)){continue;}
                 task.addEventListener('contextmenu', e => {
                     e.stopPropagation();
                     // Show context menu when right-clicking
