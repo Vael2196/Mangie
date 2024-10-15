@@ -1,9 +1,9 @@
 {{-- Sort Menu --}}
-<div id="taskSortButton" class="hover:cursor-pointer hover:bg-gray-100 border rounded px-2 items-center py-1 dark:bg-gray-700 dark:text-white">
+<div id="taskSortButton" class="hover:cursor-pointer hover:bg-gray-100 border rounded px-2 items-center py-1 dark:bg-gray-700 dark:hover:bg-gray-500 dark:text-white">
     <p>Sort</p>
 </div>
 <div class="hidden absolute z-30" id="taskSortMenu">
-    <div class="flex items-start flex-wrap bg-gray-100 px-1 py-0.5">
+    <div class="flex items-start flex-wrap bg-gray-100 px-1 py-0.5 dark:bg-gray-700">
         <div class="flex flex-col pr-2 border-r-2 border-gray-300 h-full" id="sortChildren">
             @foreach (['title' => 'Title',
                         'description' => 'Description',

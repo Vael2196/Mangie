@@ -1,5 +1,5 @@
 {{-- Filter Menu --}}
-<div id="taskFilterButton" class="hover:cursor-pointer hover:bg-gray-100 border rounded px-2 items-center py-1 dark:bg-gray-700 dark:text-white">
+<div id="taskFilterButton" class="hover:cursor-pointer hover:bg-gray-100 border rounded px-2 items-center py-1 dark:bg-gray-700 dark:hover:bg-gray-500 dark:text-white">
     <p>Add Filter</p>
 </div>
 <div class="hidden absolute z-30" id="taskFilterMenu">
