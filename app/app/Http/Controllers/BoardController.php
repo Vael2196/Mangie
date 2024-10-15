@@ -10,7 +10,7 @@ use Carbon\CarbonPeriod;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
-use IcehouseVentures\LaravelChartsjs\Facades\Charts;
+use App\Charts\BurndownChart;
 
 class BoardController extends Controller
 {
@@ -284,7 +284,7 @@ class BoardController extends Controller
         $column = Column::find($request->column_id);
 
         if ($column && $column->name == "DONE") {
-            $this->competeTask($request->task_id, $request->column_id);
+            $this->completeTask($request->task_id, $request->column_id);
         }
 
 
@@ -327,7 +327,7 @@ class BoardController extends Controller
         ]);
     }
 
-    protected function competeTask($task_id, $column_id){
+    protected function completeTask($task_id, $column_id){
         $task = Task::findOrFail($task_id);
         $column = Column::findOrFail($column_id);
 
@@ -339,6 +339,16 @@ class BoardController extends Controller
 
             $task->completed_at = now();
             $task->save();
+        } else {
+            Log::info('Task moved to a non-DONE column:', [
+                'task_id' => $task_id,
+                'column_id' => $column_id,
+            ]);
+
+            if ($task->completed_at) {
+                $task->completed_at = null;
+                $task->save();
+            }
         }
     }
 
@@ -428,6 +438,14 @@ class BoardController extends Controller
             return redirect()->back()->with('error', 'Board not found.');
         }
 
+        $totalStoryPoints = 0;
+
+        foreach ($board->columns as $column) {
+            foreach ($column->tasks as $task) {
+                $totalStoryPoints += $task->story_points;
+            }
+        }
+
         try {
             // Update the board with the new data
             $board->start_date = now();
@@ -436,6 +454,7 @@ class BoardController extends Controller
             $board->sprint_goal = $request->sprint_goal;
             $board->status = 1;
             $board->updated_at = now();
+            $board->total_story_points = $totalStoryPoints;
             $board->save();
 
             Log::info('Board updated:', ['board' => $board]);
@@ -502,7 +521,7 @@ class BoardController extends Controller
         $tasks = [];
 
         $start = \Carbon\Carbon::parse($board->start_date);
-        $end = now();
+        $end = \Carbon\Carbon::parse($board->end_date);
 
         foreach ($board->columns as $column) {
             foreach ($column->tasks as $task) {
@@ -510,21 +529,69 @@ class BoardController extends Controller
             }
         }
 
-        $totalStoryPoints = 0;
+        $totalStoryPoints = $board->total_story_points;
 
-        foreach ($tasks as $task) {
-            $totalStoryPoints += $task->story_points;
-        }
-
-        $now = \Carbon\Carbon::now();
         $labels = [];
-        $dateRange = [];
-
-        for ($date = $start->copy(); $date->lte($now); $date->addDay()) {
-            $dateRange[] = $date->format('Y-m-d');
+        $storyPointsData = [];
+        $expectedVelocityData = [];
+        $remainingStoryPoints = $totalStoryPoints;
+        for ($date = $start; $date->lte($end); $date->addDay()) {
             $labels[] = $date->format('Y-m-d');
+
+            // Deduct the story points of tasks completed by this date
+            foreach ($tasks as $task) {
+                if ($task->completed_at && \Carbon\Carbon::parse($task->completed_at)->lte($date)) {
+                    $remainingStoryPoints -= $task->story_points;
+                    // Remove the task from the list so it doesn't get deducted again
+                    // $tasks = $tasks->reject(fn($t) => $t->id == $task->id);
+                    $tasks = array_filter($tasks, function ($t) use ($task) {
+                        return $t->id !== $task->id;
+                    });
+                }
+            }
+
+
+
+            // Add the current remaining story points to the data
+            $storyPointsData[] = $remainingStoryPoints;
         }
 
-        Log::info('Date range:', $dateRange);
+        $expectedIncrement = $totalStoryPoints / count($labels);
+        for ($i = 0; $i < count($labels); $i++) {
+            $expectedVelocityData[] = $totalStoryPoints - ($expectedIncrement * $i);
+        }
+
+        Log::info('Chart stuff', [
+            'labels' => $labels,
+            'storyPointsData' => $storyPointsData,
+        ]);
+
+        $chart = new BurndownChart();
+        $chart->labels($labels);
+        $chart->dataset('Actual Velocity', 'line', $storyPointsData)
+            ->color('rgb(255, 99, 132)')
+            ->backgroundcolor('rgba(255, 99, 132, 0.2)');
+        $chart->dataset('Expected Velocity', 'line', $expectedVelocityData)
+            ->color('rgb(54, 162, 235)')
+            ->backgroundcolor('rgba(54, 162, 235, 0.2)');
+
+        $user = Auth::user();
+
+
+
+
+        return view('boards.burndown_chart', compact('chart', 'board', 'user'));
+
+
+        // $now = \Carbon\Carbon::now();
+        // $labels = [];
+        // $dateRange = [];
+
+        // for ($date = $start->copy(); $date->lte($now); $date->addDay()) {
+        //     $dateRange[] = $date->format('Y-m-d');
+        //     $labels[] = $date->format('Y-m-d');
+        // }
+
+        // Log::info('Date range:', $dateRange);
     }
 }
