@@ -27,6 +27,10 @@
             </thead>
             <tbody>
                 @foreach($users as $user)
+                    @if ($user->id == 1)
+                        @continue
+                    @endif
+
                     <tr>
                         <td class="border px-4 py-2">{{ $user->id }}</td>
                         <td class="border px-4 py-2">{{ $user->name }}</td>

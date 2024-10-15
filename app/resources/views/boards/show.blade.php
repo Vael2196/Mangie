@@ -78,20 +78,20 @@
                     <li class="text-red-500"><i class="fa-solid fa-circle-user fa-2x"></i></li> --}}
                     <div class="flex items-center space-x-2">
                         <input type="text" id="user-input" class="bg-white dark:bg-gray-700 shadow-inner rounded-lg p-2 w-full" placeholder="Add a participant" />
-                    
+
                         <!-- Dropdown list for suggested users -->
                         <ul id="user-dropdown" class="hidden absolute w-48 mt-24 rounded-md ring-1 ring-black ring-opacity-5 py-1 bg-white dark:bg-gray-700 max-h-40 overflow-auto">
                         </ul>
-                    
+
                         <!-- List to display added users as icons -->
                         <ul id="user-list" class="flex space-x-2 px-6">
                             @foreach($board->users as $user)
                                 <li class="text-gray-500">
-                                    <i class="fa-solid fa-circle-user fa-2x" title="{{ $user->name }}"></i>
+                                    <i class="fa-solid fa-circle-user fa-2x dark:text-white" title="{{ $user->name }}"></i>
                                 </li>
                             @endforeach
                         </ul>
-                    </div>                    
+                    </div>
                 </ul>
 
                 {{-- Sort Menu --}}
@@ -246,7 +246,7 @@
                     userDropdown.innerHTML = '';
                     data.users.forEach(user => {
                         const li = document.createElement('li');
-                        li.classList.add('p-2', 'hover:bg-gray-200', 'cursor-pointer');
+                        li.classList.add('p-2', 'hover:bg-gray-200', 'cursor-pointer', 'dark:hover:bg-gray-800', 'dark:text-white');
                         li.textContent = user.name;
                         li.addEventListener('click', () => selectUser(user));
                         userDropdown.appendChild(li);
