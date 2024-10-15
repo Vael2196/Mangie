@@ -598,6 +598,7 @@ class BoardController extends Controller
             $board->completed = 1;
             $board->status = 0;
             $board->updated_at = now();
+            $board->date_ended = now();
             $board->save();
 
             return redirect("/home")->with('success', 'Board completed successfully');
@@ -615,7 +616,7 @@ class BoardController extends Controller
         $tasks = [];
 
         $start = \Carbon\Carbon::parse($board->start_date);
-        $end = \Carbon\Carbon::parse($board->end_date);
+        $end = \Carbon\Carbon::parse($board->date_ended);
 
         foreach ($board->columns as $column) {
             foreach ($column->tasks as $task) {
@@ -650,7 +651,7 @@ class BoardController extends Controller
             $storyPointsData[] = $remainingStoryPoints;
         }
 
-        $expectedIncrement = $totalStoryPoints / count($labels);
+        $expectedIncrement = $totalStoryPoints / (count($labels) - 1);
         for ($i = 0; $i < count($labels); $i++) {
             $expectedVelocityData[] = $totalStoryPoints - ($expectedIncrement * $i);
         }
