@@ -201,16 +201,43 @@ class BoardController extends Controller
             $label = $_COOKIE['label'];
         }
 
+        // Get sort type
+        $sortBy = '';
+        if(isset($_COOKIE['sort'])){
+            $sortBy = $_COOKIE['sort'];
+        }
+
+        // Get sort direction
+        $sortDirection = '';
+        if(isset($_COOKIE['direction'])){
+            $sortDirection = $_COOKIE['direction'];
+        }
+
         // Fetch the board by ID with its columns and tasks, and sort columns by position
         $backlog = Board::with(['columns' => function ($query){
             $query->orderBy('position');
-        }, 'columns.tasks' => function ($query) use ($label, $priority){
+        }, 'columns.tasks' => function ($query) use ($label, $priority, $sortBy, $sortDirection){
+            // Filtering
             if($priority){ $query->Where('priority', $priority); }
             if($label){ $query->Where('labels', $label); }
-            $query->orderBy('position');
+
+            // Sorting
+            if($sortBy && $sortDirection){$query->orderBy($sortBy, $sortDirection);}
+            else{$query->orderBy('position');}
         }])->findOrFail(1);
 
-        $cookies = array('label' => $label, 'priority' => $priority);
+        // remove _ from sortBy
+        $sortByDict = ['title' => 'Title',
+                        'description' => 'Description',
+                        'priority' => 'Priority',
+                        'labels' => 'Labels',
+                        'story_points' => "Story Points",
+                        'time_log' => 'Time Log'];
+        if(array_key_exists($sortBy, $sortByDict)){
+            $sortBy = $sortByDict[$sortBy];
+        }
+
+        $cookies = array('label' => $label, 'priority' => $priority, 'sort' => array($sortBy, $sortDirection));
 
         // Get All boards for a user, including the product backlog
         $user = Auth::user();
@@ -227,35 +254,6 @@ class BoardController extends Controller
             // Pass the boards and tasks to the backlog view
             return view('boards.product_backlog_list_view', compact('backlog', 'tasks', 'boards', 'activeSprints', 'user', 'cookies'));
         }
-    }
-
-    public function sortBacklog(Request $request){
-        $request->validate([
-            'param' => 'required|string',
-            'order' => 'required|string',
-        ]);
-
-        $tasks = Task::orderBy($request->param, $request->order)->get();
-
-        return response()->json([
-            'success' => true,
-            'tasks' => $tasks,
-        ]);
-    }
-
-    public function filterBacklog(Request $request){
-        $request->validate([
-            'param' => 'required|string',
-            'filter' => 'required|string',
-            'amount' => 'required|string',
-        ]);
-
-        $tasks = Task::where($request->param, $request->filter, $request->amount)->get();
-
-        return response()->json([
-            'success' => true,
-            'tasks' => $tasks,
-        ]);
     }
 
     public function moveTasks(Request $request){

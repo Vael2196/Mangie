@@ -68,8 +68,13 @@
                     <li class="text-red-500"><i class="fa-solid fa-circle-user fa-2x"></i></li>
                 </ul>
 
+                {{-- Sort Menu --}}
+                <x-sort-menu/>
+
                 {{-- Filter Menu --}}
                 <x-filter-menu />
+
+                {{-- Cookie tags --}}
                 @foreach($cookies as $key => $value)
                     @if($value)
                         <x-cookie-tag key="{{ $key }}" tag="{{ $value }}" />

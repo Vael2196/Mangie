@@ -74,8 +74,13 @@
                     <option value="card" selected>Card View</option>
                 </select>
 
+                {{-- Sort Menu --}}
+                <x-sort-menu/>
+
                 {{-- Filter Menu --}}
                 <x-filter-menu/>
+
+                {{-- Cookie tags --}}
                 @foreach($cookies as $key => $value)
                     @if($value)
                         <x-cookie-tag key="{{ $key }}" tag="{{ $value }}" />

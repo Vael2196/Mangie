@@ -75,8 +75,14 @@
 
                 {{-- Filter Menu --}}
                 <x-filter-menu />
+
+                {{-- Cookie tags --}}
                 @foreach($cookies as $key => $value)
-                    @if($value)
+                    @if($key === 'sort')
+                        @if($value[0])
+                            <x-sort-tag key="{{ $value[0] }}" direction="{{ $value[1] }}" />
+                        @endif
+                    @elseif($value)
                         <x-cookie-tag key="{{ $key }}" tag="{{ $value }}" />
                     @endif
                 @endforeach

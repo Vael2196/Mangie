@@ -5,10 +5,15 @@
 <div class="hidden absolute z-30" id="taskSortMenu">
     <div class="flex items-start flex-wrap bg-gray-100 px-1 py-0.5">
         <div class="flex flex-col pr-2 border-r-2 border-gray-300 h-full" id="sortChildren">
-            @foreach (['title', 'description', 'priority', 'labels', 'story_points', 'time_log'] as $label)
+            @foreach (['title' => 'Title',
+                        'description' => 'Description',
+                        'priority' => 'Priority',
+                        'labels' => 'Labels',
+                        'story_points' => "Story Points",
+                        'time_log' => 'Time Log'] as $key => $value)
             <div class='bg-white border px-4 py-2 text-start leading-5 dark:bg-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-500 hover:cursor-pointer focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out flex space-x-3'
-                id="sortBy{{$label}}">
-                <h1>{{ $label }}</h1>
+                id="sortBy{{$key}}">
+                <h1>{{$value}}</h1>
             </div>
             @endforeach
         </div>
@@ -47,10 +52,11 @@
 
     // Reset cookies on page load (Make sure they are correct)
     document.addEventListener('DOMContentLoaded', e => {
-        let sort_obj = JSON.parse(localStorage.getItem('sort'));
+        localStorage.clear();
+        // let sort_obj = JSON.parse(localStorage.getItem('sort'));
 
-        document.cookie = `sort=${sort_obj['sortBy']};`;
-        document.cookie = `direction=${sort_obj['sortWith']};`;
+        // document.cookie = `sort=${sort_obj['sortBy']};`;
+        // document.cookie = `direction=${sort_obj['sortWith']};`;
 
         console.log(getCookie('sort'));
         console.log(getCookie('direction'));
