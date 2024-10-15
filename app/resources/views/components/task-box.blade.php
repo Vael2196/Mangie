@@ -57,7 +57,7 @@
 
             // Highlight task when ctrl-right-clicking
             let toggleArr = [          // OFF
-                        "hover:bg-blue-100", "dark:hover:bg-blue-600", "bg-blue-300" // ON
+                        "hover:bg-blue-100", "dark:hover:bg-blue-600", "bg-blue-300", "dark:bg-blue-400" // ON
                         ];
             for(toggleOption of toggleArr){
                 taskListItem.classList.toggle(toggleOption);

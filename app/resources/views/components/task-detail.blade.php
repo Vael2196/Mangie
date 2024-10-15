@@ -33,7 +33,7 @@
                 <!-- Task info -->
                 <div class="mb-10 flex flex-col dark:bg-transparent dark:text-white">
                     <label for="formDescription{{$task->id}}" class="mb-2">Description</label>
-                    <textarea id="formDescription{{$task->id}}" rows="5" placeholder="Enter a description dark:tex-white" value="{{$task->description}}" class="placeholder-slate-700 dark:bg-transparent dark:text-white">{{$task->description}}</textarea>
+                    <textarea id="formDescription{{$task->id}}" rows="5" placeholder="Enter a description" value="{{$task->description}}" class="dark:placeholder-white placeholder-slate-700 dark:bg-transparent dark:text-white">{{$task->description}}</textarea>
                 </div>
             </div>
 
