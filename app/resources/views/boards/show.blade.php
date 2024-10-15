@@ -66,7 +66,7 @@
                             </button>
                         </form>
                     @endif
-                    
+
                     <a class="hover:cursor-pointer"><i class="fa-solid fa-ellipsis"></i></a>
                 </div>
             </div>
@@ -157,9 +157,9 @@
 
     <script>
         // Show sprint details view when clicking on the activate sprint button
-        document.getElementById('activateSprint').addEventListener('click', function () {
-            document.getElementById('boardDetailsModal').classList.toggle('hidden');
-        });
+        // document.getElementById('activateSprint').addEventListener('click', function () {
+        //     document.getElementById('boardDetailsModal').classList.toggle('hidden');
+        // });
 
         // let activeSprint = document.getElementById('activateSprint');
 
