@@ -72,10 +72,26 @@
             </div>
             <div class="flex space-x-3">
                 <ul class="flex space-x-2 px-6">
-                    <!-- Display users here -->
-                    <li class="text-orange-500"><i class="fa-solid fa-circle-user fa-2x"></i></li>
+                    <!--Display users here -->
+                    {{-- <li class="text-orange-500"><i class="fa-solid fa-circle-user fa-2x"></i></li>
                     <li class="text-purple-500"><i class="fa-solid fa-circle-user fa-2x"></i></li>
-                    <li class="text-red-500"><i class="fa-solid fa-circle-user fa-2x"></i></li>
+                    <li class="text-red-500"><i class="fa-solid fa-circle-user fa-2x"></i></li> --}}
+                    <div class="flex items-center space-x-2">
+                        <input type="text" id="user-input" class="bg-white dark:bg-gray-700 shadow-inner rounded-lg p-2 w-full" placeholder="Add a participant" />
+                    
+                        <!-- Dropdown list for suggested users -->
+                        <ul id="user-dropdown" class="hidden absolute w-48 mt-24 rounded-md ring-1 ring-black ring-opacity-5 py-1 bg-white dark:bg-gray-700 max-h-40 overflow-auto">
+                        </ul>
+                    
+                        <!-- List to display added users as icons -->
+                        <ul id="user-list" class="flex space-x-2 px-6">
+                            @foreach($board->users as $user)
+                                <li class="text-gray-500">
+                                    <i class="fa-solid fa-circle-user fa-2x" title="{{ $user->name }}"></i>
+                                </li>
+                            @endforeach
+                        </ul>
+                    </div>                    
                 </ul>
 
                 {{-- Sort Menu --}}
@@ -156,7 +172,7 @@
     </div>
 
     <script>
-        // // Show sprint details view when clicking on the activate sprint button
+        // Show sprint details view when clicking on the activate sprint button
         // document.getElementById('activateSprint').addEventListener('click', function () {
         //     document.getElementById('boardDetailsModal').classList.toggle('hidden');
         // });
@@ -207,6 +223,84 @@
         //     .catch(error => console.error('Error:', error));
 
         // })
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const userInput = document.getElementById('user-input');
+        const userDropdown = document.getElementById('user-dropdown');
+        const userList = document.getElementById('user-list');
+
+        let timeoutId = null;
+
+        const fetchUsers = (query) => {
+            fetch('/search-users', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ query })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.users.length > 0) {
+                    userDropdown.innerHTML = '';
+                    data.users.forEach(user => {
+                        const li = document.createElement('li');
+                        li.classList.add('p-2', 'hover:bg-gray-200', 'cursor-pointer');
+                        li.textContent = user.name;
+                        li.addEventListener('click', () => selectUser(user));
+                        userDropdown.appendChild(li);
+                    });
+                    userDropdown.classList.remove('hidden');
+                } else {
+                    userDropdown.classList.add('hidden');
+                }
+            });
+        };
+
+        const selectUser = (user) => {
+            userInput.value = user.name;
+            userDropdown.classList.add('hidden');
+
+            fetch('/boards/{{ $board->id }}/add-user', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ user_id: user.id })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const newIcon = document.createElement('li');
+                    newIcon.classList.add('text-gray-500');
+                    newIcon.innerHTML = `<i class="fa-solid fa-circle-user fa-2x" title="${user.name}"></i>`;
+                    userList.appendChild(newIcon);
+                    userInput.value = '';
+                } else {
+                    alert(data.message);
+                }
+            });
+        };
+
+        userInput.addEventListener('input', function() {
+            const query = this.value.trim();
+            if (query.length > 2) {
+                clearTimeout(timeoutId);
+                timeoutId = setTimeout(() => fetchUsers(query), 300);
+            } else {
+                userDropdown.classList.add('hidden');
+            }
+        });
+
+        document.addEventListener('click', function(e) {
+            if (!userDropdown.contains(e.target) && e.target !== userInput) {
+                userDropdown.classList.add('hidden');
+            }
+        });
+        });
+
 
         document.addEventListener('DOMContentLoaded', function () {
             const addColumnBtn = document.getElementById('add-column-btn');

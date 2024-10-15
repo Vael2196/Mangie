@@ -6,6 +6,7 @@ use App\Models\Project;
 use App\Models\Column;
 use App\Models\Task;
 use App\Models\TaskUser;
+use App\Models\User;
 use Carbon\CarbonPeriod;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -30,6 +31,11 @@ class BoardController extends Controller
 
         // Fetch boards that belong to this user (for example)
         $boards = Board::where('user_id', $user->id)->get();
+
+        // end Boards that have passed end_date
+        foreach ($boards as $board) {
+            $this->endBoardIfExpired($board);
+        }
 
         // Pass the user and boards to the home view
         return view('home', compact('user', 'boards', 'activeSprints'));
@@ -65,6 +71,8 @@ class BoardController extends Controller
                 'position' => $index + 1,
             ]);
         }
+
+        $board->users()->attach(Auth::id());
 
         // Return a JSON response to the front-end
         return response()->json([
@@ -144,8 +152,21 @@ class BoardController extends Controller
 
         $user = Auth::user();
 
+        // End the board if it has expired
+        $this->endBoardIfExpired($board);
+
         // Pass the board to the sprint_board view
         return view('boards.show', compact('board', 'daysLeft', 'activeSprints', 'user', 'cookies'));
+    }
+
+    private function endBoardIfExpired(Board $board)
+    {
+        if (\Carbon\Carbon::now()->gt(\Carbon\Carbon::parse($board->end_date))) {
+            $board->completed = 1;
+            $board->status = 0;
+            $board->date_ended = $board->end_date;
+            $board->save();
+        }
     }
 
     public function storeColumn(Request $request)
@@ -599,6 +620,7 @@ class BoardController extends Controller
             $board->completed = 1;
             $board->status = 0;
             $board->updated_at = now();
+            $board->date_ended = now();
             $board->save();
 
             return redirect("/home")->with('success', 'Board completed successfully');
@@ -616,7 +638,7 @@ class BoardController extends Controller
         $tasks = [];
 
         $start = \Carbon\Carbon::parse($board->start_date);
-        $end = \Carbon\Carbon::parse($board->end_date);
+        $end = \Carbon\Carbon::parse($board->date_ended);
 
         foreach ($board->columns as $column) {
             foreach ($column->tasks as $task) {
@@ -651,7 +673,7 @@ class BoardController extends Controller
             $storyPointsData[] = $remainingStoryPoints;
         }
 
-        $expectedIncrement = $totalStoryPoints / count($labels);
+        $expectedIncrement = $totalStoryPoints / (count($labels) - 1);
         for ($i = 0; $i < count($labels); $i++) {
             $expectedVelocityData[] = $totalStoryPoints - ($expectedIncrement * $i);
         }
@@ -706,5 +728,42 @@ class BoardController extends Controller
             'tasks' => $tasks,
         ]);
     }
+
+    public function searchUsers(Request $request){
+        $query = $request->input('query');
+
+        $users = User::where('name', 'like', "%{$query}%")->get();
+
+        return response()->json([
+            'success' => true,
+            'users' => $users
+        ]);
+    }
+
+    public function addUserToBoard(Request $request, $board_id){
+        $request->validate([
+            'user_id' => 'required|exists:users,id',
+        ]);
+
+        $board = Board::findOrFail($board_id);
+        $user = User::findOrFail($request->user_id);
+
+        if ($board->users->contains($user->id)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'User is already added to this board.',
+            ]);
+        }
+
+        $board->users()->attach($user->id);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'User added successfully.',
+            'user' => $user
+        ]);
+    }
+
+
 }
 
