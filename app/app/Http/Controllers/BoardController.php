@@ -6,6 +6,7 @@ use App\Models\Project;
 use App\Models\Column;
 use App\Models\Task;
 use App\Models\TaskUser;
+use App\Models\User;
 use Carbon\CarbonPeriod;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -70,6 +71,8 @@ class BoardController extends Controller
                 'position' => $index + 1,
             ]);
         }
+
+        $board->users()->attach(Auth::id());
 
         // Return a JSON response to the front-end
         return response()->json([
@@ -724,5 +727,42 @@ class BoardController extends Controller
             'tasks' => $tasks,
         ]);
     }
+
+    public function searchUsers(Request $request){
+        $query = $request->input('query');
+
+        $users = User::where('name', 'like', "%{$query}%")->get();
+
+        return response()->json([
+            'success' => true,
+            'users' => $users
+        ]);
+    }
+
+    public function addUserToBoard(Request $request, $board_id){
+        $request->validate([
+            'user_id' => 'required|exists:users,id',
+        ]);
+
+        $board = Board::findOrFail($board_id);
+        $user = User::findOrFail($request->user_id);
+
+        if ($board->users->contains($user->id)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'User is already added to this board.',
+            ]);
+        }
+
+        $board->users()->attach($user->id);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'User added successfully.',
+            'user' => $user
+        ]);
+    }
+
+
 }
 
