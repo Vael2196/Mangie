@@ -156,10 +156,10 @@
     </div>
 
     <script>
-        // Show sprint details view when clicking on the activate sprint button
-        document.getElementById('activateSprint').addEventListener('click', function () {
-            document.getElementById('boardDetailsModal').classList.toggle('hidden');
-        });
+        // // Show sprint details view when clicking on the activate sprint button
+        // document.getElementById('activateSprint').addEventListener('click', function () {
+        //     document.getElementById('boardDetailsModal').classList.toggle('hidden');
+        // });
 
         // let activeSprint = document.getElementById('activateSprint');
 
