@@ -118,8 +118,19 @@ class BoardController extends Controller
 
         }])->findOrFail($id);
 
-        // Get cookies array
-        $cookies = array('label' => $label, 'priority' => $priority, 'sort' => $sortBy);
+        // parse sort by text to tag names
+        $sortByDict = ['title' => 'Title',
+                'description' => 'Description',
+                'priority' => 'Priority',
+                'labels' => 'Labels',
+                'story_points' => "Story Points",
+                'time_log' => 'Time Log'];
+        if(array_key_exists($sortBy, $sortByDict)){
+            $sortBy = $sortByDict[$sortBy];
+        }
+
+        $cookies = array('label' => $label, 'priority' => $priority, 'sort' => array($sortBy, $sortDirection));
+
 
         $end = \Carbon\Carbon::parse($board->end_date);
         $now = \Carbon\Carbon::now();
