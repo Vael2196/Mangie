@@ -609,7 +609,6 @@ class BoardController extends Controller
         }
     }
 
-<<<<<<< app/app/Http/Controllers/BoardController.php
     public function showBurndownChart($board_id)
     {
         $board = Board::findOrFail($board_id);
@@ -677,7 +676,7 @@ class BoardController extends Controller
 
         return view('boards.burndown_chart', compact('chart', 'board', 'user'));
     }
-=======
+
     public function sortTasks(Request $request){
         $request->validate([
             'param' => 'required|string',
@@ -705,7 +704,6 @@ class BoardController extends Controller
             'success' => true,
             'tasks' => $tasks,
         ]);
->>>>>>> app/app/Http/Controllers/BoardController.php
     }
 }
 
