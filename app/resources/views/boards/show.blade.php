@@ -66,7 +66,7 @@
                             </button>
                         </form>
                     @endif
-                    
+
                     <a class="hover:cursor-pointer"><i class="fa-solid fa-ellipsis"></i></a>
                 </div>
             </div>
