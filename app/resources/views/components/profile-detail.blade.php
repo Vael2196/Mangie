@@ -42,7 +42,7 @@
                     <form method="GET" action="{{ route('profile.add-user') }}">
                         @csrf
                         <button class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition duration-150 ease-in-out">
-                            Add User
+                            Manage Users
                         </button>
                     </form>
                 @endif

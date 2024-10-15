@@ -23,9 +23,11 @@ Route::middleware('auth')->group(function () {
 // Logout
 Route::post('/login', [ProfileController::class, 'logout'])->middleware('auth')->name('logout');
 
-// Add User
+// Manage Users
 Route::get('/adduser', [ProfileController::class, 'showAddUsers'])->middleware('auth')->name('profile.add-user');
 Route::post('/adduser', [ProfileController::class, 'addUser'])->middleware('auth')->name('profile.users.add');
+Route::patch('/adduser', [ProfileController::class, 'updateUser'])->middleware('auth')->name('profile.user_update');
+Route::delete('/removeuser/{id}', [ProfileController::class, 'removeUser'])->middleware('auth')->name('profile.user_remove');
 
 // Board
 Route::get('/dashboard', [BoardController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');

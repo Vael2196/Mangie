@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
 use App\Models\User;
+use Illuminate\Support\Facades\Log;
 
 class ProfileController extends Controller
 {
@@ -77,7 +78,8 @@ class ProfileController extends Controller
      */
     public function showAddUsers(): View
     {
-        return view('profile.add-user');
+        $users = User::all();
+        return view('profile.add-user', compact('users'));
     }
 
     /**
@@ -94,5 +96,42 @@ class ProfileController extends Controller
         ]);
 
         return Redirect::route('profile.add-user')->with('status', 'user-added');
+    }
+
+    /**
+     * Update user details
+     */
+    public function updateUser(Request $request): RedirectResponse
+    {
+        Log::info('entering update usersssssss');
+
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255|unique:users,email,' . $request->user_id,
+        ]);
+
+        // Find the user
+        $user = User::findOrFail($request->user_id);
+
+        Log::info('User Data',$request->all());
+
+        // Update the user details
+        $user->name = $request->name;
+        $user->email = $request->email;
+
+        $user->save();
+
+
+        return Redirect::route('profile.add-user')->with('status', 'user-updated');
+    }
+
+    /**
+     * Remove user
+     */
+    public function removeUser($id): RedirectResponse
+    {
+        User::where('id', $id)->firstOrFail()->delete();
+
+        return Redirect::route('profile.add-user')->with('status', 'user-removed');
     }
 }
