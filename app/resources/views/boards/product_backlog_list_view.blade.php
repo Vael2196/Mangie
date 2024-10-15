@@ -64,13 +64,28 @@
             <h1 id="issues">Issues: {{ count($tasks) }}</h1>
             {{-- Add list to card view dropdown switch here --}}
             <div class="flex space-x-5">
-
-                {{-- Change view switch --}}
-                <select id="viewButton" class="border rounded dark:bg-gray-700 dark:text-white">
+                 {{-- Change view switch --}}
+                 <select id="viewButton" class="border rounded dark:bg-gray-700 dark:text-white hover:cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-500">
                     <option value="list" selected>List View</option>
                     <option value="card">Card View</option>
                 </select>
 
+                {{-- Sort Menu --}}
+                <x-sort-menu/>
+
+                {{-- Filter Menu --}}
+                <x-filter-menu />
+
+                {{-- Cookie tags --}}
+                @foreach($cookies as $key => $value)
+                    @if($key === 'sort')
+                        @if($value[0])
+                            <x-sort-tag key="{{ $value[0] }}" direction="{{ $value[1] }}" />
+                        @endif
+                    @elseif($value)
+                        <x-cookie-tag key="{{ $key }}" tag="{{ $value }}" />
+                    @endif
+                @endforeach
                 {{-- Create sprint button --}}
                 <div id="create-sprint-button"><x-secondary-button>Create Sprint</x-secondary-button></div>
             </div>
@@ -163,7 +178,7 @@
             const contextSubMenu = document.getElementById(`contextBoardMenu`); // Context sub menu box
             const contextSubMenuChildren = contextSubMenu.children; // Context sub menu buttons
 
-            // Create task when clicking button ------------------------------------------
+            // Create task when clicking button
             createTaskButton.addEventListener('click', e => {
                 inputTaskField.classList.remove('hidden');
                 inputTaskField.focus();
@@ -175,7 +190,7 @@
                 inputTaskField.classList.add('hidden');
             });
 
-            // Create sprint when clicking button ------------------------------------------
+            // Create sprint when clicking button
             createSprintButton.addEventListener('click', e => {
                 createSprint.classList.remove('hidden');
                 createSprintInput.focus();
@@ -198,8 +213,7 @@
                 }
             });
 
-            // Context Menu ---------------------------------------------------------------
-            // Reset context menu on right click anywhere outside
+            // Reset menus on right click anywhere outside
             document.addEventListener('contextmenu', e => {
                 taskContextMenu.classList.add('hidden');
                 contextSubMenu.classList.add('hidden');
@@ -208,7 +222,7 @@
                 selectedTaskItems = [];
             });
 
-            // Reset context menu on left click anywhere outside
+            // Reset menus on left click anywhere outside
             document.addEventListener('click', e => {
                 taskContextMenu.classList.add('hidden');
                 contextSubMenu.classList.add('hidden');
@@ -218,6 +232,7 @@
             });
 
 
+            // Context Menu ---------------------------------------------------------------
             // MAKE INTO ONE LOOP
             // Show context menu when clicking three dots
             for (let taskMenu of taskMenus) {

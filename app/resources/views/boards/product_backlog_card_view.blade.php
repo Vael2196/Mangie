@@ -69,10 +69,27 @@
             <div class="flex space-x-5">
 
                 {{-- Change view switch --}}
-                <select id="viewButton" class="border rounded dark:bg-gray-700 dark:text-white">
+                <select id="viewButton" class="border rounded dark:bg-gray-700 dark:text-white hover:cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-500">
                     <option value="list">List View</option>
                     <option value="card" selected>Card View</option>
                 </select>
+
+                {{-- Sort Menu --}}
+                <x-sort-menu/>
+
+                {{-- Filter Menu --}}
+                <x-filter-menu/>
+
+                {{-- Cookie tags --}}
+                @foreach($cookies as $key => $value)
+                    @if($key === 'sort')
+                        @if($value[0])
+                            <x-sort-tag key="{{ $value[0] }}" direction="{{ $value[1] }}" />
+                        @endif
+                    @elseif($value)
+                        <x-cookie-tag key="{{ $key }}" tag="{{ $value }}" />
+                    @endif
+                @endforeach
 
                 {{-- Create sprint button --}}
                 <div id="create-sprint-button"><x-secondary-button>Create Sprint</x-secondary-button></div>
