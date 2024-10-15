@@ -31,6 +31,11 @@ class BoardController extends Controller
         // Fetch boards that belong to this user (for example)
         $boards = Board::where('user_id', $user->id)->get();
 
+        // end Boards that have passed end_date
+        foreach ($boards as $board) {
+            $this->endBoardIfExpired($board);
+        }
+
         // Pass the user and boards to the home view
         return view('home', compact('user', 'boards', 'activeSprints'));
     }
@@ -144,8 +149,21 @@ class BoardController extends Controller
 
         $user = Auth::user();
 
+        // End the board if it has expired
+        $this->endBoardIfExpired($board);
+
         // Pass the board to the sprint_board view
         return view('boards.show', compact('board', 'daysLeft', 'activeSprints', 'user', 'cookies'));
+    }
+
+    private function endBoardIfExpired(Board $board)
+    {
+        if (\Carbon\Carbon::now()->gt(\Carbon\Carbon::parse($board->end_date))) {
+            $board->completed = 1;
+            $board->status = 0;
+            $board->date_ended = $board->end_date;
+            $board->save();
+        }
     }
 
     public function storeColumn(Request $request)
