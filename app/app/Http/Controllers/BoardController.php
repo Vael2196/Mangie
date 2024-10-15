@@ -81,10 +81,58 @@ class BoardController extends Controller
      */
     public function show($id)
     {
+
+        // Get Priority
+        $priority = '';
+        if(isset($_COOKIE['priority'])){
+            $priority = $_COOKIE['priority'];
+        }
+
+        // Get Label
+        $label = '';
+        if(isset($_COOKIE['label'])){
+            $label = $_COOKIE['label'];
+        }
+
+        // Get sort type
+        $sortBy = '';
+        if(isset($_COOKIE['sort'])){
+            $sortBy = $_COOKIE['sort'];
+        }
+
+        // Get sort direction
+        $sortDirection = '';
+        if(isset($_COOKIE['direction'])){
+            $sortDirection = $_COOKIE['direction'];
+        }
+
         // Fetch the board by ID with its columns and tasks, and sort columns by position
         $board = Board::with(['columns' => function ($query) {
             $query->orderBy('position');
-        }, 'columns.tasks'])->findOrFail($id);
+        }, 'columns.tasks' => function ($query) use ($label, $priority, $sortBy, $sortDirection){
+            // Filtering
+            if($priority){ $query->Where('priority', $priority); }
+            if($label){ $query->Where('labels', $label); }
+
+            // Sort
+            if($sortBy && $sortDirection){$query->orderBy($sortBy, $sortDirection);}
+            else{$query->orderBy('position');}
+
+        }])->findOrFail($id);
+
+        // parse sort by text to tag names
+        $sortByDict = ['title' => 'Title',
+                'description' => 'Description',
+                'priority' => 'Priority',
+                'labels' => 'Labels',
+                'story_points' => "Story Points",
+                'time_log' => 'Time Log'];
+        if(array_key_exists($sortBy, $sortByDict)){
+            $sortBy = $sortByDict[$sortBy];
+        }
+
+        $cookies = array('label' => $label, 'priority' => $priority, 'sort' => array($sortBy, $sortDirection));
+
 
         $end = \Carbon\Carbon::parse($board->end_date);
         $now = \Carbon\Carbon::now();
@@ -97,7 +145,7 @@ class BoardController extends Controller
         $user = Auth::user();
 
         // Pass the board to the sprint_board view
-        return view('boards.show', compact('board', 'daysLeft', 'activeSprints', 'user'));
+        return view('boards.show', compact('board', 'daysLeft', 'activeSprints', 'user', 'cookies'));
     }
 
     public function storeColumn(Request $request)
@@ -153,10 +201,56 @@ class BoardController extends Controller
 
     public function showBacklog($view)
     {
+
+        // Get Priority
+        $priority = '';
+        if(isset($_COOKIE['priority'])){
+            $priority = $_COOKIE['priority'];
+        }
+
+        // Get Label
+        $label = '';
+        if(isset($_COOKIE['label'])){
+            $label = $_COOKIE['label'];
+        }
+
+        // Get sort type
+        $sortBy = '';
+        if(isset($_COOKIE['sort'])){
+            $sortBy = $_COOKIE['sort'];
+        }
+
+        // Get sort direction
+        $sortDirection = '';
+        if(isset($_COOKIE['direction'])){
+            $sortDirection = $_COOKIE['direction'];
+        }
+
         // Fetch the board by ID with its columns and tasks, and sort columns by position
-        $backlog = Board::with(['columns' => function ($query) {
+        $backlog = Board::with(['columns' => function ($query){
             $query->orderBy('position');
-        }, 'columns.tasks'])->findOrFail(1);
+        }, 'columns.tasks' => function ($query) use ($label, $priority, $sortBy, $sortDirection){
+            // Filtering
+            if($priority){ $query->Where('priority', $priority); }
+            if($label){ $query->Where('labels', $label); }
+
+            // Sorting
+            if($sortBy && $sortDirection){$query->orderBy($sortBy, $sortDirection);}
+            else{$query->orderBy('position');}
+        }])->findOrFail(1);
+
+        // parse sort by text to tag names
+        $sortByDict = ['title' => 'Title',
+                        'description' => 'Description',
+                        'priority' => 'Priority',
+                        'labels' => 'Labels',
+                        'story_points' => "Story Points",
+                        'time_log' => 'Time Log'];
+        if(array_key_exists($sortBy, $sortByDict)){
+            $sortBy = $sortByDict[$sortBy];
+        }
+
+        $cookies = array('label' => $label, 'priority' => $priority, 'sort' => array($sortBy, $sortDirection));
 
         // Get All boards for a user, including the product backlog
         $user = Auth::user();
@@ -168,10 +262,10 @@ class BoardController extends Controller
 
         if ($view == 'card'){
             // Pass the boards and tasks to the backlog view
-            return view('boards.product_backlog_card_view', compact('backlog', 'tasks', 'boards', 'activeSprints', 'user'));
+            return view('boards.product_backlog_card_view', compact('backlog', 'tasks', 'boards', 'activeSprints', 'user', 'cookies'));
         } else if ($view == 'list'){
             // Pass the boards and tasks to the backlog view
-            return view('boards.product_backlog_list_view', compact('backlog', 'tasks', 'boards', 'activeSprints', 'user'));
+            return view('boards.product_backlog_list_view', compact('backlog', 'tasks', 'boards', 'activeSprints', 'user', 'cookies'));
         }
     }
 
@@ -515,6 +609,7 @@ class BoardController extends Controller
         }
     }
 
+<<<<<<< app/app/Http/Controllers/BoardController.php
     public function showBurndownChart($board_id)
     {
         $board = Board::findOrFail($board_id);
@@ -581,17 +676,36 @@ class BoardController extends Controller
 
 
         return view('boards.burndown_chart', compact('chart', 'board', 'user'));
+    }
+=======
+    public function sortTasks(Request $request){
+        $request->validate([
+            'param' => 'required|string',
+            'order' => 'required|string',
+        ]);
 
+        $tasks = Task::orderBy($request->param, $request->order)->get();
 
-        // $now = \Carbon\Carbon::now();
-        // $labels = [];
-        // $dateRange = [];
+        return response()->json([
+            'success' => true,
+            'tasks' => $tasks,
+        ]);
+    }
 
-        // for ($date = $start->copy(); $date->lte($now); $date->addDay()) {
-        //     $dateRange[] = $date->format('Y-m-d');
-        //     $labels[] = $date->format('Y-m-d');
-        // }
+    public function filterTasks(Request $request){
+        $request->validate([
+            'param' => 'required|string',
+            'filter' => 'required|string',
+            'amount' => 'required|string',
+        ]);
 
-        // Log::info('Date range:', $dateRange);
+        $tasks = Task::where($request->param, $request->filter, $request->amount)->get();
+
+        return response()->json([
+            'success' => true,
+            'tasks' => $tasks,
+        ]);
+>>>>>>> app/app/Http/Controllers/BoardController.php
     }
 }
+
