@@ -42,6 +42,8 @@ Route::post('/boards/updateStatus', [BoardController::class, 'updateStatus'])->n
 Route::post('/boards/startSprint', [BoardController::class, 'startSprint'])->name('boards.startSprint');
 Route::post('/boards/{id}/endSprint', [BoardController::class, 'completeBoard'])->name('boards.complete');
 
+Route::post('/boards/{id}/burndownChart', [BoardController::class, 'showBurndownChart'])->name('boards.burndownChart');
+
 
 // Backlog
 Route::get('/backlog/{view}', [BoardController::class, 'showBacklog'])->middleware('auth')->name('backlog.show');

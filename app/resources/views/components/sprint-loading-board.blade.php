@@ -1,6 +1,6 @@
-<div {{ $attributes->merge([ "class" => "border min-w-full overflow-x-auto rounded p-3 bg-gray-100 dark:bg-gray-700"])}}>
+<div {{ $attributes->merge(["id" => "sprint-loading-table-{$board->id}", "class" => "border min-w-full overflow-x-auto rounded p-3 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-800"])}}>
     <div class="flex justify-between mb-2">
-        <h1 class="font-semibold text-xl">{{$board->name}}</h1>
+        <h1 class="font-semibold text-xl dark:text-white">{{$board->name}}</h1>
 
         @if ($activeSprints >= 1)
             @if ($board->status == 1)
@@ -20,3 +20,11 @@
         </tbody>
     </table>
 </div>
+
+
+<script>
+    // when double clicking on the board, it will open the boards.show page
+    document.getElementById('sprint-loading-table-{{$board->id}}').addEventListener('dblclick', function() {
+        window.location.href = "{{ route('boards.show', $board->id) }}";
+    });
+</script>
