@@ -355,8 +355,14 @@ class BoardController extends Controller
 
         // Convert task_ids to integer
         $task_id_num = [];
+        $column = Column::where('id', $request->column_id)->get()[0];
         foreach ($task_ids as $task_id){
             array_push($task_id_num, (int)$task_id);
+
+            // Complete task
+            if ($column && $column->name == "DONE") {
+                $this->completeTask((int)$task_id, $request->column_id);
+            }
         }
 
         // Updating the column id and positions of each task

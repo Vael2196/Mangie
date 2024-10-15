@@ -21,10 +21,10 @@
     </table>
 </div>
 
-
+{{--
 <script>
     // when double clicking on the board, it will open the boards.show page
     document.getElementById('sprint-loading-table-{{$board->id}}').addEventListener('dblclick', function() {
         window.location.href = "{{ route('boards.show', $board->id) }}";
     });
-</script>
+</script> --}}
