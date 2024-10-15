@@ -55,7 +55,6 @@
                 <div class="flex justify-between mb-2">
                     <input class='border font-semibold text-xl' id="create-sprint-input" type="text"
                         placeholder="Enter Sprint Name"/>
-                    <x-secondary-button>Start Sprint</x-secondary-button>
                 </div>
                 <p class="text-sm">Add tasks here or from the product backlog</p>
             </div>
