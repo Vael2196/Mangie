@@ -1,4 +1,16 @@
 <x-guest-layout>
+    <div class="mb-7">
+        <h1
+            class="text-2xl font-bold tracking-tight
+                text-gray-900 dark:text-white"
+        >
+            Create your workspace
+        </h1>
+
+        <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+            Create your Mangie account and start organising your work.
+        </p>
+    </div>
     <form method="POST" action="{{ route('register') }}">
         @csrf
 

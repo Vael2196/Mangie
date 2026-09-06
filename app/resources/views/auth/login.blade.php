@@ -1,4 +1,16 @@
 <x-guest-layout>
+    <div class="mb-7">
+        <h1
+            class="text-2xl font-bold tracking-tight
+                text-gray-900 dark:text-white"
+        >
+            Welcome back
+        </h1>
+
+        <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+            Sign in to continue to your Mangie workspace.
+        </p>
+    </div>
     <!-- Session Status -->
     <x-auth-session-status class="mb-4" :status="session('status')" />
 

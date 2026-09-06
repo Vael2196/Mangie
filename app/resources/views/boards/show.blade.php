@@ -4,16 +4,36 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <x-top-bar :title="$board->name" :user="$user"/>
 
-    <div class="container mx-auto mt-8">
+    <div class="mx-auto max-w-[1600px] px-6 py-8 lg:px-8">
         <div class="flex flex-col">
 
-            <div class="flex pr-10 items-start dark:text-white">
+            <div
+                class="flex flex-col gap-5 rounded-2xl
+                    border border-gray-200 bg-white
+                    p-5 shadow-sm
+                    lg:flex-row lg:items-center lg:justify-between
+                    dark:border-gray-800 dark:bg-gray-900"
+            >
 
-                @if ($board->status == 1 || $board->completed == 1)
-                    <p class="text-sm px-6 min-h-20 max-h-40 overflow-y-auto max-w-[65vw] grow">{{$board->sprint_goal}}</p>
-                @else
-                    <p class="text-sm px-6 min-h-20 max-h-40 overflow-y-auto max-w-[65vw] grow">Sprint Goal Area</p>
-                @endif
+                <div class="min-w-0 flex-1">
+                    <p
+                        class="text-xs font-semibold uppercase tracking-wider
+                            text-indigo-600 dark:text-indigo-400"
+                    >
+                        Sprint goal
+                    </p>
+
+                    <p
+                        class="mt-2 max-w-3xl text-sm leading-6
+                            text-gray-600 dark:text-gray-300"
+                    >
+                        @if ($board->status == 1 || $board->completed == 1)
+                            {{ $board->sprint_goal }}
+                        @else
+                            No sprint goal has been set yet.
+                        @endif
+                    </p>
+                </div>
 
                 <div class="flex space-x-8 items-center">
 
@@ -77,17 +97,45 @@
                     <li class="text-purple-500"><i class="fa-solid fa-circle-user fa-2x"></i></li>
                     <li class="text-red-500"><i class="fa-solid fa-circle-user fa-2x"></i></li> --}}
                     <div class="flex items-center space-x-2">
-                        <input type="text" id="user-input" class="bg-white dark:bg-gray-700 shadow-inner rounded-lg p-2 w-full" placeholder="Add a participant" />
+                        <input
+                            type="text"
+                            id="user-input"
+                            class="w-64 rounded-xl border-gray-300
+                                bg-white px-3.5 py-2.5 text-sm
+                                shadow-sm
+                                focus:border-indigo-500 focus:ring-indigo-500
+                                dark:border-gray-700 dark:bg-gray-900
+                                dark:text-white"
+                            placeholder="Add a participant..."
+                            autocomplete="off"
+                        />
 
                         <!-- Dropdown list for suggested users -->
-                        <ul id="user-dropdown" class="hidden absolute w-48 mt-24 rounded-md ring-1 ring-black ring-opacity-5 py-1 bg-white dark:bg-gray-700 max-h-40 overflow-auto">
+                        <ul
+                            id="user-dropdown"
+                            class="absolute z-50 mt-14 hidden
+                                max-h-56 w-72 overflow-auto
+                                rounded-xl border border-gray-200
+                                bg-white p-1.5 shadow-xl
+                                dark:border-gray-700 dark:bg-gray-800"
+                        >
                         </ul>
 
                         <!-- List to display added users as icons -->
                         <ul id="user-list" class="flex space-x-2 px-6">
                             @foreach($board->users as $user)
-                                <li class="text-gray-500">
-                                    <i class="fa-solid fa-circle-user fa-2x dark:text-white" title="{{ $user->name }}"></i>
+                                <li
+                                    title="{{ $user->name }}"
+                                    class="flex h-9 w-9 items-center justify-center
+                                        rounded-full border-2 border-white
+                                        bg-indigo-100 text-indigo-600
+                                        shadow-sm
+                                        dark:border-gray-900 dark:bg-indigo-950
+                                        dark:text-indigo-400"
+                                >
+                                    <span class="material-symbols-rounded text-[22px]">
+                                        account_circle
+                                    </span>
                                 </li>
                             @endforeach
                         </ul>
@@ -113,7 +161,16 @@
             </div>
         </div>
 
-        <div class="flex flex-nowrap space-x-5 h-4/6 p-5 overflow-auto max-w-[80vw] max-h-[70vh]" id="columns-container">
+        <div
+            id="columns-container"
+            class="mt-6 flex max-w-full flex-nowrap
+                items-start gap-5 overflow-x-auto
+                rounded-2xl border border-gray-200
+                bg-gradient-to-br from-gray-50 to-indigo-50/40
+                p-5 pb-7
+                dark:border-gray-800
+                dark:from-gray-950 dark:to-indigo-950/20"
+        >
             <!-- Display columns and tasks -->
             @foreach($board->columns as $column)
                 <x-task-column title="{{ $column->name }}">
@@ -136,13 +193,44 @@
             @endforeach
 
             <!-- Option to add new columns -->
-            <div id="add-column-section" class="flex items-center space-x-4">
-                <a id="add-column-btn" class="hover:cursor-pointer">
-                    <i class="fa-regular fa-square-plus fa-2x"></i>
-                </a>
+            <div
+                id="add-column-section"
+                class="flex w-72 shrink-0 items-start gap-3"
+            >
+                <button
+                    type="button"
+                    id="add-column-btn"
+                    class="flex w-full items-center justify-center gap-2
+                        rounded-xl border-2 border-dashed
+                        border-gray-300 bg-white/50
+                        px-4 py-3 text-sm font-semibold
+                        text-gray-500 transition
+                        hover:border-indigo-300 hover:bg-indigo-50
+                        hover:text-indigo-600
+                        dark:border-gray-700 dark:bg-gray-900/40
+                        dark:text-gray-400
+                        dark:hover:border-indigo-700
+                        dark:hover:bg-indigo-950/30
+                        dark:hover:text-indigo-400"
+                >
+                    <span class="material-symbols-rounded text-[20px]">
+                        add
+                    </span>
 
-                <!-- Hidden input field to add a new column -->
-                <input id="new-column-input" type="text" class="hidden bg-white shadow-inner rounded-lg p-2 w-full" placeholder="Enter new column name" />
+                    Add column
+                </button>
+
+                <input
+                    id="new-column-input"
+                    type="text"
+                    class="hidden w-full rounded-xl
+                        border-gray-300 bg-white px-3.5 py-2.5
+                        text-sm shadow-sm
+                        focus:border-indigo-500 focus:ring-indigo-500
+                        dark:border-gray-700 dark:bg-gray-900
+                        dark:text-white"
+                    placeholder="Column name..."
+                >
             </div>
         </div>
 
@@ -275,7 +363,18 @@
                 if (data.success) {
                     const newIcon = document.createElement('li');
                     newIcon.classList.add('text-gray-500');
-                    newIcon.innerHTML = `<i class="fa-solid fa-circle-user fa-2x" title="${user.name}"></i>`;
+                    newIcon.className =
+                        'flex h-9 w-9 items-center justify-center rounded-full ' +
+                        'border-2 border-white bg-indigo-100 text-indigo-600 shadow-sm ' +
+                        'dark:border-gray-900 dark:bg-indigo-950 dark:text-indigo-400';
+
+                    newIcon.title = user.name;
+
+                    newIcon.innerHTML = `
+                        <span class="material-symbols-rounded text-[22px]">
+                            account_circle
+                        </span>
+                    `;
                     userList.appendChild(newIcon);
                     userInput.value = '';
                 } else {

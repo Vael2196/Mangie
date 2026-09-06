@@ -21,7 +21,7 @@ Route::middleware('auth')->group(function () {
 });
 
 // Logout
-Route::post('/login', [ProfileController::class, 'logout'])->middleware('auth')->name('logout');
+// Route::post('/login', [ProfileController::class, 'logout'])->middleware('auth')->name('logout');
 
 // Manage Users
 Route::get('/adduser', [ProfileController::class, 'showAddUsers'])->middleware('auth')->name('profile.add-user');
@@ -30,8 +30,8 @@ Route::patch('/adduser', [ProfileController::class, 'updateUser'])->middleware('
 Route::delete('/removeuser/{id}', [ProfileController::class, 'removeUser'])->middleware('auth')->name('profile.user_remove');
 
 // Board
-Route::get('/dashboard', [BoardController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
-Route::get('/home', [BoardController::class, 'index'])->middleware('auth')->name('home');
+Route::get('/dashboard', [BoardController::class, 'dashboard']) ->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/home', [BoardController::class, 'home']) ->middleware('auth')->name('home');
 Route::post('/boards', [BoardController::class, 'store'])->name('boards.store');
 Route::get('/boards/{id}', [BoardController::class, 'show'])->middleware('auth')->name('boards.show');
 Route::post('/boards/move', [BoardController::class, 'moveColumnTasks'])->middleware('auth')->name('boards.moveTasks');

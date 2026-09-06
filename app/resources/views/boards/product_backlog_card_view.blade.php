@@ -29,7 +29,11 @@
             </x-slot>
         </x-dropdown>
     </div>
-    <div class="px-10 flex flex-col w-[80vw] overflow-auto max-h-[70vh] invisible" id="entirePage">
+    <div
+        class="mx-auto max-w-[1600px]
+            px-6 py-8 lg:px-8"
+        id="entirePage"
+    >
 
         {{-- Sprint loading list --}}
         <div class="mb-7" id="sprint-loading-board-list">
@@ -68,10 +72,51 @@
             <div class="flex space-x-5">
 
                 {{-- Change view switch --}}
-                <select id="viewButton" class="border rounded dark:bg-gray-700 dark:text-white hover:cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-500">
-                    <option value="list">List View</option>
-                    <option value="card" selected>Card View</option>
-                </select>
+                <div
+                    class="inline-flex rounded-xl
+                        border border-gray-200
+                        bg-white p-1 shadow-sm
+                        dark:border-gray-700 dark:bg-gray-900"
+                >
+                    <a
+                        href="{{ route('backlog.show', 'list') }}"
+                        @class([
+                            'flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold transition',
+
+                            'bg-indigo-600 text-white'
+                                => request()->route('view') === 'list',
+
+                            'text-gray-500 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'
+                                => request()->route('view') !== 'list',
+                        ])
+                    >
+                        <span class="material-symbols-rounded text-[19px]">
+                            view_list
+                        </span>
+
+                        List
+                    </a>
+
+
+                    <a
+                        href="{{ route('backlog.show', 'card') }}"
+                        @class([
+                            'flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold transition',
+
+                            'bg-indigo-600 text-white'
+                                => request()->route('view') === 'card',
+
+                            'text-gray-500 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'
+                                => request()->route('view') !== 'card',
+                        ])
+                    >
+                        <span class="material-symbols-rounded text-[19px]">
+                            grid_view
+                        </span>
+
+                        Cards
+                    </a>
+                </div>
 
                 {{-- Sort Menu --}}
                 <x-sort-menu/>
@@ -152,7 +197,7 @@
         // Globals
         let listViews = document.querySelectorAll('.task-list-class');
         let cardViews = document.querySelectorAll('.task-card-class');
-        let viewButton = document.getElementById('viewButton');
+        // let viewButton = document.getElementById('viewButton');
 
         // // Load previous state on document load
         // document.addEventListener('DOMContentLoaded', function() {
@@ -163,8 +208,8 @@
         // Main loop
         window.addEventListener('DOMContentLoaded', function() {
             // Hack to make it look less jarring when reloading page
-            let entirePage = document.getElementById('entirePage');
-            entirePage.classList.remove('invisible');
+            // let entirePage = document.getElementById('entirePage');
+            // entirePage.classList.remove('invisible');
 
             // Variables
             var selectedTaskItems = [];
@@ -208,20 +253,6 @@
 
             createSprintInput.addEventListener('focusout', e => {
                 createSprint.classList.add('hidden');
-            });
-
-            // Card to list view
-            viewButton.addEventListener('change', e => {
-                let view = viewButton.selectedIndex;
-                console.log(view);
-                // List view
-                if (view == 0){
-                    window.location.href = `{{ route('backlog.show', 'list')}}`;
-
-                // Card view
-                }else if (view == 1){
-                    window.location.href = `{{ route('backlog.show', 'card')}}`;
-                }
             });
 
             // Context Menu ---------------------------------------------------------------

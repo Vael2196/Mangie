@@ -17,28 +17,64 @@ class BoardController extends Controller
 {
     const PRODUCT_BACKLOG_ID = 1;
 
-    public function index()
+    // public function index()
+    // {
+    //     // Get the authenticated user
+    //     $user = Auth::user();
+
+    //     // Check if the user is authenticated
+    //     if (!$user) {
+    //         return redirect()->route('login'); // Redirect to login page if not authenticated
+    //     }
+
+    //     $activeSprints = Board::where('status', 1)->count() > 0;
+
+    //     // Fetch boards that belong to this user (for example)
+    //     $boards = Board::where('user_id', $user->id)->get();
+
+    //     // end Boards that have passed end_date
+    //     foreach ($boards as $board) {
+    //         $this->endBoardIfExpired($board);
+    //     }
+
+    //     // Pass the user and boards to the home view
+    //     return view('home', compact('user', 'boards', 'activeSprints'));
+    // }
+
+        public function home()
     {
-        // Get the authenticated user
+        return $this->renderBoardsPage('home');
+    }
+
+    public function dashboard()
+    {
+        return $this->renderBoardsPage('dashboard');
+    }
+
+    private function renderBoardsPage(string $pageMode)
+    {
         $user = Auth::user();
 
-        // Check if the user is authenticated
         if (!$user) {
-            return redirect()->route('login'); // Redirect to login page if not authenticated
+            return redirect()->route('login');
         }
 
-        $activeSprints = Board::where('status', 1)->count() > 0;
+        $activeSprints = Board::where('status', 1)->exists();
 
-        // Fetch boards that belong to this user (for example)
-        $boards = Board::where('user_id', $user->id)->get();
+        $boards = Board::where('user_id', $user->id)
+            ->orderByDesc('created_at')
+            ->get();
 
-        // end Boards that have passed end_date
         foreach ($boards as $board) {
             $this->endBoardIfExpired($board);
         }
 
-        // Pass the user and boards to the home view
-        return view('home', compact('user', 'boards', 'activeSprints'));
+        return view('home', compact(
+            'user',
+            'boards',
+            'activeSprints',
+            'pageMode'
+        ));
     }
 
 
