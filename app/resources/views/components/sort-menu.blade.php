@@ -1,19 +1,32 @@
-<div id="sort-menu-root" class="relative">
+@props(['scope'])
 
+@php
+    $sortFields = [
+        'title' => 'Title',
+        'description' => 'Description',
+        'priority' => 'Priority',
+        'labels' => 'Labels',
+        'story_points' => 'Story Points',
+        'time_log' => 'Time Log',
+    ];
+@endphp
+
+
+<div class="relative">
     <button
         type="button"
-        id="taskSortButton"
+        id="task-sort-button-{{ $scope }}"
         class="inline-flex items-center gap-2 rounded-xl
-               border border-gray-200 bg-white
-               px-3.5 py-2.5 text-sm font-semibold
+               border border-gray-300 bg-white
+               px-3.5 py-2 text-sm font-semibold
                text-gray-600 shadow-sm transition
-               hover:border-indigo-200 hover:bg-indigo-50
+               hover:border-indigo-300 hover:bg-indigo-50
                hover:text-indigo-600
                dark:border-gray-700 dark:bg-gray-900
                dark:text-gray-300
-               dark:hover:border-indigo-800
+               dark:hover:border-indigo-700
                dark:hover:bg-indigo-950/40
-               dark:hover:text-indigo-300"
+               dark:hover:text-indigo-400"
     >
         <span class="material-symbols-rounded text-[19px]">
             sort
@@ -21,182 +34,171 @@
 
         Sort
 
-        <span class="material-symbols-rounded text-[18px] text-gray-400">
+        <span class="material-symbols-rounded text-[18px]">
             expand_more
         </span>
     </button>
 
 
     <div
-        id="taskSortMenu"
+        id="task-sort-menu-{{ $scope }}"
         class="absolute right-0 top-full z-50 mt-2 hidden
-               w-60 rounded-2xl border border-gray-200
-               bg-white p-2 shadow-xl
+               w-56 overflow-visible rounded-xl
+               border border-gray-200 bg-white p-1.5
+               shadow-xl
                dark:border-gray-700 dark:bg-gray-800"
     >
-        <p
-            class="px-3 pb-2 pt-1
-                   text-xs font-semibold uppercase tracking-wider
-                   text-gray-400"
-        >
-            Sort tasks by
-        </p>
-
-
-        @foreach ([
-            'title' => 'Title',
-            'description' => 'Description',
-            'priority' => 'Priority',
-            'labels' => 'Labels',
-            'story_points' => 'Story Points',
-            'time_log' => 'Time Log'
-        ] as $key => $label)
-
+        @foreach ($sortFields as $field => $name)
             <div class="group relative">
 
                 <button
                     type="button"
                     class="flex w-full items-center justify-between
-                           rounded-lg px-3 py-2.5
-                           text-left text-sm font-medium
-                           text-gray-700 transition
-                           hover:bg-indigo-50 hover:text-indigo-700
+                           rounded-lg px-3 py-2.5 text-left
+                           text-sm font-medium text-gray-700
+                           transition hover:bg-indigo-50
+                           hover:text-indigo-700
                            dark:text-gray-200
-                           dark:hover:bg-indigo-950/50
+                           dark:hover:bg-indigo-950/40
                            dark:hover:text-indigo-300"
                 >
-                    {{ $label }}
+                    {{ $name }}
 
-                    <span
-                        class="material-symbols-rounded
-                               text-[18px] text-gray-400"
-                    >
+                    <span class="material-symbols-rounded text-[18px]">
                         chevron_right
                     </span>
                 </button>
 
+
                 <div
-                    class="absolute left-full top-0 z-[60]
-                           ml-2 hidden w-44
-                           rounded-xl border border-gray-200
-                           bg-white p-1.5 shadow-xl
-                           group-hover:block
-                           group-focus-within:block
-                           dark:border-gray-700 dark:bg-gray-800"
+                    class="pointer-events-none invisible absolute
+                           left-full top-0 z-50 w-44
+                           pl-2 opacity-0 transition
+                           group-hover:pointer-events-auto
+                           group-hover:visible group-hover:opacity-100"
                 >
-                    <button
-                        type="button"
-                        data-sort-key="{{ $key }}"
-                        data-sort-direction="asc"
-                        class="sort-choice flex w-full items-center gap-2
-                               rounded-lg px-3 py-2.5
-                               text-sm font-medium text-gray-700
-                               transition hover:bg-indigo-50
-                               hover:text-indigo-700
-                               dark:text-gray-200
-                               dark:hover:bg-indigo-950/50
-                               dark:hover:text-indigo-300"
+                    <div
+                        class="rounded-xl border border-gray-200
+                               bg-white p-1.5 shadow-xl
+                               dark:border-gray-700 dark:bg-gray-800"
                     >
-                        <span class="material-symbols-rounded text-[18px]">
-                            arrow_upward
-                        </span>
+                        <button
+                            type="button"
+                            data-sort-choice
+                            data-sort-field="{{ $field }}"
+                            data-sort-direction="asc"
+                            class="flex w-full items-center gap-2
+                                   rounded-lg px-3 py-2 text-left
+                                   text-sm text-gray-700 transition
+                                   hover:bg-indigo-50 hover:text-indigo-700
+                                   dark:text-gray-200
+                                   dark:hover:bg-indigo-950/40
+                                   dark:hover:text-indigo-300"
+                        >
+                            <span class="material-symbols-rounded text-[18px]">
+                                arrow_upward
+                            </span>
 
-                        Ascending
-                    </button>
+                            Ascending
+                        </button>
 
+                        <button
+                            type="button"
+                            data-sort-choice
+                            data-sort-field="{{ $field }}"
+                            data-sort-direction="desc"
+                            class="flex w-full items-center gap-2
+                                   rounded-lg px-3 py-2 text-left
+                                   text-sm text-gray-700 transition
+                                   hover:bg-indigo-50 hover:text-indigo-700
+                                   dark:text-gray-200
+                                   dark:hover:bg-indigo-950/40
+                                   dark:hover:text-indigo-300"
+                        >
+                            <span class="material-symbols-rounded text-[18px]">
+                                arrow_downward
+                            </span>
 
-                    <button
-                        type="button"
-                        data-sort-key="{{ $key }}"
-                        data-sort-direction="desc"
-                        class="sort-choice flex w-full items-center gap-2
-                               rounded-lg px-3 py-2.5
-                               text-sm font-medium text-gray-700
-                               transition hover:bg-indigo-50
-                               hover:text-indigo-700
-                               dark:text-gray-200
-                               dark:hover:bg-indigo-950/50
-                               dark:hover:text-indigo-300"
-                    >
-                        <span class="material-symbols-rounded text-[18px]">
-                            arrow_downward
-                        </span>
-
-                        Descending
-                    </button>
+                            Descending
+                        </button>
+                    </div>
                 </div>
-
             </div>
         @endforeach
-
     </div>
 </div>
 
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-    const root = document.getElementById('sort-menu-root');
-    const button = document.getElementById('taskSortButton');
-    const menu = document.getElementById('taskSortMenu');
+    const scope = @js($scope);
 
-    if (!root || !button || !menu) {
+    const button = document.getElementById(
+        `task-sort-button-${scope}`
+    );
+
+    const menu = document.getElementById(
+        `task-sort-menu-${scope}`
+    );
+
+    if (!button || !menu) {
         return;
     }
 
 
-    function closeMenu() {
-        menu.classList.add('hidden');
+    function setCookie(key, value) {
+        document.cookie =
+            `${scope}_${key}=${encodeURIComponent(value)}; ` +
+            `path=/; SameSite=Lax`;
     }
 
 
     button.addEventListener('click', event => {
         event.stopPropagation();
 
-        const opening = menu.classList.contains('hidden');
-
         window.dispatchEvent(
-            new CustomEvent('mangie-menu-open', {
-                detail: {
-                    menu: 'sort'
-                }
+            new CustomEvent('mangie:popover-open', {
+                detail: menu.id
             })
         );
 
-        if (opening) {
-            menu.classList.remove('hidden');
-        } else {
-            closeMenu();
+        menu.classList.toggle('hidden');
+    });
+
+
+    menu.addEventListener('click', event => {
+        event.stopPropagation();
+    });
+
+
+    window.addEventListener('mangie:popover-open', event => {
+        if (event.detail !== menu.id) {
+            menu.classList.add('hidden');
         }
     });
 
 
-    window.addEventListener('mangie-menu-open', event => {
-        if (event.detail.menu !== 'sort') {
-            closeMenu();
-        }
+    document.addEventListener('click', () => {
+        menu.classList.add('hidden');
     });
 
 
-    document.addEventListener('click', event => {
-        if (!root.contains(event.target)) {
-            closeMenu();
-        }
-    });
+    menu
+        .querySelectorAll('[data-sort-choice]')
+        .forEach(item => {
+            item.addEventListener('click', () => {
+                setCookie(
+                    'sort',
+                    item.dataset.sortField
+                );
 
+                setCookie(
+                    'direction',
+                    item.dataset.sortDirection
+                );
 
-    document.querySelectorAll('.sort-choice').forEach(choice => {
-        choice.addEventListener('click', () => {
-            const sortKey = choice.dataset.sortKey;
-            const direction = choice.dataset.sortDirection;
-
-            document.cookie =
-                `sort=${encodeURIComponent(sortKey)}; path=/; SameSite=Lax`;
-
-            document.cookie =
-                `direction=${encodeURIComponent(direction)}; path=/; SameSite=Lax`;
-
-            window.location.reload();
+                window.location.reload();
+            });
         });
-    });
 });
 </script>

@@ -1,48 +1,53 @@
-@props(['key', 'tag'])
+@props([
+    'scope',
+    'key',
+    'tag'
+])
 
-<div {{ $attributes->merge([ 'class' => 'bg-gray-100 rounded-md text-nowrap flex items-center space-x-1 pl-1 pr-2 dark:bg-gray-700'])}}>
-    <i id="cookieTag{{$key}}" class="fa-solid fa-x fa-xs hover:cursor-pointer hover:bg-gray-200 py-3 px-2 rounded-md dark:bg-gray-700"></i>
-    <h1 class="text-base">{{ $tag }}</h1>
+<div
+    class="inline-flex items-center gap-1.5
+           rounded-lg border border-gray-200
+           bg-gray-100 px-2 py-1
+           text-sm text-gray-700
+           dark:border-gray-700 dark:bg-gray-800
+           dark:text-gray-200"
+>
+    <button
+        type="button"
+        id="cookie-tag-{{ $scope }}-{{ $key }}"
+        class="flex h-5 w-5 items-center justify-center
+               rounded-md text-gray-400 transition
+               hover:bg-gray-200 hover:text-red-500
+               dark:hover:bg-gray-700"
+        title="Remove filter"
+    >
+        <span class="material-symbols-rounded text-[15px]">
+            close
+        </span>
+    </button>
+
+    <span>{{ $tag }}</span>
 </div>
 
+
 <script>
-    function getCookie(name) {
-        const value = `; ${document.cookie}`;
-        const parts = value.split(`; ${name}=`);
-        if (parts.length === 2) return parts.pop().split(';').shift();
+document.addEventListener('DOMContentLoaded', () => {
+    const scope = @js($scope);
+    const key = @js($key);
+
+    const button = document.getElementById(
+        `cookie-tag-${scope}-${key}`
+    );
+
+    if (!button) {
+        return;
     }
 
-    function appendStorageItem(field, key, value){
-        let data = localStorage.getItem(field);
-        data = data ? JSON.parse(data) : {};
-        data[key] = value;
-        localStorage.setItem(field, JSON.stringify(data));
-    }
+    button.addEventListener('click', () => {
+        document.cookie =
+            `${scope}_${key}=; Max-Age=0; path=/; SameSite=Lax`;
 
-    function getStorageItem(field){
-        let data = localStorage.getItem(field);
-        return data ? JSON.parse(data) : {};
-    }
-
-    function removeStorageItem(field, key){
-        let data = localStorage.getItem(field);
-        data = data ? JSON.parse(data) : {};
-        delete data[key];
-        localStorage.setItem(field, JSON.stringify(data));
-    }
-
-    window.addEventListener('DOMContentLoaded', e => {
-        var key='<?php echo $key; ?>';
-        let cookieTag = document.getElementById(`cookieTag${key}`);
-
-        let value = getCookie(key);
-
-        cookieTag.addEventListener('click', e => {
-            document.cookie = `${key}=; expires=Thu, 01 Jan 1970 00:00:00 UTC;`;
-            removeStorageItem('filter', key);
-
-            console.log(getStorageItem('filter'));
-            location.reload();
-        });
+        window.location.reload();
     });
+});
 </script>

@@ -126,29 +126,43 @@ class BoardController extends Controller
     public function show($id)
     {
 
-        // Get Priority
-        $priority = '';
-        if(isset($_COOKIE['priority'])){
-            $priority = $_COOKIE['priority'];
-        }
+        $scope = "board_{$id}";
 
-        // Get Label
-        $label = '';
-        if(isset($_COOKIE['label'])){
-            $label = $_COOKIE['label'];
-        }
+        $criteria = $this->getTaskCriteria($scope);
 
-        // Get sort type
-        $sortBy = '';
-        if(isset($_COOKIE['sort'])){
-            $sortBy = $_COOKIE['sort'];
-        }
+        $priority = $criteria['priority'];
+        $label = $criteria['label'];
+        $sortBy = $criteria['sortField'];
+        $sortDirection = $criteria['sortDirection'];
 
-        // Get sort direction
-        $sortDirection = '';
-        if(isset($_COOKIE['direction'])){
-            $sortDirection = $_COOKIE['direction'];
-        }
+        $board = Board::with([
+            'columns' => function ($query) {
+                $query->orderBy('position');
+            },
+
+            'columns.tasks' => function ($query) use (
+                $label,
+                $priority,
+                $sortBy,
+                $sortDirection
+            ) {
+                if ($priority !== '') {
+                    $query->where('priority', $priority);
+                }
+
+                if ($label !== '') {
+                    $query->where('labels', $label);
+                }
+
+                if ($sortBy !== '' && $sortDirection !== '') {
+                    $query->orderBy($sortBy, $sortDirection);
+                } else {
+                    $query->orderBy('position');
+                }
+            },
+        ])->findOrFail($id);
+
+        $cookies = $criteria['cookies'];
 
         // Fetch the board by ID with its columns and tasks, and sort columns by position
         $board = Board::with(['columns' => function ($query) {
@@ -259,29 +273,41 @@ class BoardController extends Controller
     public function showBacklog($view)
     {
 
-        // Get Priority
-        $priority = '';
-        if(isset($_COOKIE['priority'])){
-            $priority = $_COOKIE['priority'];
-        }
+        $criteria = $this->getTaskCriteria('backlog');
 
-        // Get Label
-        $label = '';
-        if(isset($_COOKIE['label'])){
-            $label = $_COOKIE['label'];
-        }
+        $priority = $criteria['priority'];
+        $label = $criteria['label'];
+        $sortBy = $criteria['sortField'];
+        $sortDirection = $criteria['sortDirection'];
 
-        // Get sort type
-        $sortBy = '';
-        if(isset($_COOKIE['sort'])){
-            $sortBy = $_COOKIE['sort'];
-        }
+        $backlog = Board::with([
+            'columns' => function ($query) {
+                $query->orderBy('position');
+            },
 
-        // Get sort direction
-        $sortDirection = '';
-        if(isset($_COOKIE['direction'])){
-            $sortDirection = $_COOKIE['direction'];
-        }
+            'columns.tasks' => function ($query) use (
+                $label,
+                $priority,
+                $sortBy,
+                $sortDirection
+            ) {
+                if ($priority !== '') {
+                    $query->where('priority', $priority);
+                }
+
+                if ($label !== '') {
+                    $query->where('labels', $label);
+                }
+
+                if ($sortBy !== '' && $sortDirection !== '') {
+                    $query->orderBy($sortBy, $sortDirection);
+                } else {
+                    $query->orderBy('position');
+                }
+            },
+        ])->findOrFail(self::PRODUCT_BACKLOG_ID);
+
+        $cookies = $criteria['cookies'];
 
         // Fetch the board by ID with its columns and tasks, and sort columns by position
         $backlog = Board::with(['columns' => function ($query){
@@ -782,30 +808,114 @@ class BoardController extends Controller
         ]);
     }
 
-    public function addUserToBoard(Request $request, $board_id){
-        $request->validate([
-            'user_id' => 'required|exists:users,id',
+    public function addUserToBoard(Request $request, Board $board)
+    {
+        $validated = $request->validate([
+            'user_id' => [
+                'required',
+                'integer',
+                'exists:users,id',
+            ],
         ]);
 
-        $board = Board::findOrFail($board_id);
-        $user = User::findOrFail($request->user_id);
+        $user = User::findOrFail(
+            $validated['user_id']
+        );
 
-        if ($board->users->contains($user->id)) {
+        $alreadyAdded = $board
+            ->users()
+            ->where('users.id', $user->id)
+            ->exists();
+
+        if ($alreadyAdded) {
             return response()->json([
                 'success' => false,
                 'message' => 'User is already added to this board.',
-            ]);
+            ], 409);
         }
 
-        $board->users()->attach($user->id);
+        $board->users()->syncWithoutDetaching([
+            $user->id,
+        ]);
 
         return response()->json([
             'success' => true,
             'message' => 'User added successfully.',
-            'user' => $user
+            'user' => $user,
         ]);
     }
 
+    private function getTaskCriteria(string $scope): array {
+        $readCookie = function (string $name) use ($scope): string {
+            $value = $_COOKIE["{$scope}_{$name}"] ?? '';
+
+            return rawurldecode($value);
+        };
+
+        $priority = $readCookie('priority');
+        $label = $readCookie('label');
+        $sortField = $readCookie('sort');
+        $sortDirection = $readCookie('direction');
+
+        $validPriorities = [
+            'Low',
+            'Medium',
+            'High',
+        ];
+
+        $validLabels = [
+            'API',
+            'Backend',
+            'Frontend',
+            'UI/UX',
+            'Database',
+        ];
+
+        $sortLabels = [
+            'title' => 'Title',
+            'description' => 'Description',
+            'priority' => 'Priority',
+            'labels' => 'Labels',
+            'story_points' => 'Story Points',
+            'time_log' => 'Time Log',
+        ];
+
+        if (!in_array($priority, $validPriorities, true)) {
+            $priority = '';
+        }
+
+        if (!in_array($label, $validLabels, true)) {
+            $label = '';
+        }
+
+        if (!array_key_exists($sortField, $sortLabels)) {
+            $sortField = '';
+        }
+
+        if (!in_array($sortDirection, ['asc', 'desc'], true)) {
+            $sortDirection = '';
+        }
+
+        return [
+            'priority' => $priority,
+            'label' => $label,
+            'sortField' => $sortField,
+            'sortDirection' => $sortDirection,
+
+            'cookies' => [
+                'priority' => $priority,
+                'label' => $label,
+
+                'sort' => [
+                    $sortField !== ''
+                        ? $sortLabels[$sortField]
+                        : '',
+
+                    $sortDirection,
+                ],
+            ],
+        ];
+    }
 
 }
 

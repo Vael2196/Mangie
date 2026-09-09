@@ -1,44 +1,61 @@
-@props(['key', 'direction'])
+@props([
+    'scope',
+    'key',
+    'direction'
+])
 
-<div {{ $attributes->merge([ 'class' => 'bg-gray-100 rounded-md text-nowrap flex items-center space-x-2 pl-1 pr-2 dark:bg-gray-700'])}}>
-    <i id="sortTag" class="fa-solid fa-x fa-xs hover:cursor-pointer hover:bg-gray-500 py-3 px-2 rounded-md dark:bg-gray-700"></i>
-    <h1 class="text-base">{{ $key }}</h1>
-    <div>
-        @if($direction === "asc")
-            <i class="fa-solid fa-arrow-up fa-sm"></i>
-        @else
-            <i class="fa-solid fa-arrow-down fa-sm"></i>
-        @endif
-    </div>
+<div
+    class="inline-flex items-center gap-1.5
+           rounded-lg border border-gray-200
+           bg-gray-100 px-2 py-1
+           text-sm text-gray-700
+           dark:border-gray-700 dark:bg-gray-800
+           dark:text-gray-200"
+>
+    <button
+        type="button"
+        id="sort-tag-{{ $scope }}"
+        class="flex h-5 w-5 items-center justify-center
+               rounded-md text-gray-400 transition
+               hover:bg-gray-200 hover:text-red-500
+               dark:hover:bg-gray-700"
+        title="Remove sorting"
+    >
+        <span class="material-symbols-rounded text-[15px]">
+            close
+        </span>
+    </button>
+
+    <span>{{ $key }}</span>
+
+    <span class="material-symbols-rounded text-[16px]">
+        {{ $direction === 'asc'
+            ? 'arrow_upward'
+            : 'arrow_downward' }}
+    </span>
 </div>
 
+
 <script>
-    function getCookie(name) {
-        const value = `; ${document.cookie}`;
-        const parts = value.split(`; ${name}=`);
-        if (parts.length === 2) return parts.pop().split(';').shift();
+document.addEventListener('DOMContentLoaded', () => {
+    const scope = @js($scope);
+
+    const button = document.getElementById(
+        `sort-tag-${scope}`
+    );
+
+    if (!button) {
+        return;
     }
 
-    function getStorageItem(field){
-        let data = localStorage.getItem(field);
-        return data ? JSON.parse(data) : {};
-    }
+    button.addEventListener('click', () => {
+        document.cookie =
+            `${scope}_sort=; Max-Age=0; path=/; SameSite=Lax`;
 
-    function resetStorageItem(field){
-        localStorage.setItem(field, "");
-    }
+        document.cookie =
+            `${scope}_direction=; Max-Age=0; path=/; SameSite=Lax`;
 
-    window.addEventListener('DOMContentLoaded', e => {
-        var key='<?php echo $key; ?>';
-        var direction='<?php echo $direction; ?>';
-        let cookieTag = document.getElementById(`sortTag`);
-
-        cookieTag.addEventListener('click', e => {
-            document.cookie = `sort=; expires=Thu, 01 Jan 1970 00:00:00 UTC;`;
-            document.cookie = `direction=; expires=Thu, 01 Jan 1970 00:00:00 UTC;`;
-            console.log(getStorageItem('sort'));
-            resetStorageItem('sort');
-            location.reload();
-        });
+        window.location.reload();
     });
+});
 </script>

@@ -57,5 +57,5 @@ Route::delete('/projects/{project}/users/{user}', [ProjectController::class, 're
 require __DIR__.'/auth.php';
 
 //Search and add user to a board
-Route::post('/search-users', [BoardController::class, 'searchUsers'])->name('users.search');
-Route::post('/boards/{board}/add-user', [BoardController::class, 'addUserToBoard'])->name('boards.addUser');
+Route::post('/search-users', [BoardController::class, 'searchUsers']) ->middleware('auth') ->name('users.search');
+Route::post('/boards/{board}/add-user', [BoardController::class, 'addUserToBoard']) ->middleware('auth')->name('boards.addUser');

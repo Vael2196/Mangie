@@ -90,23 +90,35 @@
                     </a>
                 </div>
 
-                {{-- Sort Menu --}}
-                <x-sort-menu/>
+                @php
+                    $criteriaScope = 'backlog';
+                @endphp
+                <x-sort-menu :scope="$criteriaScope" />
+                <x-filter-menu :scope="$criteriaScope" />
 
-                {{-- Filter Menu --}}
-                <x-filter-menu/>
-
-                {{-- Cookie tags --}}
                 @foreach($cookies as $key => $value)
-                    @if($key === 'sort')
-                        @if($value[0])
-                            <x-sort-tag key="{{ $value[0] }}" direction="{{ $value[1] }}" />
-                        @endif
-                    @elseif($value)
-                        <x-cookie-tag key="{{ $key }}" tag="{{ $value }}" />
-                    @endif
-                @endforeach
 
+                    @if($key === 'sort')
+
+                        @if($value[0])
+                            <x-sort-tag
+                                :scope="$criteriaScope"
+                                key="{{ $value[0] }}"
+                                direction="{{ $value[1] }}"
+                            />
+                        @endif
+
+                    @elseif($value)
+
+                        <x-cookie-tag
+                            :scope="$criteriaScope"
+                            key="{{ $key }}"
+                            tag="{{ $value }}"
+                        />
+
+                    @endif
+
+                @endforeach
                 {{-- Create sprint button --}}
                 <div id="create-sprint-button"><x-secondary-button>Create Sprint</x-secondary-button></div>
             </div>

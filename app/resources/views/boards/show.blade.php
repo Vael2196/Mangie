@@ -146,21 +146,34 @@
 
                 </div>
 
-                {{-- Sort Menu --}}
-                <x-sort-menu/>
+                @php
+                    $criteriaScope = 'board_' . $board->id;
+                @endphp
+                <x-sort-menu :scope="$criteriaScope" />
+                <x-filter-menu :scope="$criteriaScope" />
 
-                {{-- Filter Menu --}}
-                <x-filter-menu />
-
-                {{-- Cookie tags --}}
                 @foreach($cookies as $key => $value)
+
                     @if($key === 'sort')
+
                         @if($value[0])
-                            <x-sort-tag key="{{ $value[0] }}" direction="{{ $value[1] }}" />
+                            <x-sort-tag
+                                :scope="$criteriaScope"
+                                key="{{ $value[0] }}"
+                                direction="{{ $value[1] }}"
+                            />
                         @endif
+
                     @elseif($value)
-                        <x-cookie-tag key="{{ $key }}" tag="{{ $value }}" />
+
+                        <x-cookie-tag
+                            :scope="$criteriaScope"
+                            key="{{ $key }}"
+                            tag="{{ $value }}"
+                        />
+
                     @endif
+
                 @endforeach
             </div>
         </div>
@@ -199,8 +212,9 @@
             <!-- Option to add new columns -->
             <div
                 id="add-column-section"
-                class="flex w-72 shrink-0 items-start gap-3"
+                class="w-72 shrink-0"
             >
+                {{-- Initial button --}}
                 <button
                     type="button"
                     id="add-column-btn"
@@ -209,9 +223,11 @@
                         border-gray-300 bg-white/50
                         px-4 py-3 text-sm font-semibold
                         text-gray-500 transition
-                        hover:border-indigo-300 hover:bg-indigo-50
+                        hover:border-indigo-300
+                        hover:bg-indigo-50
                         hover:text-indigo-600
-                        dark:border-gray-700 dark:bg-gray-900/40
+                        dark:border-gray-700
+                        dark:bg-gray-900/40
                         dark:text-gray-400
                         dark:hover:border-indigo-700
                         dark:hover:bg-indigo-950/30
@@ -224,19 +240,70 @@
                     Add column
                 </button>
 
-                <input
-                    id="new-column-input"
-                    type="text"
-                    class="hidden w-full rounded-xl
-                        border-gray-300 bg-white px-3.5 py-2.5
-                        text-sm shadow-sm
-                        focus:border-indigo-500 focus:ring-indigo-500
-                        dark:border-gray-700 dark:bg-gray-900
-                        dark:text-white"
-                    placeholder="Column name..."
+
+                {{-- Replacement editor --}}
+                <div
+                    id="new-column-editor"
+                    class="hidden rounded-2xl
+                        border border-gray-200
+                        bg-gray-100/80 p-3 shadow-sm
+                        dark:border-gray-700
+                        dark:bg-gray-800/80"
                 >
+                    <input
+                        id="new-column-input"
+                        type="text"
+                        class="w-full rounded-xl
+                            border border-gray-300
+                            bg-white px-3.5 py-2.5
+                            text-sm text-gray-900 shadow-sm
+                            placeholder:text-gray-400
+                            focus:border-indigo-500
+                            focus:ring-indigo-500
+                            dark:border-gray-700
+                            dark:bg-gray-900
+                            dark:text-white"
+                        placeholder="Column name..."
+                        autocomplete="off"
+                    >
+
+                    <div class="mt-3 flex items-center gap-2">
+                        <button
+                            type="button"
+                            id="confirm-add-column"
+                            class="inline-flex items-center gap-1.5
+                                rounded-lg bg-indigo-600
+                                px-3 py-2 text-sm font-semibold
+                                text-white transition
+                                hover:bg-indigo-500"
+                        >
+                            <span class="material-symbols-rounded text-[18px]">
+                                add
+                            </span>
+
+                            Add
+                        </button>
+
+                        <button
+                            type="button"
+                            id="cancel-add-column"
+                            class="rounded-lg px-3 py-2
+                                text-sm font-semibold text-gray-500
+                                transition hover:bg-gray-200
+                                dark:text-gray-400
+                                dark:hover:bg-gray-700"
+                        >
+                            Cancel
+                        </button>
+                    </div>
+
+                    <p
+                        id="new-column-error"
+                        class="mt-2 hidden text-xs
+                            text-red-600 dark:text-red-400"
+                    ></p>
+                </div>
             </div>
-        </div>
 
         {{-- Context Menu --}}
         <div class="hidden absolute z-30" id="task-context-menu">
@@ -399,14 +466,16 @@
 
                         item.appendChild(status);
                     } else {
-                        item.addEventListener('click', () => {
+                        item.addEventListener('click', async event => {
+                            event.stopPropagation();
+
                             selectedUser = user;
                             userInput.value = user.name;
 
                             clearError();
                             hideDropdown();
 
-                            userInput.focus();
+                            await addUser(user);
                         });
                     }
 
@@ -650,8 +719,6 @@
 
 
         document.addEventListener('DOMContentLoaded', function () {
-            const addColumnBtn = document.getElementById('add-column-btn');
-            const inputField = document.getElementById('new-column-input');
             const columnsContainer = document.getElementById('columns-container');
             const newTaskInput = document.getElementById('new-task-input');
             const firstColumnTaskList = document.getElementById('task-list-{{ $board->columns->first()->id }}');
@@ -666,11 +733,141 @@
             const contextSubMenuChildren = contextSubMenu.children; // Context sub menu buttons
 
             // Add new column
-            addColumnBtn.addEventListener('click', function () {
-                inputField.classList.remove('hidden');
+            const addColumnBtn = document.getElementById('add-column-btn');
+
+            const columnEditor = document.getElementById('new-column-editor');
+
+            const inputField = document.getElementById('new-column-input');
+
+            const confirmColumnBtn = document.getElementById('confirm-add-column');
+
+            const cancelColumnBtn = document.getElementById('cancel-add-column');
+
+            const columnError = document.getElementById('new-column-error');
+
+
+            function openColumnEditor() {
+                addColumnBtn.classList.add('hidden');
+
+                columnEditor.classList.remove('hidden');
+
                 inputField.focus();
-                addColumnBtn.style.marginLeft = '20px';
-            });
+            }
+
+
+            function closeColumnEditor() {
+                inputField.value = '';
+
+                columnError.textContent = '';
+                columnError.classList.add('hidden');
+
+                columnEditor.classList.add('hidden');
+
+                addColumnBtn.classList.remove('hidden');
+            }
+
+
+            async function createColumn() {
+                const columnName = inputField.value.trim();
+
+                if (!columnName) {
+                    columnError.textContent =
+                        'Please enter a column name.';
+
+                    columnError.classList.remove('hidden');
+
+                    return;
+                }
+
+                columnError.classList.add('hidden');
+
+                try {
+                    const response = await fetch(
+                        '{{ route('columns.store') }}',
+                        {
+                            method: 'POST',
+
+                            headers: {
+                                'X-CSRF-TOKEN':
+                                    document
+                                        .querySelector(
+                                            'meta[name="csrf-token"]'
+                                        )
+                                        .getAttribute('content'),
+
+                                'Content-Type': 'application/json',
+                                'Accept': 'application/json',
+                            },
+
+                            body: JSON.stringify({
+                                name: columnName,
+                                board_id: {{ $board->id }},
+                            }),
+                        }
+                    );
+
+                    const data = await response.json();
+
+                    if (!response.ok || !data.success) {
+                        columnError.textContent =
+                            data.message ??
+                            'Could not create column.';
+
+                        columnError.classList.remove('hidden');
+
+                        return;
+                    }
+
+                    window.location.reload();
+
+                } catch (error) {
+                    console.error(
+                        'Creating column failed:',
+                        error
+                    );
+
+                    columnError.textContent =
+                        'Could not create column.';
+
+                    columnError.classList.remove('hidden');
+                }
+            }
+
+
+            addColumnBtn?.addEventListener(
+                'click',
+                openColumnEditor
+            );
+
+
+            cancelColumnBtn?.addEventListener(
+                'click',
+                closeColumnEditor
+            );
+
+
+            confirmColumnBtn?.addEventListener(
+                'click',
+                createColumn
+            );
+
+
+            inputField?.addEventListener(
+                'keydown',
+                event => {
+                    if (event.key === 'Enter') {
+                        event.preventDefault();
+
+                        createColumn();
+                    }
+
+                    if (event.key === 'Escape') {
+                        event.preventDefault();
+
+                        closeColumnEditor();
+                    }
+                }
+            );
 
             // Create a new column
             inputField.addEventListener('keypress', function (e) {
