@@ -91,56 +91,60 @@
                 </div>
             </div>
             <div class="flex space-x-3">
-                <ul class="flex space-x-2 px-6">
-                    <!--Display users here -->
-                    {{-- <li class="text-orange-500"><i class="fa-solid fa-circle-user fa-2x"></i></li>
-                    <li class="text-purple-500"><i class="fa-solid fa-circle-user fa-2x"></i></li>
-                    <li class="text-red-500"><i class="fa-solid fa-circle-user fa-2x"></i></li> --}}
-                    <div class="flex items-center space-x-2">
+                <div class="flex flex-wrap items-center gap-3">
+
+                    {{-- User search --}}
+                    <div class="relative">
                         <input
                             type="text"
                             id="user-input"
-                            class="w-64 rounded-xl border-gray-300
+                            class="w-64 rounded-xl border border-gray-300
                                 bg-white px-3.5 py-2.5 text-sm
-                                shadow-sm
+                                text-gray-900 shadow-sm
+                                placeholder:text-gray-400
                                 focus:border-indigo-500 focus:ring-indigo-500
                                 dark:border-gray-700 dark:bg-gray-900
-                                dark:text-white"
+                                dark:text-white dark:placeholder:text-gray-500"
                             placeholder="Add a participant..."
                             autocomplete="off"
-                        />
+                        >
 
-                        <!-- Dropdown list for suggested users -->
                         <ul
                             id="user-dropdown"
-                            class="absolute z-50 mt-14 hidden
-                                max-h-56 w-72 overflow-auto
+                            class="absolute left-0 top-full z-50 mt-2 hidden
+                                max-h-56 w-72 overflow-y-auto
                                 rounded-xl border border-gray-200
                                 bg-white p-1.5 shadow-xl
                                 dark:border-gray-700 dark:bg-gray-800"
-                        >
-                        </ul>
+                        ></ul>
 
-                        <!-- List to display added users as icons -->
-                        <ul id="user-list" class="flex space-x-2 px-6">
-                            @foreach($board->users as $user)
-                                <li
-                                    title="{{ $user->name }}"
-                                    class="flex h-9 w-9 items-center justify-center
-                                        rounded-full border-2 border-white
-                                        bg-indigo-100 text-indigo-600
-                                        shadow-sm
-                                        dark:border-gray-900 dark:bg-indigo-950
-                                        dark:text-indigo-400"
-                                >
-                                    <span class="material-symbols-rounded text-[22px]">
-                                        account_circle
-                                    </span>
-                                </li>
-                            @endforeach
-                        </ul>
+                        <p
+                            id="user-error"
+                            class="mt-1.5 hidden text-sm text-red-600 dark:text-red-400"
+                        ></p>
                     </div>
-                </ul>
+
+
+                    {{-- Existing members --}}
+                    <ul id="user-list" class="flex -space-x-2">
+                        @foreach($board->users as $boardUser)
+                            <li
+                                class="flex h-9 w-9 items-center justify-center
+                                    rounded-full border-2 border-white
+                                    bg-indigo-100 text-indigo-600 shadow-sm
+                                    dark:border-gray-900 dark:bg-indigo-950
+                                    dark:text-indigo-400"
+                                title="{{ $boardUser->name }}"
+                                data-user-id="{{ $boardUser->id }}"
+                            >
+                                <span class="material-symbols-rounded text-[22px]">
+                                    account_circle
+                                </span>
+                            </li>
+                        @endforeach
+                    </ul>
+
+                </div>
 
                 {{-- Sort Menu --}}
                 <x-sort-menu/>
@@ -312,92 +316,336 @@
 
         // })
 
-    document.addEventListener('DOMContentLoaded', function() {
-        const userInput = document.getElementById('user-input');
-        const userDropdown = document.getElementById('user-dropdown');
-        const userList = document.getElementById('user-list');
+        document.addEventListener('DOMContentLoaded', () => {
+            const userInput = document.getElementById('user-input');
+            const userDropdown = document.getElementById('user-dropdown');
+            const userList = document.getElementById('user-list');
+            const userError = document.getElementById('user-error');
 
-        let timeoutId = null;
+            if (!userInput || !userDropdown || !userList) {
+                return;
+            }
 
-        const fetchUsers = (query) => {
-            fetch('/search-users', {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ query })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success && data.users.length > 0) {
-                    userDropdown.innerHTML = '';
-                    data.users.forEach(user => {
-                        const li = document.createElement('li');
-                        li.classList.add('p-2', 'hover:bg-gray-200', 'cursor-pointer', 'dark:hover:bg-gray-800', 'dark:text-white');
-                        li.textContent = user.name;
-                        li.addEventListener('click', () => selectUser(user));
-                        userDropdown.appendChild(li);
-                    });
+            const existingUserIds = new Set(
+                [...userList.querySelectorAll('[data-user-id]')]
+                    .map(element => Number(element.dataset.userId))
+            );
+
+            let availableUsers = [];
+            let selectedUser = null;
+            let searchTimeout = null;
+
+
+            function showError(message) {
+                userError.textContent = message;
+                userError.classList.remove('hidden');
+            }
+
+
+            function clearError() {
+                userError.textContent = '';
+                userError.classList.add('hidden');
+            }
+
+
+            function hideDropdown() {
+                userDropdown.classList.add('hidden');
+            }
+
+
+            function renderUsers(users) {
+                userDropdown.innerHTML = '';
+
+                if (!users.length) {
+                    const emptyItem = document.createElement('li');
+
+                    emptyItem.className =
+                        'px-3 py-2 text-sm text-gray-500 dark:text-gray-400';
+
+                    emptyItem.textContent = 'No users found';
+
+                    userDropdown.appendChild(emptyItem);
                     userDropdown.classList.remove('hidden');
-                } else {
-                    userDropdown.classList.add('hidden');
+
+                    return;
                 }
-            });
-        };
 
-        const selectUser = (user) => {
-            userInput.value = user.name;
-            userDropdown.classList.add('hidden');
+                users.forEach(user => {
+                    const alreadyAdded = existingUserIds.has(Number(user.id));
 
-            fetch('/boards/{{ $board->id }}/add-user', {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ user_id: user.id })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
+                    const item = document.createElement('li');
+
+                    item.className =
+                        'flex items-center justify-between rounded-lg px-3 py-2 ' +
+                        'text-sm transition ' +
+                        (alreadyAdded
+                            ? 'cursor-default text-gray-400 dark:text-gray-500'
+                            : 'cursor-pointer text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 ' +
+                            'dark:text-gray-200 dark:hover:bg-indigo-950/50 dark:hover:text-indigo-300'
+                        );
+
+                    const name = document.createElement('span');
+                    name.textContent = user.name;
+
+                    item.appendChild(name);
+
+                    if (alreadyAdded) {
+                        const status = document.createElement('span');
+
+                        status.className =
+                            'text-xs font-medium text-gray-400';
+
+                        status.textContent = 'Added';
+
+                        item.appendChild(status);
+                    } else {
+                        item.addEventListener('click', () => {
+                            selectedUser = user;
+                            userInput.value = user.name;
+
+                            clearError();
+                            hideDropdown();
+
+                            userInput.focus();
+                        });
+                    }
+
+                    userDropdown.appendChild(item);
+                });
+
+                userDropdown.classList.remove('hidden');
+            }
+
+
+            async function fetchUsers(query = '') {
+                try {
+                    const response = await fetch(
+                        '{{ route('users.search') }}',
+                        {
+                            method: 'POST',
+
+                            headers: {
+                                'X-CSRF-TOKEN':
+                                    document.querySelector(
+                                        'meta[name="csrf-token"]'
+                                    ).content,
+
+                                'Content-Type': 'application/json',
+                                'Accept': 'application/json'
+                            },
+
+                            body: JSON.stringify({
+                                query: query
+                            })
+                        }
+                    );
+
+                    if (!response.ok) {
+                        throw new Error(
+                            `User search failed with status ${response.status}`
+                        );
+                    }
+
+                    const data = await response.json();
+
+                    availableUsers = data.success
+                        ? data.users
+                        : [];
+
+                    renderUsers(availableUsers);
+
+                } catch (error) {
+                    console.error('User search failed:', error);
+
+                    hideDropdown();
+                    showError('Could not load users.');
+                }
+            }
+
+
+            async function addUser(user) {
+                clearError();
+
+                try {
+                    const response = await fetch(
+                        '{{ route('boards.addUser', ['board' => $board->id]) }}',
+                        {
+                            method: 'POST',
+
+                            headers: {
+                                'X-CSRF-TOKEN':
+                                    document.querySelector(
+                                        'meta[name="csrf-token"]'
+                                    ).content,
+
+                                'Content-Type': 'application/json',
+                                'Accept': 'application/json'
+                            },
+
+                            body: JSON.stringify({
+                                user_id: user.id
+                            })
+                        }
+                    );
+
+                    const data = await response.json();
+
+                    if (!response.ok || !data.success) {
+                        showError(
+                            data.message ?? 'Could not add this participant.'
+                        );
+
+                        return;
+                    }
+
+
+                    existingUserIds.add(Number(user.id));
+
+
                     const newIcon = document.createElement('li');
-                    newIcon.classList.add('text-gray-500');
-                    newIcon.className =
-                        'flex h-9 w-9 items-center justify-center rounded-full ' +
-                        'border-2 border-white bg-indigo-100 text-indigo-600 shadow-sm ' +
-                        'dark:border-gray-900 dark:bg-indigo-950 dark:text-indigo-400';
 
+                    newIcon.dataset.userId = user.id;
                     newIcon.title = user.name;
+
+                    newIcon.className =
+                        'flex h-9 w-9 items-center justify-center ' +
+                        'rounded-full border-2 border-white ' +
+                        'bg-indigo-100 text-indigo-600 shadow-sm ' +
+                        'dark:border-gray-900 dark:bg-indigo-950 ' +
+                        'dark:text-indigo-400';
 
                     newIcon.innerHTML = `
                         <span class="material-symbols-rounded text-[22px]">
                             account_circle
                         </span>
                     `;
+
                     userList.appendChild(newIcon);
+
                     userInput.value = '';
-                } else {
-                    alert(data.message);
+                    selectedUser = null;
+
+                    hideDropdown();
+
+                } catch (error) {
+                    console.error('Adding participant failed:', error);
+
+                    showError('Could not add this participant.');
+                }
+            }
+
+
+            userInput.addEventListener('focus', () => {
+                fetchUsers(userInput.value.trim());
+            });
+
+
+            userInput.addEventListener('input', () => {
+                selectedUser = null;
+                clearError();
+
+                clearTimeout(searchTimeout);
+
+                searchTimeout = setTimeout(() => {
+                    fetchUsers(userInput.value.trim());
+                }, 200);
+            });
+
+
+            userInput.addEventListener('keydown', async event => {
+                if (event.key !== 'Enter') {
+                    return;
+                }
+
+                event.preventDefault();
+
+                const typedName = userInput.value.trim();
+
+                if (!typedName) {
+                    showError('Please choose a user.');
+
+                    return;
+                }
+
+
+                let user =
+                    selectedUser &&
+                    selectedUser.name.toLowerCase() === typedName.toLowerCase()
+                        ? selectedUser
+                        : availableUsers.find(
+                            candidate =>
+                                candidate.name.toLowerCase() ===
+                                typedName.toLowerCase()
+                        );
+
+
+                /*
+                * If the list hasn't caught up with the typing yet,
+                * search once more before treating the value as invalid.
+                */
+                if (!user) {
+                    try {
+                        const response = await fetch(
+                            '{{ route('users.search') }}',
+                            {
+                                method: 'POST',
+
+                                headers: {
+                                    'X-CSRF-TOKEN':
+                                        document.querySelector(
+                                            'meta[name="csrf-token"]'
+                                        ).content,
+
+                                    'Content-Type': 'application/json',
+                                    'Accept': 'application/json'
+                                },
+
+                                body: JSON.stringify({
+                                    query: typedName
+                                })
+                            }
+                        );
+
+                        const data = await response.json();
+
+                        user = data.users?.find(
+                            candidate =>
+                                candidate.name.toLowerCase() ===
+                                typedName.toLowerCase()
+                        );
+
+                    } catch (error) {
+                        console.error(error);
+                    }
+                }
+
+
+                if (!user) {
+                    showError('Please select a valid user from the list.');
+
+                    return;
+                }
+
+
+                if (existingUserIds.has(Number(user.id))) {
+                    showError('This user is already on the board.');
+
+                    return;
+                }
+
+
+                await addUser(user);
+            });
+
+
+            document.addEventListener('click', event => {
+                if (
+                    event.target !== userInput &&
+                    !userDropdown.contains(event.target)
+                ) {
+                    hideDropdown();
                 }
             });
-        };
-
-        userInput.addEventListener('input', function() {
-            const query = this.value.trim();
-            if (query.length > 2) {
-                clearTimeout(timeoutId);
-                timeoutId = setTimeout(() => fetchUsers(query), 300);
-            } else {
-                userDropdown.classList.add('hidden');
-            }
-        });
-
-        document.addEventListener('click', function(e) {
-            if (!userDropdown.contains(e.target) && e.target !== userInput) {
-                userDropdown.classList.add('hidden');
-            }
-        });
         });
 
 

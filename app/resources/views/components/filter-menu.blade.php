@@ -1,138 +1,223 @@
-{{-- Filter Menu --}}
-<div id="taskFilterButton" class="hover:cursor-pointer hover:bg-gray-100 border rounded px-2 items-center py-1 dark:bg-gray-700 dark:hover:bg-gray-500 dark:text-white">
-    <p>Add Filter</p>
-</div>
-<div class="hidden absolute z-30" id="taskFilterMenu">
-    <div class="2xl:flex 2xl:items-start">
-        <div class="flex flex-col">
-            {{-- priority filtering Button --}}
+<div id="filter-menu-root" class="relative">
+
+    <button
+        type="button"
+        id="taskFilterButton"
+        class="inline-flex items-center gap-2 rounded-xl
+               border border-gray-200 bg-white
+               px-3.5 py-2.5 text-sm font-semibold
+               text-gray-600 shadow-sm transition
+               hover:border-indigo-200 hover:bg-indigo-50
+               hover:text-indigo-600
+               dark:border-gray-700 dark:bg-gray-900
+               dark:text-gray-300
+               dark:hover:border-indigo-800
+               dark:hover:bg-indigo-950/40
+               dark:hover:text-indigo-300"
+    >
+        <span class="material-symbols-rounded text-[19px]">
+            filter_alt
+        </span>
+
+        Filter
+
+        <span class="material-symbols-rounded text-[18px] text-gray-400">
+            expand_more
+        </span>
+    </button>
+
+
+    <div
+        id="taskFilterMenu"
+        class="absolute right-0 top-full z-50 mt-2 hidden
+               w-52 rounded-2xl border border-gray-200
+               bg-white p-2 shadow-xl
+               dark:border-gray-700 dark:bg-gray-800"
+    >
+        <p
+            class="px-3 pb-2 pt-1
+                   text-xs font-semibold uppercase tracking-wider
+                   text-gray-400"
+        >
+            Filter tasks
+        </p>
+
+        <div class="group relative">
+
+            <button
+                type="button"
+                class="flex w-full items-center justify-between
+                       rounded-lg px-3 py-2.5
+                       text-sm font-medium text-gray-700
+                       transition hover:bg-indigo-50
+                       hover:text-indigo-700
+                       dark:text-gray-200
+                       dark:hover:bg-indigo-950/50
+                       dark:hover:text-indigo-300"
+            >
+                Priority
+
+                <span class="material-symbols-rounded text-[18px] text-gray-400">
+                    chevron_right
+                </span>
+            </button>
+
+
             <div
-                class='bg-white border px-4 py-2 items-center leading-5 dark:bg-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-500 hover:cursor-pointer focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out rounded flex space-x-3'>
-                <div class = "text-center"
-                    onmouseover="document.getElementById('filterPriorityMenu').classList.remove('hidden');
-                                document.getElementById('filterLabelsMenu').classList.add('hidden');">priority
-                </div>
-                <div class="text-center"><i class="fa-solid fa-angle-right"></i></div>
+                class="absolute left-full top-0 z-[60]
+                       ml-2 hidden w-40
+                       rounded-xl border border-gray-200
+                       bg-white p-1.5 shadow-xl
+                       group-hover:block
+                       group-focus-within:block
+                       dark:border-gray-700 dark:bg-gray-800"
+            >
+                @foreach (['Low', 'Medium', 'High'] as $priority)
+                    <button
+                        type="button"
+                        data-filter-key="priority"
+                        data-filter-value="{{ $priority }}"
+                        class="filter-choice block w-full rounded-lg
+                               px-3 py-2.5 text-left
+                               text-sm font-medium text-gray-700
+                               transition hover:bg-indigo-50
+                               hover:text-indigo-700
+                               dark:text-gray-200
+                               dark:hover:bg-indigo-950/50
+                               dark:hover:text-indigo-300"
+                    >
+                        {{ $priority }}
+                    </button>
+                @endforeach
             </div>
 
-            {{-- labels filtering Button --}}
+        </div>
+
+
+        <div class="group relative">
+
+            <button
+                type="button"
+                class="flex w-full items-center justify-between
+                       rounded-lg px-3 py-2.5
+                       text-sm font-medium text-gray-700
+                       transition hover:bg-indigo-50
+                       hover:text-indigo-700
+                       dark:text-gray-200
+                       dark:hover:bg-indigo-950/50
+                       dark:hover:text-indigo-300"
+            >
+                Label
+
+                <span class="material-symbols-rounded text-[18px] text-gray-400">
+                    chevron_right
+                </span>
+            </button>
+
+
             <div
-                class='bg-white border px-4 py-2 items-center leading-5 dark:bg-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-500 hover:cursor-pointer focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out rounded flex space-x-3'>
-                <div class = "text-center"
-                    onmouseover="document.getElementById('filterLabelsMenu').classList.remove('hidden');
-                                document.getElementById('filterPriorityMenu').classList.add('hidden');">labels
-                </div>
-                <div class="text-center"><i class="fa-solid fa-angle-right"></i></div>
+                class="absolute left-full top-0 z-[60]
+                       ml-2 hidden w-40
+                       rounded-xl border border-gray-200
+                       bg-white p-1.5 shadow-xl
+                       group-hover:block
+                       group-focus-within:block
+                       dark:border-gray-700 dark:bg-gray-800"
+            >
+                @foreach ([
+                    'API',
+                    'Backend',
+                    'Frontend',
+                    'UI/UX',
+                    'Database'
+                ] as $label)
+
+                    <button
+                        type="button"
+                        data-filter-key="label"
+                        data-filter-value="{{ $label }}"
+                        class="filter-choice block w-full rounded-lg
+                               px-3 py-2.5 text-left
+                               text-sm font-medium text-gray-700
+                               transition hover:bg-indigo-50
+                               hover:text-indigo-700
+                               dark:text-gray-200
+                               dark:hover:bg-indigo-950/50
+                               dark:hover:text-indigo-300"
+                    >
+                        {{ $label }}
+                    </button>
+
+                @endforeach
             </div>
+
         </div>
 
-        {{-- Priority filtering sub Menu--}}
-        <div class="hidden shadow-lg" id="filterPriorityMenu">
-            @foreach (["Low", "Medium", "High"] as $priority)
-                <div class='bg-white border px-4 py-2 text-start leading-5 dark:bg-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-500 hover:cursor-pointer focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out flex space-x-3'
-                    id="filterPriority{{$priority}}">
-                    <h1>{{ $priority }}</h1>
-                </div>
-            @endforeach
-        </div>
-
-        {{-- Labels filtering sub Menu --}}
-        <div class="hidden shadow-lg" id="filterLabelsMenu">
-            @foreach (["API", "Backend", "Frontend", "UI/UX", "Database"] as $label)
-                <div class='bg-white border px-4 py-2 text-start leading-5 dark:bg-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-500 hover:cursor-pointer focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out flex space-x-3'
-                    id="filterLabel{{$label}}">
-                    <h1>{{ $label }}</h1>
-                </div>
-            @endforeach
-        </div>
     </div>
 </div>
 
 
-{{-- Script --}}
 <script>
-    function getCookie(name) {
-        const value = `; ${document.cookie}`;
-        const parts = value.split(`; ${name}=`);
-        if (parts.length === 2) return parts.pop().split(';').shift();
+document.addEventListener('DOMContentLoaded', () => {
+    const root = document.getElementById('filter-menu-root');
+    const button = document.getElementById('taskFilterButton');
+    const menu = document.getElementById('taskFilterMenu');
+
+    if (!root || !button || !menu) {
+        return;
     }
 
-    function appendStorageItem(field, key, value){
-        let data = localStorage.getItem(field);
-        data = data ? JSON.parse(data) : {};
-        data[key] = value;
-        localStorage.setItem(field, JSON.stringify(data));
+
+    function closeMenu() {
+        menu.classList.add('hidden');
     }
 
-    function getStorageItem(field){
-        let data = localStorage.getItem(field);
-        return data ? JSON.parse(data) : {};
-    }
 
-    document.addEventListener('DOMContentLoaded', e => {
-        let filters = getStorageItem('filter');
+    button.addEventListener('click', event => {
+        event.stopPropagation();
 
-        // Adding cookies for filters
-        for(const [label, filter] of Object.entries(filters)){
-            document.cookie = `${label}=${filter};`;
+        const opening = menu.classList.contains('hidden');
+
+        window.dispatchEvent(
+            new CustomEvent('mangie-menu-open', {
+                detail: {
+                    menu: 'filter'
+                }
+            })
+        );
+
+        if (opening) {
+            menu.classList.remove('hidden');
+        } else {
+            closeMenu();
         }
-        console.log(getCookie('label'));
-        console.log(getCookie('priority'));
     });
 
-    window.addEventListener('DOMContentLoaded', e => {
-        // Filter Menu
-        const taskFilterButton = document.getElementById('taskFilterButton');
-        const taskFilterMenu = document.getElementById('taskFilterMenu');
-        const filterPriorityMenu = document.getElementById('filterPriorityMenu');
-        const filterLabelsMenu = document.getElementById('filterLabelsMenu');
 
-        const filterPriorityMenuItems = filterPriorityMenu.children;
-        const filterLabelsMenuItems = filterLabelsMenu.children
-
-        // Reset menus on right click anywhere outside
-        document.addEventListener('contextmenu', e => {
-            filterPriorityMenu.classList.add('hidden');
-            filterLabelsMenu.classList.add('hidden');
-            taskFilterMenu.classList.add('hidden');
-        });
-
-        document.addEventListener('click', e => {
-            filterPriorityMenu.classList.add('hidden');
-            filterLabelsMenu.classList.add('hidden');
-            taskFilterMenu.classList.add('hidden');
-        });
-
-        // Show filter menu when clicking filter button
-        taskFilterButton.addEventListener('click', e => {
-            e.stopPropagation();
-            const rect = taskFilterButton.getBoundingClientRect();
-            taskFilterMenu.style.left = (window.scrollX + rect.left - 20) + 'px';
-            taskFilterMenu.style.top = (window.scrollY + rect.top + rect.height) + 'px';
-            taskFilterMenu.classList.remove('hidden');
-        });
-
-        // Priority sub menus
-        for(let item of filterPriorityMenuItems){
-            item.addEventListener('click', e => {
-                console.log(item.id);
-                let filter = item.id.replace('filterPriority', '');
-
-                appendStorageItem('filter', 'priority', filter);
-                document.cookie = `priority=${filter};`;
-                location.reload();
-            });
-        };
-
-        // Labels sub menus
-        for(let item of filterLabelsMenuItems){
-            item.addEventListener('click', e => {
-                console.log(item.id);
-                let filter = item.id.replace('filterLabel', '')
-                appendStorageItem('filter', 'label', filter);
-                document.cookie = `label=${filter};`;
-                location.reload();
-            });
-        };
+    window.addEventListener('mangie-menu-open', event => {
+        if (event.detail.menu !== 'filter') {
+            closeMenu();
+        }
     });
+
+
+    document.addEventListener('click', event => {
+        if (!root.contains(event.target)) {
+            closeMenu();
+        }
+    });
+
+
+    document.querySelectorAll('.filter-choice').forEach(choice => {
+        choice.addEventListener('click', () => {
+            const key = choice.dataset.filterKey;
+            const value = choice.dataset.filterValue;
+
+            document.cookie =
+                `${key}=${encodeURIComponent(value)}; path=/; SameSite=Lax`;
+
+            window.location.reload();
+        });
+    });
+});
 </script>

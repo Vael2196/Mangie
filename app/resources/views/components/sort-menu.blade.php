@@ -1,161 +1,202 @@
-{{-- Sort Menu --}}
-<div id="taskSortButton" class="hover:cursor-pointer hover:bg-gray-100 border rounded px-2 items-center py-1 dark:bg-gray-700 dark:hover:bg-gray-500 dark:text-white">
-    <p>Sort</p>
-</div>
-<div class="hidden absolute z-30" id="taskSortMenu">
-    <div class="flex items-start flex-wrap bg-gray-100 px-1 py-0.5 dark:bg-gray-700">
-        <div class="flex flex-col pr-2 border-r-2 border-gray-300 h-full" id="sortChildren">
-            @foreach (['title' => 'Title',
-                        'description' => 'Description',
-                        'priority' => 'Priority',
-                        'labels' => 'Labels',
-                        'story_points' => "Story Points",
-                        'time_log' => 'Time Log'] as $key => $value)
-            <div class='bg-white border px-4 py-2 text-start leading-5 dark:bg-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-500 hover:cursor-pointer focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out flex space-x-3'
-                id="sortBy{{$key}}">
-                <h1>{{$value}}</h1>
-            </div>
-            @endforeach
-        </div>
+<div id="sort-menu-root" class="relative">
 
-        <div class="flex flex-col justify-between pl-2">
-            <div id="sortDirection">
-                <div class='bg-white border px-4 py-2 text-start leading-5 dark:bg-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-500 hover:cursor-pointer focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out flex space-x-3'
-                    id="sortWithasc">
-                    <h1>Ascending</h1>
+    <button
+        type="button"
+        id="taskSortButton"
+        class="inline-flex items-center gap-2 rounded-xl
+               border border-gray-200 bg-white
+               px-3.5 py-2.5 text-sm font-semibold
+               text-gray-600 shadow-sm transition
+               hover:border-indigo-200 hover:bg-indigo-50
+               hover:text-indigo-600
+               dark:border-gray-700 dark:bg-gray-900
+               dark:text-gray-300
+               dark:hover:border-indigo-800
+               dark:hover:bg-indigo-950/40
+               dark:hover:text-indigo-300"
+    >
+        <span class="material-symbols-rounded text-[19px]">
+            sort
+        </span>
+
+        Sort
+
+        <span class="material-symbols-rounded text-[18px] text-gray-400">
+            expand_more
+        </span>
+    </button>
+
+
+    <div
+        id="taskSortMenu"
+        class="absolute right-0 top-full z-50 mt-2 hidden
+               w-60 rounded-2xl border border-gray-200
+               bg-white p-2 shadow-xl
+               dark:border-gray-700 dark:bg-gray-800"
+    >
+        <p
+            class="px-3 pb-2 pt-1
+                   text-xs font-semibold uppercase tracking-wider
+                   text-gray-400"
+        >
+            Sort tasks by
+        </p>
+
+
+        @foreach ([
+            'title' => 'Title',
+            'description' => 'Description',
+            'priority' => 'Priority',
+            'labels' => 'Labels',
+            'story_points' => 'Story Points',
+            'time_log' => 'Time Log'
+        ] as $key => $label)
+
+            <div class="group relative">
+
+                <button
+                    type="button"
+                    class="flex w-full items-center justify-between
+                           rounded-lg px-3 py-2.5
+                           text-left text-sm font-medium
+                           text-gray-700 transition
+                           hover:bg-indigo-50 hover:text-indigo-700
+                           dark:text-gray-200
+                           dark:hover:bg-indigo-950/50
+                           dark:hover:text-indigo-300"
+                >
+                    {{ $label }}
+
+                    <span
+                        class="material-symbols-rounded
+                               text-[18px] text-gray-400"
+                    >
+                        chevron_right
+                    </span>
+                </button>
+
+                <div
+                    class="absolute left-full top-0 z-[60]
+                           ml-2 hidden w-44
+                           rounded-xl border border-gray-200
+                           bg-white p-1.5 shadow-xl
+                           group-hover:block
+                           group-focus-within:block
+                           dark:border-gray-700 dark:bg-gray-800"
+                >
+                    <button
+                        type="button"
+                        data-sort-key="{{ $key }}"
+                        data-sort-direction="asc"
+                        class="sort-choice flex w-full items-center gap-2
+                               rounded-lg px-3 py-2.5
+                               text-sm font-medium text-gray-700
+                               transition hover:bg-indigo-50
+                               hover:text-indigo-700
+                               dark:text-gray-200
+                               dark:hover:bg-indigo-950/50
+                               dark:hover:text-indigo-300"
+                    >
+                        <span class="material-symbols-rounded text-[18px]">
+                            arrow_upward
+                        </span>
+
+                        Ascending
+                    </button>
+
+
+                    <button
+                        type="button"
+                        data-sort-key="{{ $key }}"
+                        data-sort-direction="desc"
+                        class="sort-choice flex w-full items-center gap-2
+                               rounded-lg px-3 py-2.5
+                               text-sm font-medium text-gray-700
+                               transition hover:bg-indigo-50
+                               hover:text-indigo-700
+                               dark:text-gray-200
+                               dark:hover:bg-indigo-950/50
+                               dark:hover:text-indigo-300"
+                    >
+                        <span class="material-symbols-rounded text-[18px]">
+                            arrow_downward
+                        </span>
+
+                        Descending
+                    </button>
                 </div>
 
-                <div class='bg-white border px-4 py-2 text-start leading-5 dark:bg-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-500 hover:cursor-pointer focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out flex space-x-3'
-                    id="sortWithdesc">
-                    <h1>Descending</h1>
-                </div>
             </div>
-            <div class='bg-slate-600 border px-4 py-2 text-start leading-5 dark:bg-gray-600 text-white dark:text-gray-300 hover:bg-slate-500 dark:hover:bg-gray-500 hover:cursor-pointer focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out flex space-x-3'
-                id="sortSubmit">
-                <h1>Submit</h1>
-            </div>
-        </div>
+        @endforeach
+
     </div>
 </div>
 
+
 <script>
-    function getCookie(name) {
-        const value = `; ${document.cookie}`;
-        const parts = value.split(`; ${name}=`);
-        if (parts.length === 2) return parts.pop().split(';').shift();
+document.addEventListener('DOMContentLoaded', () => {
+    const root = document.getElementById('sort-menu-root');
+    const button = document.getElementById('taskSortButton');
+    const menu = document.getElementById('taskSortMenu');
+
+    if (!root || !button || !menu) {
+        return;
     }
 
-    function getStorageItem(field){
-        let data = localStorage.getItem(field);
-        return data ? JSON.parse(data) : {};
+
+    function closeMenu() {
+        menu.classList.add('hidden');
     }
 
-    // Reset cookies on page load (Make sure they are correct)
-    document.addEventListener('DOMContentLoaded', e => {
-        localStorage.clear();
-        // let sort_obj = JSON.parse(localStorage.getItem('sort'));
 
-        // document.cookie = `sort=${sort_obj['sortBy']};`;
-        // document.cookie = `direction=${sort_obj['sortWith']};`;
+    button.addEventListener('click', event => {
+        event.stopPropagation();
 
-        console.log(getCookie('sort'));
-        console.log(getCookie('direction'));
-    });
+        const opening = menu.classList.contains('hidden');
 
-    window.addEventListener('DOMContentLoaded', e => {
-        let form_dict = {};
-        let taskSortButton = document.getElementById('taskSortButton');
-        let taskSortMenu = document.getElementById('taskSortMenu');
-        let sortMenuItems = Array.prototype.slice.call(document.getElementById('sortChildren').children, 0);
-        let sortMenuDirections = Array.prototype.slice.call(document.getElementById('sortDirection').children, 0);
-        let sortBySubmit = document.getElementById('sortSubmit');
-
-        // Reset menus on right click anywhere outside
-        document.addEventListener('contextmenu', e => {resetDocument()});
-
-        // Reset menus on right click anywhere outside
-        document.addEventListener('click', e => {resetDocument()});
-
-        // Show sort menu
-        taskSortButton.addEventListener('click', e => {
-            e.stopPropagation();
-            const rect = taskSortButton.getBoundingClientRect();
-            taskSortMenu.style.left = (window.scrollX + rect.left - 20) + 'px';
-            taskSortMenu.style.top = (window.scrollY + rect.top + rect.height) + 'px';
-            taskSortMenu.classList.remove('hidden');
-        });
-
-        // Sort type sub menus
-        for(let item of sortMenuItems){
-            // Clicking on sort menu item
-            item.addEventListener('click', e => {
-                e.stopPropagation();
-                clickMenuItem(item, 'sortBy', sortMenuItems)
-            });
-        };
-
-        // Sort direction sub menus
-        for(let item of sortMenuDirections){
-            // Clicking on sort direction menu item
-            item.addEventListener('click', e => {
-                e.stopPropagation();
-                clickMenuItem(item, 'sortWith', sortMenuDirections)
-            });
-        }
-
-        // Submit sort query
-        sortBySubmit.addEventListener('click', e => {
-            // Break if either a sorting option and direction are not chosen
-            if(!(form_dict['sortBy'] && form_dict['sortWith'])){return;}
-
-            // Set cookies
-            localStorage.setItem('sort', JSON.stringify(form_dict));
-            document.cookie = `sort=${form_dict['sortBy']};`;
-            document.cookie = `direction=${form_dict['sortWith']};`;
-
-            // Log cookies
-            console.log(getCookie('sort'));
-            console.log(getCookie('direction'));
-            location.reload();
-        });
-
-        // Helper FUNCTIONS ---------------------------------------------------------------
-        const resetDocument = () => {
-            taskSortMenu.classList.add('hidden');
-
-            // Remove other selected items
-            for(let sortItem of sortMenuItems.concat(sortMenuDirections)){
-                removeItemStyles(sortItem);
-            }
-            // Reset sort dictionary
-            form_dict = {};
-        }
-
-        // Remove on click styles from item
-        const removeItemStyles = (item) => {
-            item.classList.remove('bg-slate-600');
-            item.classList.remove('hover:bg-slate-500');
-            item.classList.remove('text-white');
-        }
-
-        // Clicking on sort menu item
-        const clickMenuItem = (item, field, sortMenuItems) => {
-            // Toggle selected item
-            item.classList.toggle('bg-slate-600');
-            item.classList.toggle('hover:bg-slate-500');
-            item.classList.toggle('text-white');
-
-            // Append sort value to form dictionary
-            let sort = item.id.replace(field, '');
-            form_dict[field] = form_dict[field] === sort ? "" : sort;
-
-            // Remove other selected items
-            for(let sortItem of sortMenuItems){
-                if(sortItem.id != item.id){
-                    removeItemStyles(sortItem);
+        window.dispatchEvent(
+            new CustomEvent('mangie-menu-open', {
+                detail: {
+                    menu: 'sort'
                 }
-            }
-        }
+            })
+        );
 
+        if (opening) {
+            menu.classList.remove('hidden');
+        } else {
+            closeMenu();
+        }
     });
+
+
+    window.addEventListener('mangie-menu-open', event => {
+        if (event.detail.menu !== 'sort') {
+            closeMenu();
+        }
+    });
+
+
+    document.addEventListener('click', event => {
+        if (!root.contains(event.target)) {
+            closeMenu();
+        }
+    });
+
+
+    document.querySelectorAll('.sort-choice').forEach(choice => {
+        choice.addEventListener('click', () => {
+            const sortKey = choice.dataset.sortKey;
+            const direction = choice.dataset.sortDirection;
+
+            document.cookie =
+                `sort=${encodeURIComponent(sortKey)}; path=/; SameSite=Lax`;
+
+            document.cookie =
+                `direction=${encodeURIComponent(direction)}; path=/; SameSite=Lax`;
+
+            window.location.reload();
+        });
+    });
+});
 </script>
