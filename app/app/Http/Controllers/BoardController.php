@@ -11,6 +11,7 @@ use Carbon\CarbonPeriod;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 use App\Charts\BurndownChart;
 
 class BoardController extends Controller
@@ -137,7 +138,7 @@ class BoardController extends Controller
 
         $board = Board::with([
             'columns' => function ($query) {
-                $query->orderBy('position');
+                $query->withCount('tasks')->orderBy('position');
             },
 
             'columns.tasks' => function ($query) use (
@@ -166,7 +167,7 @@ class BoardController extends Controller
 
         // Fetch the board by ID with its columns and tasks, and sort columns by position
         $board = Board::with(['columns' => function ($query) {
-            $query->orderBy('position');
+            $query->withCount('tasks')->orderBy('position');
         }, 'columns.tasks' => function ($query) use ($label, $priority, $sortBy, $sortDirection){
             // Filtering
             if($priority){ $query->Where('priority', $priority); }
@@ -238,6 +239,139 @@ class BoardController extends Controller
         return response()->json([
             'success' => true,
             'column' => $column,
+        ]);
+    }
+
+    public function updateColumnColor(Request $request, Column $column) {
+        $validated = $request->validate([
+            'color' => [
+                'required',
+                'string',
+                'in:gray,blue,green,yellow,orange,red,purple,pink',
+            ],
+        ]);
+
+        $column->update([
+            'color' => $validated['color'],
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'column' => $column,
+        ]);
+    }
+
+    public function copyColumn(Column $column)
+    {
+        $column->load([
+            'tasks' => function ($query) {
+                $query->orderBy('position');
+            },
+            'tasks.users',
+        ]);
+
+        $copiedColumn = DB::transaction(
+            function () use ($column) {
+
+                Column::where(
+                    'board_id',
+                    $column->board_id
+                )
+                    ->where(
+                        'position',
+                        '>',
+                        $column->position
+                    )
+                    ->increment('position');
+
+                $newColumn = $column->replicate([
+                    'id',
+                    'position',
+                    'created_at',
+                    'updated_at',
+                ]);
+
+                $newColumn->name =
+                    $column->name . ' copy';
+
+                $newColumn->position =
+                    $column->position + 1;
+
+                $newColumn->save();
+
+                foreach ($column->tasks as $task) {
+
+                    $newTask = $task->replicate([
+                        'id',
+                        'column_id',
+                        'position',
+                        'created_at',
+                        'updated_at',
+                    ]);
+
+                    $newTask->column_id =
+                        $newColumn->id;
+
+                    $newTask->position =
+                        $task->position;
+
+                    $newTask->completed_at = null;
+
+                    $newTask->save();
+
+                    $newTask->users()->sync(
+                        $task->users
+                            ->pluck('id')
+                            ->all()
+                    );
+                }
+
+
+                return $newColumn;
+            }
+        );
+
+
+        return response()->json([
+            'success' => true,
+            'column' => $copiedColumn,
+        ]);
+    }
+
+    public function destroyColumn(Column $column)
+    {
+        if ($column->tasks()->exists()) {
+            return response()->json([
+                'success' => false,
+                'message' =>
+                    'This column cannot be deleted because it contains tasks.',
+            ], 422);
+        }
+
+        DB::transaction(function () use ($column) {
+
+            $boardId =
+                $column->board_id;
+
+            $position =
+                $column->position;
+
+            $column->delete();
+
+            Column::where(
+                'board_id',
+                $boardId
+            )
+                ->where(
+                    'position',
+                    '>',
+                    $position
+                )
+                ->decrement('position');
+        });
+
+        return response()->json([
+            'success' => true,
         ]);
     }
 

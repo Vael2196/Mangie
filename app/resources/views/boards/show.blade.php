@@ -190,7 +190,7 @@
         >
             <!-- Display columns and tasks -->
             @foreach($board->columns as $column)
-                <x-task-column title="{{ $column->name }}">
+                <x-task-column :column="$column" :editable="$board->completed == 0">
 
                     <div
                         class="task-list space-y-3"
@@ -408,6 +408,158 @@
                         </div>
                     @endforeach
                 </div>
+            </div>
+        </div>
+        <div
+            id="delete-column-modal"
+            class="fixed inset-0 z-[120] hidden"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="delete-column-title"
+        >
+
+            {{-- Backdrop --}}
+            <div
+                data-delete-column-backdrop
+                class="absolute inset-0
+                    bg-gray-950/55
+                    backdrop-blur-[2px]"
+            ></div>
+
+
+            <div
+                class="relative flex min-h-full
+                    items-center justify-center
+                    p-4"
+            >
+
+                <div
+                    class="w-full max-w-md
+                        rounded-3xl
+                        border border-gray-200
+                        bg-white p-6
+                        shadow-2xl
+                        dark:border-gray-700
+                        dark:bg-gray-900"
+                >
+
+                    <div
+                        class="flex items-start gap-4"
+                    >
+
+                        <div
+                            class="flex h-11 w-11
+                                shrink-0 items-center
+                                justify-center rounded-xl
+                                bg-red-50
+                                text-red-600
+                                dark:bg-red-950/50
+                                dark:text-red-400"
+                        >
+                            <span
+                                class="material-symbols-rounded
+                                    text-[23px]"
+                            >
+                                delete
+                            </span>
+                        </div>
+
+
+                        <div class="min-w-0 flex-1">
+
+                            <h3
+                                id="delete-column-title"
+                                class="text-lg font-bold
+                                    text-gray-900
+                                    dark:text-white"
+                            >
+                                Delete column?
+                            </h3>
+
+                            <p
+                                class="mt-2 text-sm
+                                    leading-6
+                                    text-gray-500
+                                    dark:text-gray-400"
+                            >
+                                The empty column
+                                <span
+                                    id="delete-column-name"
+                                    class="font-semibold
+                                        text-gray-700
+                                        dark:text-gray-200"
+                                ></span>
+                                will be permanently deleted.
+                                This cannot be undone.
+                            </p>
+
+                        </div>
+                    </div>
+
+
+                    <p
+                        id="delete-column-error"
+                        class="mt-4 hidden
+                            rounded-xl
+                            bg-red-50 px-3 py-2
+                            text-sm text-red-600
+                            dark:bg-red-950/40
+                            dark:text-red-400"
+                    ></p>
+
+
+                    <div
+                        class="mt-6 flex
+                            justify-end gap-2"
+                    >
+
+                        <button
+                            type="button"
+                            id="cancel-delete-column"
+                            class="rounded-xl
+                                px-4 py-2.5
+                                text-sm font-semibold
+                                text-gray-600
+                                transition
+                                hover:bg-gray-100
+                                dark:text-gray-300
+                                dark:hover:bg-gray-800"
+                        >
+                            Cancel
+                        </button>
+
+
+                        <button
+                            type="button"
+                            id="confirm-delete-column"
+                            class="inline-flex
+                                items-center gap-2
+                                rounded-xl
+                                bg-red-600
+                                px-4 py-2.5
+                                text-sm font-semibold
+                                text-white
+                                shadow-sm transition
+                                hover:bg-red-500
+                                disabled:cursor-not-allowed
+                                disabled:opacity-60"
+                        >
+                            <span
+                                class="material-symbols-rounded
+                                    text-[18px]"
+                            >
+                                delete
+                            </span>
+
+                            <span data-delete-label>
+                                Delete column
+                            </span>
+                        </button>
+
+                    </div>
+
+                </div>
+
             </div>
         </div>
     </div>
@@ -942,6 +1094,473 @@
                         event.preventDefault();
 
                         closeColumnEditor();
+                    }
+                }
+            );
+
+            const columnMenuWrappers =
+                document.querySelectorAll(
+                    '[data-column-menu]'
+                );
+
+            const columnsBaseUrl =
+                @json(url('/columns'));
+
+            const csrfToken =
+                document
+                    .querySelector(
+                        'meta[name="csrf-token"]'
+                    )
+                    .getAttribute('content');
+
+
+            function closeAllColumnMenus(
+                except = null
+            ) {
+                columnMenuWrappers.forEach(
+                    wrapper => {
+
+                        if (wrapper === except) {
+                            return;
+                        }
+
+                        const panel =
+                            wrapper.querySelector(
+                                '[data-column-menu-panel]'
+                            );
+
+                        const toggle =
+                            wrapper.querySelector(
+                                '[data-column-menu-toggle]'
+                            );
+
+                        panel.classList.add('hidden');
+
+                        toggle.setAttribute(
+                            'aria-expanded',
+                            'false'
+                        );
+                    }
+                );
+            }
+
+
+            async function sendColumnRequest(
+                url,
+                method,
+                body = null
+            ) {
+                const options = {
+                    method: method,
+
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken,
+                        'Accept': 'application/json',
+                        'Content-Type':
+                            'application/json',
+                    },
+                };
+
+
+                if (body !== null) {
+                    options.body =
+                        JSON.stringify(body);
+                }
+
+
+                const response =
+                    await fetch(url, options);
+
+
+                let data = {};
+
+                try {
+                    data = await response.json();
+                } catch (error) {
+                    // Response had no JSON body.
+                }
+
+
+                if (
+                    !response.ok ||
+                    data.success === false
+                ) {
+                    throw new Error(
+                        data.message ??
+                        'The column could not be updated.'
+                    );
+                }
+
+
+                return data;
+            }
+
+
+            columnMenuWrappers.forEach(
+                wrapper => {
+
+                    const columnId =
+                        Number(
+                            wrapper.dataset.columnId
+                        );
+
+                    const columnName =
+                        wrapper.dataset.columnName;
+
+                    const toggle =
+                        wrapper.querySelector(
+                            '[data-column-menu-toggle]'
+                        );
+
+                    const panel =
+                        wrapper.querySelector(
+                            '[data-column-menu-panel]'
+                        );
+
+                    const menuError =
+                        wrapper.querySelector(
+                            '[data-column-menu-error]'
+                        );
+
+                    const colourButtons =
+                        wrapper.querySelectorAll(
+                            '[data-column-color]'
+                        );
+
+                    const copyButton =
+                        wrapper.querySelector(
+                            '[data-copy-column]'
+                        );
+
+                    const deleteButton =
+                        wrapper.querySelector(
+                            '[data-delete-column]'
+                        );
+
+
+                    function clearMenuError() {
+                        menuError.textContent = '';
+
+                        menuError.classList.add(
+                            'hidden'
+                        );
+                    }
+
+
+                    function showMenuError(message) {
+                        menuError.textContent =
+                            message;
+
+                        menuError.classList.remove(
+                            'hidden'
+                        );
+                    }
+
+
+                    toggle.addEventListener(
+                        'click',
+                        event => {
+
+                            event.stopPropagation();
+
+                            clearMenuError();
+
+                            const wasHidden =
+                                panel.classList.contains(
+                                    'hidden'
+                                );
+
+
+                            closeAllColumnMenus();
+
+
+                            if (wasHidden) {
+                                panel.classList.remove(
+                                    'hidden'
+                                );
+
+                                toggle.setAttribute(
+                                    'aria-expanded',
+                                    'true'
+                                );
+                            }
+                        }
+                    );
+
+                    panel.addEventListener(
+                        'click',
+                        event => {
+                            event.stopPropagation();
+                        }
+                    );
+
+                    colourButtons.forEach(
+                        button => {
+
+                            button.addEventListener(
+                                'click',
+                                async () => {
+
+                                    clearMenuError();
+
+                                    const color =
+                                        button.dataset.color;
+
+
+                                    colourButtons.forEach(
+                                        item => {
+                                            item.disabled =
+                                                true;
+                                        }
+                                    );
+
+
+                                    try {
+
+                                        await sendColumnRequest(
+                                            `${columnsBaseUrl}/${columnId}/color`,
+                                            'PATCH',
+                                            {
+                                                color: color,
+                                            }
+                                        );
+
+                                        window.location.reload();
+
+                                    } catch (error) {
+
+                                        showMenuError(
+                                            error.message
+                                        );
+
+                                        colourButtons.forEach(
+                                            item => {
+                                                item.disabled =
+                                                    false;
+                                            }
+                                        );
+                                    }
+                                }
+                            );
+                        }
+                    );
+
+                    copyButton?.addEventListener(
+                        'click',
+                        async () => {
+
+                            clearMenuError();
+
+                            const label =
+                                copyButton.querySelector(
+                                    '[data-copy-label]'
+                                );
+
+                            copyButton.disabled = true;
+
+                            label.textContent =
+                                'Copying...';
+
+
+                            try {
+
+                                await sendColumnRequest(
+                                    `${columnsBaseUrl}/${columnId}/copy`,
+                                    'POST'
+                                );
+
+                                window.location.reload();
+
+                            } catch (error) {
+
+                                showMenuError(
+                                    error.message
+                                );
+
+                                copyButton.disabled =
+                                    false;
+
+                                label.textContent =
+                                    'Copy column';
+                            }
+                        }
+                    );
+
+                    deleteButton?.addEventListener(
+                        'click',
+                        () => {
+
+                            closeAllColumnMenus();
+
+                            openDeleteColumnModal(
+                                columnId,
+                                columnName
+                            );
+                        }
+                    );
+                }
+            );
+
+            document.addEventListener(
+                'click',
+                () => {
+                    closeAllColumnMenus();
+                }
+            );
+
+            
+            const deleteColumnModal =
+                document.getElementById(
+                    'delete-column-modal'
+                );
+
+            const deleteColumnName =
+                document.getElementById(
+                    'delete-column-name'
+                );
+
+            const deleteColumnError =
+                document.getElementById(
+                    'delete-column-error'
+                );
+
+            const cancelDeleteColumn =
+                document.getElementById(
+                    'cancel-delete-column'
+                );
+
+            const confirmDeleteColumn =
+                document.getElementById(
+                    'confirm-delete-column'
+                );
+
+            const deleteBackdrop =
+                deleteColumnModal.querySelector(
+                    '[data-delete-column-backdrop]'
+                );
+
+            let pendingDeleteColumnId = null;
+
+
+            function openDeleteColumnModal(
+                columnId,
+                columnName
+            ) {
+                pendingDeleteColumnId =
+                    columnId;
+
+                deleteColumnName.textContent =
+                    `"${columnName}"`;
+
+                deleteColumnError.textContent =
+                    '';
+
+                deleteColumnError.classList.add(
+                    'hidden'
+                );
+
+                deleteColumnModal.classList.remove(
+                    'hidden'
+                );
+
+                document.body.classList.add(
+                    'overflow-hidden'
+                );
+            }
+
+
+            function closeDeleteColumnModal() {
+                pendingDeleteColumnId = null;
+
+                deleteColumnModal.classList.add(
+                    'hidden'
+                );
+
+                document.body.classList.remove(
+                    'overflow-hidden'
+                );
+            }
+
+
+            cancelDeleteColumn.addEventListener(
+                'click',
+                closeDeleteColumnModal
+            );
+
+
+            deleteBackdrop.addEventListener(
+                'click',
+                closeDeleteColumnModal
+            );
+
+
+            document.addEventListener(
+                'keydown',
+                event => {
+
+                    if (
+                        event.key === 'Escape' &&
+                        !deleteColumnModal
+                            .classList
+                            .contains('hidden')
+                    ) {
+                        closeDeleteColumnModal();
+                    }
+                }
+            );
+
+
+            confirmDeleteColumn.addEventListener(
+                'click',
+                async () => {
+
+                    if (
+                        pendingDeleteColumnId === null
+                    ) {
+                        return;
+                    }
+
+
+                    deleteColumnError.classList.add(
+                        'hidden'
+                    );
+
+                    confirmDeleteColumn.disabled =
+                        true;
+
+                    const label =
+                        confirmDeleteColumn
+                            .querySelector(
+                                '[data-delete-label]'
+                            );
+
+                    label.textContent =
+                        'Deleting...';
+
+
+                    try {
+
+                        await sendColumnRequest(
+                            `${columnsBaseUrl}/${pendingDeleteColumnId}`,
+                            'DELETE'
+                        );
+
+                        window.location.reload();
+
+                    } catch (error) {
+
+                        deleteColumnError.textContent =
+                            error.message;
+
+                        deleteColumnError.classList.remove(
+                            'hidden'
+                        );
+
+                        confirmDeleteColumn.disabled =
+                            false;
+
+                        label.textContent =
+                            'Delete column';
                     }
                 }
             );

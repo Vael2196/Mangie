@@ -9,7 +9,7 @@ class Column extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'board_id', 'position'];
+    protected $fillable = ['name', 'board_id', 'position', 'color'];
 
     // Column belongs to Board
     public function board()

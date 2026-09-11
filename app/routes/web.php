@@ -37,7 +37,10 @@ Route::get('/boards/{id}', [BoardController::class, 'show'])->middleware('auth')
 Route::post('/boards/move', [BoardController::class, 'moveColumnTasks'])->middleware('auth')->name('boards.moveTasks');
 Route::delete('/boards/{id}', [BoardController::class, 'destroy'])->middleware('auth')->name('boards.destroy');
 
-Route::post('/columns/store', [BoardController::class, 'storeColumn'])->name('columns.store');
+Route::post('/columns/store', [BoardController::class, 'storeColumn'])->middleware('auth')->name('columns.store');
+Route::patch('/columns/{column}/color', [BoardController::class, 'updateColumnColor'])->middleware('auth')->name('columns.color');
+Route::post('/columns/{column}/copy', [BoardController::class, 'copyColumn'])->middleware('auth')->name('columns.copy');
+Route::delete('/columns/{column}', [BoardController::class, 'destroyColumn'])->middleware('auth')-> name('columns.destroy');
 Route::post('/tasks/store', [BoardController::class, 'storeTask'])->name('tasks.store');
 Route::post('/tasks/update', [BoardController::class, 'updateTask'])->name('tasks.update');
 Route::post('/boards/updateStatus', [BoardController::class, 'updateStatus'])->name('boards.updateStatus');
