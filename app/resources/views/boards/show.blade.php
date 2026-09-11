@@ -192,20 +192,102 @@
             @foreach($board->columns as $column)
                 <x-task-column title="{{ $column->name }}">
 
-                    {{-- Show tasks for each column --}}
-                    <div class="task-list" id="task-list-{{ $column->id }}">
+                    <div
+                        class="task-list space-y-3"
+                        id="task-list-{{ $column->id }}"
+                    >
                         @foreach($column->tasks as $task)
                             <x-task-box :task="$task"/>
                         @endforeach
                     </div>
 
-                    {{-- Add task button --}}
-                    {{-- @if ($loop->first)
-                        <!-- Input field for adding a new task in the first column -->
-                        <div class="mt-2">
-                            <input type="text" id="new-task-input" class="bg-white shadow-inner rounded-lg p-2 w-full dark:bg-gray-500 dark:text-white" placeholder="Enter new task" />
+                    @if($board->completed == 0)
+                        <div
+                            class="add-task-section mt-3"
+                            data-column-id="{{ $column->id }}"
+                        >
+                            <button
+                                type="button"
+                                class="add-task-btn flex w-full items-center gap-2
+                                    rounded-lg px-2.5 py-2
+                                    text-sm font-medium text-gray-500
+                                    transition
+                                    hover:bg-gray-200/80 hover:text-gray-700
+                                    dark:text-gray-400
+                                    dark:hover:bg-gray-700
+                                    dark:hover:text-gray-200"
+                            >
+                                <span class="material-symbols-rounded text-[19px]">
+                                    add
+                                </span>
+
+                                Add a task
+                            </button>
+
+                            <div class="new-task-editor hidden">
+                                <textarea
+                                    class="new-task-input min-h-[90px] w-full
+                                        resize-none rounded-xl
+                                        border border-gray-200 bg-white
+                                        px-3 py-2.5 text-sm
+                                        text-gray-900 shadow-sm
+                                        placeholder:text-gray-400
+                                        focus:border-indigo-500
+                                        focus:ring-indigo-500
+                                        dark:border-gray-700
+                                        dark:bg-gray-900
+                                        dark:text-white"
+                                    maxlength="255"
+                                    rows="3"
+                                    placeholder="Enter a title for this task..."
+                                ></textarea>
+
+                                <div class="mt-2 flex items-center gap-2">
+
+                                    <button
+                                        type="button"
+                                        class="confirm-add-task
+                                            inline-flex items-center
+                                            rounded-lg bg-indigo-600
+                                            px-3 py-2
+                                            text-sm font-semibold text-white
+                                            transition
+                                            hover:bg-indigo-500
+                                            disabled:cursor-not-allowed
+                                            disabled:opacity-50"
+                                    >
+                                        Add task
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        class="cancel-add-task
+                                            flex h-9 w-9 items-center
+                                            justify-center rounded-lg
+                                            text-gray-500 transition
+                                            hover:bg-gray-200
+                                            hover:text-gray-700
+                                            dark:text-gray-400
+                                            dark:hover:bg-gray-700
+                                            dark:hover:text-white"
+                                        aria-label="Cancel"
+                                    >
+                                        <span class="material-symbols-rounded text-[21px]">
+                                            close
+                                        </span>
+                                    </button>
+
+                                </div>
+
+                                <p
+                                    class="task-error mt-2 hidden
+                                        text-xs text-red-600
+                                        dark:text-red-400"
+                                ></p>
+                            </div>
                         </div>
-                    @endif --}}
+                    @endif
+
                 </x-task-column>
             @endforeach
 
@@ -720,19 +802,13 @@
 
         document.addEventListener('DOMContentLoaded', function () {
             const columnsContainer = document.getElementById('columns-container');
-            const newTaskInput = document.getElementById('new-task-input');
-            const firstColumnTaskList = document.getElementById('task-list-{{ $board->columns->first()->id }}');
+            const taskItems = document.querySelectorAll(`[id*="task-list-item"]`);
 
-            // Task Items
-            const taskItems = document.querySelectorAll(`[id*="task-list-item"]`); // Rows of the table -- change to be more general name
-
-            // Context Menu
             var selectedTaskItems = [];
-            const taskContextMenu = document.getElementById(`task-context-menu`); // Context menu
-            const contextSubMenu = document.getElementById(`contextBoardMenu`); // Context sub menu box
-            const contextSubMenuChildren = contextSubMenu.children; // Context sub menu buttons
+            const taskContextMenu = document.getElementById(`task-context-menu`);
+            const contextSubMenu = document.getElementById(`contextBoardMenu`);
+            const contextSubMenuChildren = contextSubMenu.children;
 
-            // Add new column
             const addColumnBtn = document.getElementById('add-column-btn');
 
             const columnEditor = document.getElementById('new-column-editor');
@@ -852,6 +928,7 @@
             );
 
 
+            // New column handler
             inputField?.addEventListener(
                 'keydown',
                 event => {
@@ -869,75 +946,203 @@
                 }
             );
 
-            // Create a new column
-            inputField.addEventListener('keypress', function (e) {
-                if (e.key === 'Enter') {
-                    const columnName = inputField.value.trim();
-                    if (columnName !== '') {
-                        fetch('{{ route('columns.store') }}', {
-                            method: 'POST',
-                            headers: {
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify({
-                                name: columnName,
-                                board_id: {{ $board->id }}
-                            })
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success) {
-                                // const newColumn = document.createElement('div');
-                                // newColumn.classList.add('bg-gray-100', 'shadow-lg', 'rounded-lg', 'p-4', 'w-64');
-                                // newColumn.innerHTML = `<h2 class="text-xl font-bold">${data.column.name}</h2>`;
-                                // columnsContainer.insertBefore(newColumn, document.getElementById('add-column-section'));
-                                inputField.value = '';
-                                inputField.classList.add('hidden');
-                                // addColumnBtn.style.marginLeft = '0';
-                                location.reload();
-                            } else {
-                                console.error('Error adding column:', data.message);
+            // Add task thingy
+            const addTaskSections =
+                document.querySelectorAll('.add-task-section');
+
+            addTaskSections.forEach(section => {
+
+                const columnId = Number(section.dataset.columnId);
+
+                const addTaskBtn =
+                    section.querySelector('.add-task-btn');
+
+                const editor =
+                    section.querySelector('.new-task-editor');
+
+                const input =
+                    section.querySelector('.new-task-input');
+
+                const confirmBtn =
+                    section.querySelector('.confirm-add-task');
+
+                const cancelBtn =
+                    section.querySelector('.cancel-add-task');
+
+                const errorElement =
+                    section.querySelector('.task-error');
+
+
+                function showTaskError(message) {
+                    errorElement.textContent = message;
+                    errorElement.classList.remove('hidden');
+                }
+
+
+                function clearTaskError() {
+                    errorElement.textContent = '';
+                    errorElement.classList.add('hidden');
+                }
+
+
+                function openTaskEditor() {
+                    addTaskBtn.classList.add('hidden');
+                    editor.classList.remove('hidden');
+
+                    clearTaskError();
+
+                    input.focus();
+                }
+
+
+                function closeTaskEditor() {
+                    input.value = '';
+
+                    clearTaskError();
+
+                    editor.classList.add('hidden');
+                    addTaskBtn.classList.remove('hidden');
+                }
+
+
+                async function createTask() {
+
+                    const title = input.value.trim();
+
+                    if (!title) {
+                        showTaskError(
+                            'Please enter a task title.'
+                        );
+
+                        input.focus();
+
+                        return;
+                    }
+
+
+                    clearTaskError();
+
+                    confirmBtn.disabled = true;
+
+
+                    try {
+
+                        const response = await fetch(
+                            '{{ route('tasks.store') }}',
+                            {
+                                method: 'POST',
+
+                                headers: {
+                                    'X-CSRF-TOKEN':
+                                        document
+                                            .querySelector(
+                                                'meta[name="csrf-token"]'
+                                            )
+                                            .getAttribute('content'),
+
+                                    'Content-Type': 'application/json',
+
+                                    'Accept': 'application/json',
+                                },
+
+                                body: JSON.stringify({
+                                    title: title,
+                                    column_id: columnId,
+                                }),
                             }
-                        })
-                        .catch(error => console.error('Error:', error));
+                        );
+
+
+                        const data = await response.json();
+
+
+                        if (!response.ok || !data.success) {
+
+                            showTaskError(
+                                data.message ??
+                                'Could not create task.'
+                            );
+
+                            return;
+                        }
+
+
+                        /*
+                        * Reload just like the existing Add Column
+                        * implementation.
+                        *
+                        * This guarantees the newly created task receives
+                        * all of the normal x-task-box functionality,
+                        * including its task-detail menu.
+                        */
+                        window.location.reload();
+
+                    } catch (error) {
+
+                        console.error(
+                            'Creating task failed:',
+                            error
+                        );
+
+                        showTaskError(
+                            'Could not create task.'
+                        );
+
+                    } finally {
+
+                        confirmBtn.disabled = false;
+
                     }
                 }
+
+
+                addTaskBtn.addEventListener(
+                    'click',
+                    openTaskEditor
+                );
+
+
+                cancelBtn.addEventListener(
+                    'click',
+                    closeTaskEditor
+                );
+
+
+                confirmBtn.addEventListener(
+                    'click',
+                    createTask
+                );
+
+
+                input.addEventListener(
+                    'keydown',
+                    event => {
+
+                        /*
+                        * Enter       = create
+                        * Shift+Enter = newline
+                        */
+                        if (
+                            event.key === 'Enter' &&
+                            !event.shiftKey
+                        ) {
+                            event.preventDefault();
+
+                            createTask();
+                        }
+
+
+                        // Escape = cancel
+                        if (event.key === 'Escape') {
+
+                            event.preventDefault();
+
+                            closeTaskEditor();
+                        }
+                    }
+                );
+
             });
-
-            // Add new task
-            // newTaskInput.addEventListener('keypress', function (e) {
-            //     if (e.key === 'Enter') {
-            //         const taskTitle = newTaskInput.value.trim();
-            //         if (taskTitle !== '') {
-            //             fetch('{{ route('tasks.store') }}', {
-            //                 method: 'POST',
-            //                 headers: {
-            //                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-            //                     'Content-Type': 'application/json'
-            //                 },
-            //                 body: JSON.stringify({
-            //                     title: taskTitle,
-            //                     column_id: {{ $board->columns->first()->id }}
-            //                 })
-            //             })
-            //             .then(response => response.json())
-            //             .then(data => {
-            //                 if (data.success) {
-            //                     // Insert task into the task list of the first column
-            //                     // const newTask = `<div class="bg-white p-2 my-2 rounded-lg shadow">${data.task.title}</div>`;
-            //                     // firstColumnTaskList.insertAdjacentHTML('beforeend', newTask);
-            //                     newTaskInput.value = '';
-            //                     location.reload();
-            //                 } else {
-            //                     console.error('Error adding task:', data.message);
-            //                 }
-            //             })
-            //             .catch(error => console.error('Error:', error));
-            //         }
-            //     }
-            // });
-
 
             // Context Menu ---------------------------------------------------------------
             // Reset context menu on right click anywhere outside
