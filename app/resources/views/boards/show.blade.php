@@ -386,7 +386,7 @@
                     ></p>
                 </div>
             </div>
-
+        </div>
         {{-- Context Menu --}}
         <div class="hidden absolute z-30" id="task-context-menu">
             <div class="2xl:flex 2xl:items-start">

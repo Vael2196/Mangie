@@ -101,19 +101,19 @@
     ]) }}
 >
     <div
-        class="relative mb-3 flex
-            items-center justify-between
-            gap-2 px-1 py-1"
+        class="relative mb-3 flex min-w-0
+            items-center gap-2 px-1 py-1"
     >
 
-        <div class="min-w-0 flex-1">
-
+        <div
+            class="min-w-0 flex-1 overflow-hidden"
+        >
             @if($editable)
 
                 <button
                     type="button"
                     data-column-name-display
-                    class="group flex max-w-full items-center
+                    class="block w-full min-w-0
                         rounded-lg px-1.5 py-1
                         text-left transition
                         hover:bg-black/5
@@ -122,7 +122,8 @@
                 >
                     <span
                         data-column-name-text
-                        class="truncate text-sm font-bold
+                        class="block truncate
+                            text-sm font-bold
                             uppercase tracking-wide
                             text-gray-700
                             dark:text-gray-200"
@@ -131,9 +132,10 @@
                     </span>
                 </button>
 
+
                 <div
                     data-column-name-editor
-                    class="hidden"
+                    class="hidden w-full min-w-0"
                 >
                     <input
                         type="text"
@@ -141,12 +143,14 @@
                         value="{{ $column->name }}"
                         maxlength="255"
                         autocomplete="off"
-                        class="w-full rounded-lg
+                        class="block w-full min-w-0
+                            rounded-lg
                             border border-indigo-300
-                            bg-white px-2.5 py-1.5
+                            bg-white
+                            px-2.5 py-1.5
                             text-sm font-semibold
-                            text-gray-800 shadow-sm
-                            outline-none
+                            text-gray-800
+                            shadow-sm outline-none
                             transition
                             focus:border-indigo-500
                             focus:ring-2
@@ -169,7 +173,8 @@
             @else
 
                 <h2
-                    class="truncate text-sm font-bold
+                    class="truncate
+                        text-sm font-bold
                         uppercase tracking-wide
                         text-gray-700
                         dark:text-gray-200"
@@ -178,33 +183,27 @@
                 </h2>
 
             @endif
-
         </div>
 
 
         <div
-            class="flex shrink-0 items-center gap-1"
+            class="ml-auto flex shrink-0
+                items-center gap-1"
         >
 
             <div
                 data-column-task-count
-                class="flex h-8 items-center gap-1
-                    rounded-lg px-2
+                class="flex h-7 min-w-7 shrink-0
+                    items-center justify-center
+                    rounded-lg
+                    bg-black/5 px-2
                     text-xs font-semibold
                     text-gray-500
-                    dark:text-gray-400"
+                    dark:bg-white/10
+                    dark:text-gray-300"
                 title="{{ $taskCount }} {{ $taskCount === 1 ? 'task' : 'tasks' }}"
             >
-                <span
-                    class="material-symbols-rounded
-                        text-[17px]"
-                >
-                    task_alt
-                </span>
-
-                <span data-task-count-value>
-                    {{ $taskCount }}
-                </span>
+                {{ $taskCount }}
             </div>
 
         @if($editable)
@@ -457,6 +456,7 @@
 
         @endif
 
+    </div>
     </div>
 
 
