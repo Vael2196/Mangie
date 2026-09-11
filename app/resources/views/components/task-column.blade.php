@@ -82,6 +82,9 @@
 
     $canDelete =
         ($column->tasks_count ?? 0) === 0;
+
+    $taskCount = (int) ($column->tasks_count ?? 0);
+
 @endphp
 
 
@@ -99,19 +102,110 @@
 >
     <div
         class="relative mb-3 flex
-               items-center justify-between
-               px-1 py-1"
+            items-center justify-between
+            gap-2 px-1 py-1"
     >
 
-        <h2
-            class="min-w-0 truncate
-                   text-sm font-bold uppercase
-                   tracking-wide text-gray-700
-                   dark:text-gray-200"
-        >
-            {{ $column->name }}
-        </h2>
+        <div class="min-w-0 flex-1">
 
+            @if($editable)
+
+                <button
+                    type="button"
+                    data-column-name-display
+                    class="group flex max-w-full items-center
+                        rounded-lg px-1.5 py-1
+                        text-left transition
+                        hover:bg-black/5
+                        dark:hover:bg-white/10"
+                    title="Click to rename column"
+                >
+                    <span
+                        data-column-name-text
+                        class="truncate text-sm font-bold
+                            uppercase tracking-wide
+                            text-gray-700
+                            dark:text-gray-200"
+                    >
+                        {{ $column->name }}
+                    </span>
+                </button>
+
+                <div
+                    data-column-name-editor
+                    class="hidden"
+                >
+                    <input
+                        type="text"
+                        data-column-name-input
+                        value="{{ $column->name }}"
+                        maxlength="255"
+                        autocomplete="off"
+                        class="w-full rounded-lg
+                            border border-indigo-300
+                            bg-white px-2.5 py-1.5
+                            text-sm font-semibold
+                            text-gray-800 shadow-sm
+                            outline-none
+                            transition
+                            focus:border-indigo-500
+                            focus:ring-2
+                            focus:ring-indigo-200
+                            dark:border-indigo-700
+                            dark:bg-gray-900
+                            dark:text-gray-100
+                            dark:focus:border-indigo-500
+                            dark:focus:ring-indigo-950"
+                    >
+
+                    <p
+                        data-column-name-error
+                        class="mt-1 hidden
+                            text-xs text-red-600
+                            dark:text-red-400"
+                    ></p>
+                </div>
+
+            @else
+
+                <h2
+                    class="truncate text-sm font-bold
+                        uppercase tracking-wide
+                        text-gray-700
+                        dark:text-gray-200"
+                >
+                    {{ $column->name }}
+                </h2>
+
+            @endif
+
+        </div>
+
+
+        <div
+            class="flex shrink-0 items-center gap-1"
+        >
+
+            <div
+                data-column-task-count
+                class="flex h-8 items-center gap-1
+                    rounded-lg px-2
+                    text-xs font-semibold
+                    text-gray-500
+                    dark:text-gray-400"
+                title="{{ $taskCount }} {{ $taskCount === 1 ? 'task' : 'tasks' }}"
+            >
+                <span
+                    class="material-symbols-rounded
+                        text-[17px]"
+                >
+                    task_alt
+                </span>
+
+                <span data-task-count-value>
+                    {{ $taskCount }}
+                </span>
+            </div>
 
         @if($editable)
 

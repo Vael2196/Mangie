@@ -242,6 +242,43 @@ class BoardController extends Controller
         ]);
     }
 
+    public function updateColumnName(
+        Request $request,
+        Column $column
+    ) {
+        if ($column->board?->completed) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Completed sprint columns cannot be renamed.',
+            ], 403);
+        }
+
+        $request->merge([
+            'name' => trim((string) $request->input('name')),
+        ]);
+
+        $validated = $request->validate([
+            'name' => [
+                'required',
+                'string',
+                'max:255',
+            ],
+        ]);
+
+        $column->update([
+            'name' => $validated['name'],
+        ]);
+
+        return response()->json([
+            'success' => true,
+
+            'column' => [
+                'id' => $column->id,
+                'name' => $column->name,
+            ],
+        ]);
+    }
+
     public function updateColumnColor(Request $request, Column $column) {
         $validated = $request->validate([
             'color' => [

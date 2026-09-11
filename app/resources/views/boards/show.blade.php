@@ -1204,7 +1204,7 @@
                             wrapper.dataset.columnId
                         );
 
-                    const columnName =
+                    let columnName =
                         wrapper.dataset.columnName;
 
                     const toggle =
@@ -1237,6 +1237,181 @@
                             '[data-delete-column]'
                         );
 
+                    const columnElement =
+                        document.getElementById(
+                            `column-${columnId}`
+                        );
+
+                    const nameDisplay =
+                        columnElement.querySelector(
+                            '[data-column-name-display]'
+                        );
+
+                    const nameText =
+                        columnElement.querySelector(
+                            '[data-column-name-text]'
+                        );
+
+                    const nameEditor =
+                        columnElement.querySelector(
+                            '[data-column-name-editor]'
+                        );
+
+                    const nameInput =
+                        columnElement.querySelector(
+                            '[data-column-name-input]'
+                        );
+
+                    const nameError =
+                        columnElement.querySelector(
+                            '[data-column-name-error]'
+                        );
+
+                    let savingColumnName = false;
+
+                    function clearColumnNameError() {
+                        nameError.textContent = '';
+
+                        nameError.classList.add(
+                            'hidden'
+                        );
+                    }
+
+                    function showColumnNameError(message) {
+                        nameError.textContent = message;
+
+                        nameError.classList.remove(
+                            'hidden'
+                        );
+                    }
+
+                    function openColumnNameEditor() {
+                        closeAllColumnMenus();
+
+                        clearColumnNameError();
+
+                        nameInput.value =
+                            columnName;
+
+                        nameDisplay.classList.add(
+                            'hidden'
+                        );
+
+                        nameEditor.classList.remove(
+                            'hidden'
+                        );
+
+                        nameInput.focus();
+
+                        nameInput.select();
+                    }
+
+
+                    function cancelColumnNameEditor() {
+                        nameInput.value =
+                            columnName;
+
+                        clearColumnNameError();
+
+                        nameEditor.classList.add(
+                            'hidden'
+                        );
+
+                        nameDisplay.classList.remove(
+                            'hidden'
+                        );
+                    }
+
+
+                    async function saveColumnName() {
+
+                        if (savingColumnName) {
+                            return;
+                        }
+
+
+                        const nextName =
+                            nameInput.value.trim();
+
+
+                        if (!nextName) {
+                            showColumnNameError(
+                                'Column name cannot be empty.'
+                            );
+
+                            nameInput.focus();
+
+                            return;
+                        }
+
+
+                        if (nextName === columnName) {
+                            cancelColumnNameEditor();
+
+                            return;
+                        }
+
+
+                        clearColumnNameError();
+
+                        savingColumnName = true;
+
+                        nameInput.disabled = true;
+
+
+                        try {
+
+                            const data =
+                                await sendColumnRequest(
+                                    `${columnsBaseUrl}/${columnId}/name`,
+                                    'PATCH',
+                                    {
+                                        name: nextName,
+                                    }
+                                );
+
+
+                            columnName =
+                                data.column.name;
+
+                            nameText.textContent =
+                                columnName;
+
+                            wrapper.dataset.columnName =
+                                columnName;
+
+                            columnElement.dataset.columnName =
+                                columnName;
+
+                            nameInput.value =
+                                columnName;
+
+
+                            nameEditor.classList.add(
+                                'hidden'
+                            );
+
+                            nameDisplay.classList.remove(
+                                'hidden'
+                            );
+
+                        } catch (error) {
+
+                            showColumnNameError(
+                                error.message ??
+                                'Could not rename column.'
+                            );
+
+                            nameInput.focus();
+
+                        } finally {
+
+                            savingColumnName = false;
+
+                            nameInput.disabled = false;
+
+                        }
+                    }
 
                     function clearMenuError() {
                         menuError.textContent = '';
@@ -1256,6 +1431,53 @@
                         );
                     }
 
+                    nameDisplay?.addEventListener(
+                        'click',
+                        event => {
+
+                            event.stopPropagation();
+
+                            openColumnNameEditor();
+                        }
+                    );
+
+
+                    nameInput?.addEventListener(
+                        'keydown',
+                        event => {
+
+                            if (event.key === 'Enter') {
+
+                                event.preventDefault();
+
+                                saveColumnName();
+
+                                return;
+                            }
+
+
+                            if (event.key === 'Escape') {
+
+                                event.preventDefault();
+
+                                cancelColumnNameEditor();
+                            }
+                        }
+                    );
+
+                    nameInput?.addEventListener(
+                        'blur',
+                        () => {
+
+                            if (
+                                !nameEditor
+                                    .classList
+                                    .contains('hidden')
+                            ) {
+                                saveColumnName();
+                            }
+                        }
+                    );
 
                     toggle.addEventListener(
                         'click',
@@ -1408,7 +1630,7 @@
                 }
             );
 
-            
+
             const deleteColumnModal =
                 document.getElementById(
                     'delete-column-modal'
