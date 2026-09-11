@@ -1,228 +1,791 @@
-{{-- Task Success notification --}}
-<div id="task-success-{{$task->id}}" class="hidden absolute top-0 right-0 z-50 w-full bg-green-100 border border-green-400 text-gray-700 px-4 py-3 rounded mb-4">
-    Task has been Updated successfully
-</div>
+<div
+    class="relative z-10 w-full max-w-5xl
+           overflow-hidden rounded-3xl
+           border border-gray-200
+           bg-white shadow-2xl
+           dark:border-gray-700
+           dark:bg-gray-900"
+>
 
-{{-- Task Fail notification --}}
-<div id="task-fail-{{$task->id}}" class="hidden absolute top-0 right-0 z-50 w-full bg-red-100 border border-red-400 text-gray-700 px-4 py-3 rounded mb-4"></div>
-
-<div class = "absolute top-0 right-0 h-full w-full p-5 flex justify-center items-center z-30 backdrop-blur-sm bg-black bg-opacity-30">
-    <div class = "overflow-x-auto rounded lg:px-11 px-2 py-7 w-4/6 h-3/5 bg-white dark:bg-gradient-to-l from-slate-700 to-gray-900 border-2 flex flex-col">
-        {{-- Top bar --}}
-        <div class="flex justify-between items-center space-x-10 w-full mb-3">
-
-            {{-- Task Title --}}
-            <input id="formTitle{{$task->id}}" type="text" placeholder="{{$task->title ? $task->title : "Enter a title"}}" value="{{$task->title}}" class="placeholder-slate-700 text-2xl min-w-24 max-w-lg flex-grow dark:bg-transparent dark:text-white">
-
-            {{-- Select details --}}
-            <button type="button" id="saveTaskButton{{$task->id}}" class='inline-flex items-center px-4 py-2 bg-blue-500 dark:bg-gray-800 border border-gray-300 dark:border-gray-500 rounded-md font-semibold text-xs text-white dark:text-gray-300 uppercase tracking-widest shadow-sm hover:bg-blue-600 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:opacity-25 transition ease-in-out duration-150'>
-                Save
-            </button>
-
-            {{-- X button --}}
-            <span class="flex items-start" id="xButton{{$task->id}}">
-                <div class="p-2 hover:cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-900 bg-opacity-10 rounded">
-                    <i class="fa-solid fa-xmark fa-2xl"></i>
-                </div>
+    <div
+        class="flex items-start gap-4
+               border-b border-gray-200
+               px-5 py-5 sm:px-7
+               dark:border-gray-800"
+    >
+        <div
+            class="mt-1 flex h-10 w-10 shrink-0
+                   items-center justify-center
+                   rounded-xl bg-indigo-50
+                   text-indigo-600
+                   dark:bg-indigo-950/60
+                   dark:text-indigo-400"
+        >
+            <span class="material-symbols-rounded">
+                task_alt
             </span>
         </div>
 
-        {{-- Main content --}}
-        <div class="flex justify-between w-full h-full overflow-y-hidden">
-            <div class = "flex flex-col w-1/2 h-full min-w-64">
-                <!-- Task info -->
-                <div class="mb-10 flex flex-col dark:bg-transparent dark:text-white">
-                    <label for="formDescription{{$task->id}}" class="mb-2">Description</label>
-                    <textarea id="formDescription{{$task->id}}" rows="5" placeholder="Enter a description" value="{{$task->description}}" class="dark:placeholder-white placeholder-slate-700 dark:bg-transparent dark:text-white">{{$task->description}}</textarea>
+        <div class="min-w-0 flex-1">
+            <p
+                class="mb-1 text-xs font-semibold uppercase
+                       tracking-wider text-gray-400"
+            >
+                Task #{{ $task->id }}
+            </p>
+
+            <input
+                id="formTitle{{ $task->id }}"
+                type="text"
+                value="{{ $task->title }}"
+                placeholder="Task title"
+                class="w-full rounded-xl
+                       border border-transparent
+                       bg-transparent px-3 py-2
+                       text-xl font-bold
+                       text-gray-900
+                       transition
+                       hover:border-gray-200
+                       hover:bg-gray-50
+                       focus:border-indigo-400
+                       focus:bg-white
+                       focus:ring-4
+                       focus:ring-indigo-100
+                       dark:text-white
+                       dark:hover:border-gray-700
+                       dark:hover:bg-gray-800
+                       dark:focus:border-indigo-600
+                       dark:focus:bg-gray-900
+                       dark:focus:ring-indigo-950"
+            >
+        </div>
+
+        <button
+            type="button"
+            id="xButton{{ $task->id }}"
+            class="flex h-10 w-10 shrink-0
+                   items-center justify-center
+                   rounded-xl text-gray-400
+                   transition
+                   hover:bg-gray-100
+                   hover:text-gray-700
+                   dark:hover:bg-gray-800
+                   dark:hover:text-white"
+            aria-label="Close task"
+        >
+            <span class="material-symbols-rounded text-[22px]">
+                close
+            </span>
+        </button>
+    </div>
+
+
+    <div
+        class="max-h-[calc(100vh-11rem)]
+               overflow-y-auto"
+    >
+        <div
+            class="grid grid-cols-1 gap-6
+                   p-5 sm:p-7
+                   lg:grid-cols-[minmax(0,1.6fr)_minmax(280px,0.8fr)]"
+        >
+
+            <div class="space-y-6">
+
+                <section>
+                    <div class="mb-3 flex items-center gap-2">
+                        <span
+                            class="material-symbols-rounded
+                                   text-[20px] text-gray-400"
+                        >
+                            subject
+                        </span>
+
+                        <h3
+                            class="text-sm font-semibold
+                                   text-gray-800
+                                   dark:text-gray-200"
+                        >
+                            Description
+                        </h3>
+                    </div>
+
+                    <textarea
+                        id="formDescription{{ $task->id }}"
+                        rows="8"
+                        placeholder="Add a more detailed description..."
+                        class="w-full resize-y
+                               rounded-2xl
+                               border border-gray-200
+                               bg-gray-50/70
+                               px-4 py-3
+                               text-sm leading-6
+                               text-gray-800
+                               shadow-inner
+                               transition
+                               placeholder:text-gray-400
+                               hover:border-gray-300
+                               focus:border-indigo-400
+                               focus:bg-white
+                               focus:ring-4
+                               focus:ring-indigo-100
+                               dark:border-gray-700
+                               dark:bg-gray-800/70
+                               dark:text-gray-100
+                               dark:placeholder:text-gray-500
+                               dark:hover:border-gray-600
+                               dark:focus:border-indigo-600
+                               dark:focus:bg-gray-900
+                               dark:focus:ring-indigo-950"
+                    >{{ $task->description }}</textarea>
+                </section>
+
+
+                <section
+                    class="rounded-2xl border border-gray-200
+                           bg-gray-50/70 p-4
+                           dark:border-gray-700
+                           dark:bg-gray-800/50"
+                >
+                    <div class="mb-4 flex items-center gap-2">
+                        <span
+                            class="material-symbols-rounded
+                                   text-[20px] text-gray-400"
+                        >
+                            monitoring
+                        </span>
+
+                        <h3
+                            class="text-sm font-semibold
+                                   text-gray-800
+                                   dark:text-gray-200"
+                        >
+                            Estimates
+                        </h3>
+                    </div>
+
+                    <div
+                        class="grid grid-cols-1 gap-4
+                               sm:grid-cols-2"
+                    >
+                        <div>
+                            <label
+                                for="formStoryPoint{{ $task->id }}"
+                                class="mb-1.5 block
+                                       text-xs font-semibold
+                                       text-gray-500
+                                       dark:text-gray-400"
+                            >
+                                Story points
+                            </label>
+
+                            <input
+                                type="number"
+                                min="0"
+                                id="formStoryPoint{{ $task->id }}"
+                                value="{{ $task->story_points }}"
+                                placeholder="0"
+                                class="w-full rounded-xl
+                                       border border-gray-200
+                                       bg-white px-3.5 py-2.5
+                                       text-sm text-gray-800
+                                       shadow-sm
+                                       focus:border-indigo-400
+                                       focus:ring-4
+                                       focus:ring-indigo-100
+                                       dark:border-gray-700
+                                       dark:bg-gray-900
+                                       dark:text-white
+                                       dark:focus:border-indigo-600
+                                       dark:focus:ring-indigo-950"
+                            >
+                        </div>
+
+                        <div>
+                            <label
+                                for="formTimeLog{{ $task->id }}"
+                                class="mb-1.5 block
+                                       text-xs font-semibold
+                                       text-gray-500
+                                       dark:text-gray-400"
+                            >
+                                Time logged
+                            </label>
+
+                            <input
+                                type="number"
+                                min="0"
+                                id="formTimeLog{{ $task->id }}"
+                                value="{{ $task->time_log }}"
+                                placeholder="0"
+                                class="w-full rounded-xl
+                                       border border-gray-200
+                                       bg-white px-3.5 py-2.5
+                                       text-sm text-gray-800
+                                       shadow-sm
+                                       focus:border-indigo-400
+                                       focus:ring-4
+                                       focus:ring-indigo-100
+                                       dark:border-gray-700
+                                       dark:bg-gray-900
+                                       dark:text-white
+                                       dark:focus:border-indigo-600
+                                       dark:focus:ring-indigo-950"
+                            >
+                        </div>
+                    </div>
+                </section>
+
+
+                <div
+                    class="flex flex-wrap gap-x-6 gap-y-2
+                           text-xs text-gray-400"
+                >
+                    <span>
+                        Created:
+                        {{ $task->created_at?->format('d M Y, H:i') }}
+                    </span>
+
+                    <span>
+                        Updated:
+                        {{ $task->updated_at?->format('d M Y, H:i') }}
+                    </span>
                 </div>
+
             </div>
 
-            <!-- Task details -->
-            <div class = "flex flex-col w-1/2 h-full items-center mb-2 min-w-64">
-                {{-- Details box --}}
-                <div class = "dark:text-white border-2 rounded-3 lg:w-3/4 w-10/12 h-3/4 flex flex-col justify-evenly px-3 py-1 mb-10">
-                    <h1>Details</h1>
 
-                    {{-- Assignee --}}
-                    <div class = "flex justify-between w-full">
-                        <p>Assignee</p>
-                        <select class = "dark:bg-gray-700 dark:text-white rounded-md border-2 border-white focus:ring-blue-500 focus:border-blue-500 cursor-pointer" id="formAssignee{{$task->id}}">
-                            <option value="" selected>No one</option>
-                            @foreach ($users as $assignee)
-                                <option value="{{$assignee->id}}">{{$assignee->name}}</option>
-                            @endforeach
-                        </select>
+            <aside>
+                <div
+                    class="rounded-2xl
+                           border border-gray-200
+                           bg-gray-50/70 p-4
+                           dark:border-gray-700
+                           dark:bg-gray-800/50"
+                >
+                    <div class="mb-5 flex items-center gap-2">
+                        <span
+                            class="material-symbols-rounded
+                                   text-[20px] text-gray-400"
+                        >
+                            tune
+                        </span>
+
+                        <h3
+                            class="text-sm font-semibold
+                                   text-gray-800
+                                   dark:text-gray-200"
+                        >
+                            Details
+                        </h3>
                     </div>
 
-                    {{-- Column --}}
-                    <div class = "flex justify-between w-full">
-                        <p>Status</p>
-                        <select class = "dark:bg-gray-700 dark:text-white w-50 rounded-md border-2 border-white focus:ring-blue-500 focus:border-blue-500 cursor-pointer" id="formColumn{{$task->id}}">
-                            @foreach ($parent_board->columns as $column)
-                                @if($task->column_id == $column->id)
-                                    <option value="{{$column->id}}" selected>{{$column->name}}</option>
-                                @else
-                                    <option value="{{$column->id}}">{{$column->name}}</option>
-                                @endif
-                            @endforeach
-                        </select>
-                    </div>
 
-                    {{-- Labels --}}
-                    <div class = "flex justify-between w-full">
-                        <p>Labels</p>
-                        <select class = "dark:bg-gray-700 dark:text-white w-50 rounded-md border-2 border-white focus:ring-blue-500 focus:border-blue-500 cursor-pointer" id="formLabels{{$task->id}}">
-                            <option value="" selected>Select</option>
-                            @foreach (["API", "Backend", "Frontend", "UI/UX", "Database"] as $label)
-                                @if($task->labels == $label)
-                                    <option value="{{$label}}" selected>{{$label}}</option>
-                                @else
-                                    <option value="{{$label}}">{{$label}}</option>
-                                @endif
-                            @endforeach
-                        </select>
-                    </div>
+                    <div class="space-y-4">
 
-                    {{-- Priority --}}
-                    <div class = "flex justify-between w-full">
-                        <p>Priority</p>
-                        <select class = "dark:bg-gray-700 dark:text-white w-50 rounded-md border-2 border-white focus:ring-blue-500 focus:border-blue-500 cursor-pointer" id="formPriority{{$task->id}}">
-                            <option value="" selected>Select</option>
-                            @foreach (["Low", "Medium", "High"] as $priority)
-                                @if($task->priority == $priority)
-                                    <option value="{{$priority}}" selected>{{$priority}}</option>
-                                @else
-                                    <option value="{{$priority}}">{{$priority}}</option>
-                                @endif
-                            @endforeach
-                        </select>
-                    </div>
+                        <div>
+                            <label
+                                for="formColumn{{ $task->id }}"
+                                class="mb-1.5 block
+                                       text-xs font-semibold
+                                       text-gray-500
+                                       dark:text-gray-400"
+                            >
+                                Status
+                            </label>
 
-                    {{-- Sprint board --}}
-                    <div class = "flex justify-between w-full">
-                        <p>Sprint</p>
-                        <p class = "fw-bold px-2 cursor-default dark:text-white">{{$parent_board->name}}</p>
-                    </div>
+                            <select
+                                id="formColumn{{ $task->id }}"
+                                class="w-full rounded-xl
+                                       border border-gray-200
+                                       bg-white px-3 py-2.5
+                                       text-sm text-gray-800
+                                       shadow-sm
+                                       focus:border-indigo-400
+                                       focus:ring-4
+                                       focus:ring-indigo-100
+                                       dark:border-gray-700
+                                       dark:bg-gray-900
+                                       dark:text-white
+                                       dark:focus:border-indigo-600
+                                       dark:focus:ring-indigo-950"
+                            >
+                                @foreach ($parent_board->columns as $column)
+                                    <option
+                                        value="{{ $column->id }}"
+                                        @selected($task->column_id == $column->id)
+                                    >
+                                        {{ $column->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
 
-                    {{-- Story point estimate --}}
-                    <div class = "flex justify-between w-full">
-                        <p>SP ESTIMATE</p>
-                        <input type="number" id="formStoryPoint{{$task->id}}" class = "text-end rounded-md w-10 dark:text-white dark:bg-transparent border-2 border-gray-300 focus:ring-blue-500 focus:border-blue-500 cursor-pointer placeholder-slate-700 dark:placeholder-white" placeholder="{{$task->story_points}}"/>
-                    </div>
 
-                    {{-- Time log --}}
-                    <div class = "flex justify-between w-full dark:text-white">
-                        <p>Time log</p>
-                        <input type="number" id="formTimeLog{{$task->id}}" class = "text-end rounded-md w-20 dark:text-white dark:bg-transparent border-2 border-gray-300 focus:ring-blue-500 focus:border-blue-500 cursor-pointer placeholder-slate-700 dark:placeholder-white" placeholder="{{$task->time_log}}"/>
+                        <div>
+                            <label
+                                for="formAssignee{{ $task->id }}"
+                                class="mb-1.5 block
+                                       text-xs font-semibold
+                                       text-gray-500
+                                       dark:text-gray-400"
+                            >
+                                Assignee
+                            </label>
+
+                            <select
+                                id="formAssignee{{ $task->id }}"
+                                class="w-full rounded-xl
+                                       border border-gray-200
+                                       bg-white px-3 py-2.5
+                                       text-sm text-gray-800
+                                       shadow-sm
+                                       focus:border-indigo-400
+                                       focus:ring-4
+                                       focus:ring-indigo-100
+                                       dark:border-gray-700
+                                       dark:bg-gray-900
+                                       dark:text-white
+                                       dark:focus:border-indigo-600
+                                       dark:focus:ring-indigo-950"
+                            >
+                                <option value="">
+                                    No one
+                                </option>
+
+                                @foreach ($users as $assignee)
+                                    <option value="{{ $assignee->id }}">
+                                        {{ $assignee->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+
+                        <div>
+                            <label
+                                for="formLabels{{ $task->id }}"
+                                class="mb-1.5 block
+                                       text-xs font-semibold
+                                       text-gray-500
+                                       dark:text-gray-400"
+                            >
+                                Label
+                            </label>
+
+                            <select
+                                id="formLabels{{ $task->id }}"
+                                class="w-full rounded-xl
+                                       border border-gray-200
+                                       bg-white px-3 py-2.5
+                                       text-sm text-gray-800
+                                       shadow-sm
+                                       focus:border-indigo-400
+                                       focus:ring-4
+                                       focus:ring-indigo-100
+                                       dark:border-gray-700
+                                       dark:bg-gray-900
+                                       dark:text-white
+                                       dark:focus:border-indigo-600
+                                       dark:focus:ring-indigo-950"
+                            >
+                                <option value="">
+                                    No label
+                                </option>
+
+                                @foreach (
+                                    [
+                                        'API',
+                                        'Backend',
+                                        'Frontend',
+                                        'UI/UX',
+                                        'Database'
+                                    ] as $label
+                                )
+                                    <option
+                                        value="{{ $label }}"
+                                        @selected($task->labels == $label)
+                                    >
+                                        {{ $label }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+
+                        <div>
+                            <label
+                                for="formPriority{{ $task->id }}"
+                                class="mb-1.5 block
+                                       text-xs font-semibold
+                                       text-gray-500
+                                       dark:text-gray-400"
+                            >
+                                Priority
+                            </label>
+
+                            <select
+                                id="formPriority{{ $task->id }}"
+                                class="w-full rounded-xl
+                                       border border-gray-200
+                                       bg-white px-3 py-2.5
+                                       text-sm text-gray-800
+                                       shadow-sm
+                                       focus:border-indigo-400
+                                       focus:ring-4
+                                       focus:ring-indigo-100
+                                       dark:border-gray-700
+                                       dark:bg-gray-900
+                                       dark:text-white
+                                       dark:focus:border-indigo-600
+                                       dark:focus:ring-indigo-950"
+                            >
+                                <option value="">
+                                    No priority
+                                </option>
+
+                                @foreach (
+                                    ['Low', 'Medium', 'High']
+                                    as $priority
+                                )
+                                    <option
+                                        value="{{ $priority }}"
+                                        @selected($task->priority == $priority)
+                                    >
+                                        {{ $priority }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+
+                        <div>
+                            <p
+                                class="mb-1.5
+                                       text-xs font-semibold
+                                       text-gray-500
+                                       dark:text-gray-400"
+                            >
+                                Sprint
+                            </p>
+
+                            <div
+                                class="flex items-center gap-2
+                                       rounded-xl
+                                       border border-gray-200
+                                       bg-white px-3 py-2.5
+                                       text-sm text-gray-700
+                                       shadow-sm
+                                       dark:border-gray-700
+                                       dark:bg-gray-900
+                                       dark:text-gray-200"
+                            >
+                                <span
+                                    class="material-symbols-rounded
+                                           text-[18px]
+                                           text-indigo-400"
+                                >
+                                    sprint
+                                </span>
+
+                                {{ $parent_board->name }}
+                            </div>
+                        </div>
+
                     </div>
                 </div>
+            </aside>
 
-                {{-- Creation dates --}}
-                <div class = "flex flex-col items-start w-75">
-                    <p>Created: <span>{{$task->created_at}}</span></p>
-                    <p>Updated: <span>{{$task->updated_at}}</span></p>
-                </div>
-            </div>
         </div>
     </div>
+
+
+    {{-- Footer --}}
+    <div
+        class="flex items-center justify-between
+               border-t border-gray-200
+               bg-gray-50/70
+               px-5 py-4 sm:px-7
+               dark:border-gray-800
+               dark:bg-gray-900"
+    >
+        <div class="min-h-5">
+            <p
+                id="task-success-{{ $task->id }}"
+                class="hidden text-sm font-medium
+                       text-emerald-600
+                       dark:text-emerald-400"
+            >
+                Task saved successfully.
+            </p>
+
+            <p
+                id="task-fail-{{ $task->id }}"
+                class="hidden text-sm font-medium
+                       text-red-600
+                       dark:text-red-400"
+            ></p>
+        </div>
+
+        <button
+            type="button"
+            id="saveTaskButton{{ $task->id }}"
+            class="inline-flex items-center gap-2
+                   rounded-xl bg-indigo-600
+                   px-4 py-2.5
+                   text-sm font-semibold
+                   text-white shadow-sm
+                   transition
+                   hover:bg-indigo-500
+                   focus:outline-none
+                   focus:ring-4
+                   focus:ring-indigo-200
+                   disabled:cursor-not-allowed
+                   disabled:opacity-60
+                   dark:focus:ring-indigo-950"
+        >
+            <span
+                class="material-symbols-rounded text-[18px]"
+            >
+                save
+            </span>
+
+            <span data-save-text>
+                Save changes
+            </span>
+        </button>
+    </div>
+
 </div>
 
-<script type="module">
-    import { getVisibleElements } from '/js/utils.js';
 
-    document.addEventListener('DOMContentLoaded', function () {
-        var task_id= Number("<?php echo "$task->id"?>");
-        let saveButton = document.getElementById(`saveTaskButton${task_id}`);
-        let xButton = document.getElementById(`xButton${task_id}`);
-        let taskSuccess = document.getElementById(`task-success-${task_id}`);
-        let taskFail = document.getElementById(`task-fail-${task_id}`);
-        var initialStoryPoint = document.getElementById(`formStoryPoint${task_id}`).placeholder;
-        var initialTimeLog = document.getElementById(`formStoryPoint${task_id}`).placeholder;
+<script>
+document.addEventListener('DOMContentLoaded', function () {
 
-        // Remove notif on clicking outside
-        document.addEventListener('click', e => {
-            taskSuccess.classList.add('hidden');
-            taskFail.classList.add('hidden');
-        });
+    const taskId = {{ $task->id }};
 
-        // Save button functionality
-        saveButton.addEventListener('click', e => {
-            var inputTitle = document.getElementById(`formTitle${task_id}`).value;
-            var inputDescription = document.getElementById(`formDescription${task_id}`).value;
-            var assignee = document.getElementById(`formAssignee${task_id}`).value;
-            var columnId = document.getElementById(`formColumn${task_id}`).value;
-            var labels = document.getElementById(`formLabels${task_id}`).value;
-            var priority = document.getElementById(`formPriority${task_id}`).value;
-            var storyPoint = document.getElementById(`formStoryPoint${task_id}`).value;
-            var timeLog = document.getElementById(`formTimeLog${task_id}`).value;
+    const saveButton =
+        document.getElementById(
+            `saveTaskButton${taskId}`
+        );
 
-            // Get placeholder is story point not emitted
-            if (!Number(storyPoint)){
-                storyPoint = initialStoryPoint;
-            }
+    const closeButton =
+        document.getElementById(
+            `xButton${taskId}`
+        );
 
-            if(!Number(timeLog)){
-                timeLog = initialTimeLog;
+    const successMessage =
+        document.getElementById(
+            `task-success-${taskId}`
+        );
 
-            }
+    const failMessage =
+        document.getElementById(
+            `task-fail-${taskId}`
+        );
 
-            // Submit the form via AJAX (using Fetch API)
-            fetch('{{ route('tasks.update') }}', {
-                method: 'POST',
-                body: JSON.stringify({
-                    task_id: task_id,
-                    column_id: columnId,
-                    title: inputTitle,
-                    description: inputDescription,
-                    assignee: Number(assignee),
-                    labels: labels,
-                    priority: priority,
-                    storyPoint: Number(storyPoint),
-                    timeLog: Number(timeLog),
-                }),
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                }
-            })
-            .then(response => {
-                    let responseClone = response.clone();
-                    return response.json();
-                })
-            .then(data => {
-                if (data.success) {
-                    console.log(data.task);
+    const modal =
+        document.getElementById(
+            `task-list-detail-${taskId}`
+        );
 
-                    // Success message
-                    taskSuccess.classList.remove('hidden');
-                    taskFail.classList.add('hidden');
-                } else {
-                    console.error('Error updating task:', data.message);
 
-                    // Error message
-                    taskSuccess.classList.add('hidden');
-                    taskFail.classList.remove('hidden');
-                    taskFail.innerHTML = data.message;
-                }
-                // Print the response to the console
-            }, function (rejectionReason) {
-                console.log('Error parsing JSON from response:', rejectionReason, responseClone);
-                responseClone.text()
-                .then(function (bodyText) {
-                    console.log('Received the following instead of valid JSON:', bodyText);
-                });
-            });
-        });
+    closeButton.addEventListener('click', function () {
 
-        //  xbutton click behaviour
-        xButton.addEventListener('click', e => {
-            // Close the task detail view
-            // let taskDetail = getVisibleElements(`#task-list-detail-${task_id}`);
+        modal.dispatchEvent(
+            new CustomEvent('task-detail:close')
+        );
 
-            let taskDetail = document.getElementById(`task-list-detail-${task_id}`);
-            taskDetail.classList.toggle('hidden');
-
-            location.reload();
-        });
     });
+
+
+    saveButton.addEventListener(
+        'click',
+        async function () {
+
+            const title =
+                document.getElementById(
+                    `formTitle${taskId}`
+                ).value.trim();
+
+            const description =
+                document.getElementById(
+                    `formDescription${taskId}`
+                ).value.trim();
+
+            const assignee =
+                document.getElementById(
+                    `formAssignee${taskId}`
+                ).value;
+
+            const columnId =
+                document.getElementById(
+                    `formColumn${taskId}`
+                ).value;
+
+            const labels =
+                document.getElementById(
+                    `formLabels${taskId}`
+                ).value;
+
+            const priority =
+                document.getElementById(
+                    `formPriority${taskId}`
+                ).value;
+
+            const storyPoint =
+                document.getElementById(
+                    `formStoryPoint${taskId}`
+                ).value;
+
+            const timeLog =
+                document.getElementById(
+                    `formTimeLog${taskId}`
+                ).value;
+
+
+            if (!title) {
+
+                failMessage.textContent =
+                    'Task title cannot be empty.';
+
+                failMessage.classList.remove('hidden');
+
+                return;
+            }
+
+
+            successMessage.classList.add('hidden');
+            failMessage.classList.add('hidden');
+
+            saveButton.disabled = true;
+
+            const saveText =
+                saveButton.querySelector(
+                    '[data-save-text]'
+                );
+
+            saveText.textContent = 'Saving...';
+
+
+            try {
+
+                const response = await fetch(
+                    '{{ route('tasks.update') }}',
+                    {
+                        method: 'POST',
+
+                        headers: {
+                            'Content-Type':
+                                'application/json',
+
+                            'Accept':
+                                'application/json',
+
+                            'X-CSRF-TOKEN':
+                                document
+                                    .querySelector(
+                                        'meta[name="csrf-token"]'
+                                    )
+                                    .getAttribute(
+                                        'content'
+                                    )
+                        },
+
+                        body: JSON.stringify({
+                            task_id: taskId,
+                            column_id:
+                                Number(columnId),
+
+                            title: title,
+
+                            description:
+                                description || null,
+
+                            assignee:
+                                Number(assignee || 0),
+
+                            labels:
+                                labels || null,
+
+                            priority:
+                                priority || null,
+
+                            storyPoint:
+                                Number(
+                                    storyPoint || 0
+                                ),
+
+                            timeLog:
+                                Number(
+                                    timeLog || 0
+                                )
+                        })
+                    }
+                );
+
+
+                const data =
+                    await response.json();
+
+
+                if (!response.ok || !data.success) {
+
+                    let message =
+                        data.message ??
+                        'Could not save task.';
+
+                    if (data.errors) {
+                        message =
+                            Object
+                                .values(data.errors)
+                                .flat()
+                                .join(' ');
+                    }
+
+                    throw new Error(message);
+                }
+
+
+                successMessage.classList.remove(
+                    'hidden'
+                );
+
+
+                const taskTitle =
+                    document.querySelector(
+                        `#task-list-item-${taskId}
+                         [data-task-title]`
+                    );
+
+                if (taskTitle) {
+                    taskTitle.textContent = title;
+                }
+
+                setTimeout(function () {
+                    window.location.reload();
+                }, 450);
+
+            } catch (error) {
+
+                failMessage.textContent =
+                    error.message ??
+                    'Could not save task.';
+
+                failMessage.classList.remove(
+                    'hidden'
+                );
+
+            } finally {
+
+                saveButton.disabled = false;
+
+                saveText.textContent =
+                    'Save changes';
+
+            }
+        }
+    );
+
+});
 </script>
