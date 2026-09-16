@@ -105,6 +105,7 @@ window.addEventListener('DOMContentLoaded', function () {
 
     const taskDetail =
         document.getElementById(`task-list-detail-${taskId}`);
+        document.body.appendChild(taskDetail);
 
     const backdrop =
         taskDetail.querySelector('[data-task-backdrop]');
@@ -125,6 +126,13 @@ window.addEventListener('DOMContentLoaded', function () {
 
 
     taskListItem.addEventListener('click', function (event) {
+
+        if (
+            taskListItem.dataset.wasDragged
+            === '1'
+        ) {
+            return;
+        }
 
         if (
             event.target.closest(

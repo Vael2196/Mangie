@@ -443,17 +443,27 @@ class BoardController extends Controller
 
     public function showBacklog($view)
     {
+        $criteria =
+            $this->getTaskCriteria('backlog');
 
-        $criteria = $this->getTaskCriteria('backlog');
+        $priority =
+            $criteria['priority'];
 
-        $priority = $criteria['priority'];
-        $label = $criteria['label'];
-        $sortBy = $criteria['sortField'];
-        $sortDirection = $criteria['sortDirection'];
+        $label =
+            $criteria['label'];
+
+        $sortBy =
+            $criteria['sortField'];
+
+        $sortDirection =
+            $criteria['sortDirection'];
+
 
         $backlog = Board::with([
             'columns' => function ($query) {
-                $query->orderBy('position');
+                $query
+                    ->withCount('tasks')
+                    ->orderBy('position');
             },
 
             'columns.tasks' => function ($query) use (
@@ -463,65 +473,133 @@ class BoardController extends Controller
                 $sortDirection
             ) {
                 if ($priority !== '') {
-                    $query->where('priority', $priority);
+                    $query->where(
+                        'priority',
+                        $priority
+                    );
                 }
 
                 if ($label !== '') {
-                    $query->where('labels', $label);
+                    $query->where(
+                        'labels',
+                        $label
+                    );
                 }
 
-                if ($sortBy !== '' && $sortDirection !== '') {
-                    $query->orderBy($sortBy, $sortDirection);
+                if (
+                    $sortBy !== '' &&
+                    $sortDirection !== ''
+                ) {
+                    $query->orderBy(
+                        $sortBy,
+                        $sortDirection
+                    );
                 } else {
                     $query->orderBy('position');
                 }
             },
-        ])->findOrFail(self::PRODUCT_BACKLOG_ID);
+        ])
+            ->findOrFail(
+                self::PRODUCT_BACKLOG_ID
+            );
 
-        $cookies = $criteria['cookies'];
+        $backlogIssueCount =
+            $backlog->columns
+                ->sum('tasks_count');
 
-        // Fetch the board by ID with its columns and tasks, and sort columns by position
-        $backlog = Board::with(['columns' => function ($query){
-            $query->orderBy('position');
-        }, 'columns.tasks' => function ($query) use ($label, $priority, $sortBy, $sortDirection){
-            // Filtering
-            if($priority){ $query->Where('priority', $priority); }
-            if($label){ $query->Where('labels', $label); }
 
-            // Sorting
-            if($sortBy && $sortDirection){$query->orderBy($sortBy, $sortDirection);}
-            else{$query->orderBy('position');}
-        }])->findOrFail(1);
+        $sortByDict = [
+            'title' => 'Title',
+            'description' => 'Description',
+            'priority' => 'Priority',
+            'labels' => 'Labels',
+            'story_points' => 'Story Points',
+            'time_log' => 'Time Log',
+        ];
 
-        // parse sort by text to tag names
-        $sortByDict = ['title' => 'Title',
-                        'description' => 'Description',
-                        'priority' => 'Priority',
-                        'labels' => 'Labels',
-                        'story_points' => "Story Points",
-                        'time_log' => 'Time Log'];
-        if(array_key_exists($sortBy, $sortByDict)){
-            $sortBy = $sortByDict[$sortBy];
-        }
+        $sortTag =
+            $sortByDict[$sortBy] ?? $sortBy;
 
-        $cookies = array('label' => $label, 'priority' => $priority, 'sort' => array($sortBy, $sortDirection));
+        $cookies = [
+            'label' => $label,
+            'priority' => $priority,
+            'sort' => [
+                $sortTag,
+                $sortDirection,
+            ],
+        ];
 
-        // Get All boards for a user, including the product backlog
+
         $user = Auth::user();
-        $boards = Board::where('user_id', $user->id)->orWhere('id', 1)->get();
-        $inactive_boards = Board::where('user_id', $user->id)->where('status', 0)->orWhere('id', 1)->get();
-        $tasks = Task::all();
 
-        // boolean on whether there are any active sprints
-        $activeSprints = Board::where('status', 1)->count() > 0;
+        $boards = Board::with([
+            'columns' => function ($query) {
+                $query->orderBy('position');
+            },
 
-        if ($view == 'card'){
-            // Pass the boards and tasks to the backlog view
-            return view('boards.product_backlog_card_view', compact('backlog', 'tasks', 'boards', 'inactive_boards', 'activeSprints', 'user', 'cookies'));
-        } else if ($view == 'list'){
-            // Pass the boards and tasks to the backlog view
-            return view('boards.product_backlog_list_view', compact('backlog', 'tasks', 'boards', 'inactive_boards', 'activeSprints', 'user', 'cookies'));
-        }
+            'columns.tasks' => function ($query) {
+                $query->orderBy('position');
+            },
+        ])
+            ->where(function ($query) use ($user) {
+                $query
+                    ->where(
+                        'user_id',
+                        $user->id
+                    )
+                    ->orWhere(
+                        'id',
+                        self::PRODUCT_BACKLOG_ID
+                    );
+            })
+            ->get();
+
+
+        $inactive_boards =
+            $boards->filter(
+                fn ($board) =>
+                    $board->id
+                        === self::PRODUCT_BACKLOG_ID
+                    || (
+                        !$board->completed
+                        && !$board->status
+                    )
+            );
+
+
+        $activeSprints =
+            $boards->contains(
+                fn ($board) =>
+                    $board->id
+                        !== self::PRODUCT_BACKLOG_ID
+                    && !$board->completed
+                    && $board->status
+            );
+
+
+        $viewName = match ($view) {
+            'card' =>
+                'boards.product_backlog_card_view',
+
+            'list' =>
+                'boards.product_backlog_list_view',
+
+            default => abort(404),
+        };
+
+
+        return view(
+            $viewName,
+            compact(
+                'backlog',
+                'backlogIssueCount',
+                'boards',
+                'inactive_boards',
+                'activeSprints',
+                'user',
+                'cookies'
+            )
+        );
     }
 
     public function moveTasks(Request $request){
@@ -572,6 +650,111 @@ class BoardController extends Controller
         return response()->json([
             'success' => true,
             'tasks' => $tasks
+        ]);
+    }
+
+    public function moveTask(Request $request, Task $task)
+    {
+        $validated = $request->validate([
+            'target_column_id' => [
+                'required',
+                'integer',
+                'exists:columns,id',
+            ],
+        ]);
+
+        $targetColumn = Column::with('board')
+            ->findOrFail($validated['target_column_id']);
+
+        $task->load('column.board');
+
+        $sourceColumnId = $task->column_id;
+
+        if ($targetColumn->board?->completed) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Tasks cannot be moved into a completed sprint.',
+            ], 422);
+        }
+
+        if ($sourceColumnId === $targetColumn->id) {
+            return response()->json([
+                'success' => true,
+                'task' => $task,
+                'source_column_count' =>
+                    Task::where('column_id', $sourceColumnId)->count(),
+                'target_column_count' =>
+                    Task::where('column_id', $targetColumn->id)->count(),
+                'backlog_issue_count' =>
+                    Task::whereHas('column', function ($query) {
+                        $query->where(
+                            'board_id',
+                            self::PRODUCT_BACKLOG_ID
+                        );
+                    })->count(),
+            ]);
+        }
+
+        DB::transaction(function () use (
+            $task,
+            $sourceColumnId,
+            $targetColumn
+        ) {
+            $oldPosition = $task->position ?? 0;
+
+            Task::where('column_id', $sourceColumnId)
+                ->where('position', '>', $oldPosition)
+                ->decrement('position');
+
+            $newPosition =
+                (Task::where(
+                    'column_id',
+                    $targetColumn->id
+                )->max('position') ?? 0) + 1;
+
+            $task->column_id = $targetColumn->id;
+            $task->position = $newPosition;
+
+            if (
+                strtoupper(trim($targetColumn->name))
+                === 'DONE'
+            ) {
+                $task->completed_at = now();
+            } else {
+                $task->completed_at = null;
+            }
+
+            $task->save();
+        });
+
+        return response()->json([
+            'success' => true,
+
+            'task' => $task->fresh(),
+
+            'source_column_id' => $sourceColumnId,
+
+            'target_column_id' => $targetColumn->id,
+
+            'source_column_count' =>
+                Task::where(
+                    'column_id',
+                    $sourceColumnId
+                )->count(),
+
+            'target_column_count' =>
+                Task::where(
+                    'column_id',
+                    $targetColumn->id
+                )->count(),
+
+            'backlog_issue_count' =>
+                Task::whereHas('column', function ($query) {
+                    $query->where(
+                        'board_id',
+                        self::PRODUCT_BACKLOG_ID
+                    );
+                })->count(),
         ]);
     }
 

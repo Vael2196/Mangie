@@ -1,77 +1,208 @@
-<tr {{ $attributes->merge(["class" => "px-4 py-2 text-start leading-5 dark:bg-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-400 hover:cursor-pointer focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out rounded",
-                            "id" => "task-list-item-$task->id"])}}>
-    <td class="py-2 pl-5 border-b-2 min-w-20 overflow-hidden">{{$task->title}}</td>
-    <td class="py-2 border-b-2 min-w-40 overflow-hidden">
-        <div class="flex space-x-2 justify-end px-6">
+<tr
+    {{ $attributes->merge([
+        'class' =>
+            'group text-gray-700 transition
+             hover:bg-gray-50
+             dark:bg-gray-900
+             dark:text-gray-300
+             dark:hover:bg-gray-800',
+
+        'id' => "task-list-item-$task->id"
+    ]) }}
+>
+    <td
+        class="border-b border-gray-200
+               py-3 pl-5 pr-3
+               text-sm font-medium
+               dark:border-gray-700"
+    >
+        {{ $task->title }}
+    </td>
+
+    <td
+        class="border-b border-gray-200
+               py-3
+               dark:border-gray-700"
+    >
+        <div
+            class="flex justify-end gap-2
+                   px-4"
+        >
             @if($task->column_id != 1)
-                <x-status-icon name="{{$column->name}}"/>
+                <x-status-icon
+                    name="{{ $column->name }}"
+                />
             @endif
-            @if($task->labels != null)
-                <x-status-icon name="{{$task->labels}}"/>
+
+            @if($task->labels)
+                <x-status-icon
+                    name="{{ $task->labels }}"
+                />
             @endif
-            @if($task->priority != null)
-                <x-status-icon name="{{$task->priority}}"/>
+
+            @if($task->priority)
+                <x-status-icon
+                    name="{{ $task->priority }}"
+                />
             @endif
         </div>
     </td>
-    <td class="py-2 border-b-2 w-10">Pr</td>
-    <td class="py-2 border-b-2 w-10">As</td>
-    <td class="py-1 border-b-2 w-10">
-        <div id="task-list-menu-{{$task->id}}" class="hover:cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-400 bg-opacity-10 list-none rounded">
-            <i class="fa-solid fa-ellipsis px-2 py-2"></i>
+
+    <td
+        class="w-14 border-b
+               border-gray-200 py-2
+               dark:border-gray-700"
+    >
+        <button
+            type="button"
+            id="task-list-menu-{{ $task->id }}"
+            class="flex h-9 w-9
+                   items-center justify-center
+                   rounded-lg text-gray-400
+                   transition
+                   hover:bg-gray-100
+                   hover:text-gray-700
+                   dark:hover:bg-gray-700
+                   dark:hover:text-white"
+            aria-label="Task actions"
+        >
+            <span
+                class="material-symbols-rounded
+                       text-[20px]"
+            >
+                more_horiz
+            </span>
+        </button>
+
+
+        <div
+            id="task-list-detail-{{ $task->id }}"
+            class="fixed inset-0 z-[150]
+                   hidden overflow-y-auto"
+            role="dialog"
+            aria-modal="true"
+        >
+            <div
+                data-task-backdrop
+                class="fixed inset-0
+                       bg-gray-950/55
+                       backdrop-blur-[2px]"
+            ></div>
+
+            <div
+                class="relative flex min-h-full
+                       items-start justify-center
+                       p-4
+                       sm:items-center sm:p-6"
+            >
+                <x-task-detail :task="$task"/>
+            </div>
         </div>
     </td>
-    <div class='hidden' id="task-list-detail-{{$task->id}}">
-        <x-task-detail :task="$task"/>
-    </div>
 </tr>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        var index = {!! json_encode($task->id, JSON_HEX_TAG) !!};
-        task = document.getElementById(`task-list-item-${index}`);
-        taskMenu = document.getElementById(`task-list-menu-${index}`);
+window.addEventListener(
+    'DOMContentLoaded',
+    function () {
 
-        // Reset everything when clicking outside
-        document.addEventListener('click', e => {
-            const taskItem = document.getElementById(`task-list-item-${index}`);
-            taskItem.classList.remove("hover:bg-blue-100", "dark:hover:bg-blue-600", "bg-blue-300");
-            taskItem.classList.add("hover:bg-gray-100", "dark:hover:bg-gray-600");
-        })
+        const taskId =
+            {{ $task->id }};
 
-        document.addEventListener('contextmenu', e => {
-            const taskItem = document.getElementById(`task-list-item-${index}`);
-            taskItem.classList.remove("hover:bg-blue-100", "dark:hover:bg-blue-600", "bg-blue-300");
-            taskItem.classList.add("hover:bg-gray-100", "dark:hover:bg-gray-600");
-        })
+        const row =
+            document.getElementById(
+                `task-list-item-${taskId}`
+            );
 
-        // Show detailed task view when clicking on the item
-        task.addEventListener('click', e => {
-            e.stopPropagation();
-            if (e.ctrlKey){return false;};
-            const taskDetail = document.getElementById(`task-list-detail-${index}`);
-            const taskContextMenu = document.getElementById(`task-context-menu`);
-            taskContextMenu.classList.add('hidden');
-            taskDetail.classList.toggle('hidden');
-        }, false);
+        const modal =
+            document.getElementById(
+                `task-list-detail-${taskId}`
+            );
 
-        // Right clicking behaviour
-        task.addEventListener('contextmenu', e => {
-            e.stopPropagation();
-            const taskHighlight = document.getElementById(`task-list-item-${index}`);
-            e.preventDefault();
+        const backdrop =
+            modal.querySelector(
+                '[data-task-backdrop]'
+            );
 
-            // Do nothing when right clicking
-            if (!e.ctrlKey){return false;};
+        document.body.appendChild(modal);
 
-            // Highlight task when ctrl-right-clicking
-            toggleArr = ["hover:bg-gray-100","dark:hover:bg-gray-600",              // OFF
-                        "hover:bg-blue-100", "dark:hover:bg-blue-600", "bg-blue-300", "dark:bg-blue-400" // ON
-                        ];
-            for(toggleOption of toggleArr){
-                taskHighlight.classList.toggle(toggleOption);
+
+        function openTaskDetail() {
+
+            if (
+                row.dataset.wasDragged
+                === '1'
+            ) {
+                return;
             }
-            return false;
-        }, false);
-    });
+
+            modal.classList.remove(
+                'hidden'
+            );
+
+            document.body.classList.add(
+                'overflow-hidden'
+            );
+        }
+
+
+        function closeTaskDetail() {
+
+            modal.classList.add(
+                'hidden'
+            );
+
+            document.body.classList.remove(
+                'overflow-hidden'
+            );
+        }
+
+
+        row.addEventListener(
+            'click',
+            function (event) {
+
+                if (
+                    event.ctrlKey ||
+                    event.target.closest(
+                        'button, a, input, textarea, select, label'
+                    )
+                ) {
+                    return;
+                }
+
+                openTaskDetail();
+            }
+        );
+
+
+        backdrop.addEventListener(
+            'click',
+            closeTaskDetail
+        );
+
+
+        modal.addEventListener(
+            'task-detail:close',
+            closeTaskDetail
+        );
+
+
+        document.addEventListener(
+            'keydown',
+            function (event) {
+
+                if (
+                    event.key === 'Escape'
+                    && !modal
+                        .classList
+                        .contains('hidden')
+                ) {
+                    closeTaskDetail();
+                }
+            }
+        );
+
+    }
+);
 </script>

@@ -1,5 +1,7 @@
 <x-app-layout>
 
+    <meta name="task-move-base" content="{{ url('/tasks') }}">
+    <meta name="task-dnd-context" content="board">
     <!-- Meta tag for CSRF token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <x-top-bar :title="$board->name" :user="$user"/>
@@ -193,11 +195,20 @@
                 <x-task-column :column="$column" :editable="$board->completed == 0">
 
                     <div
-                        class="task-list space-y-3"
+                        class="task-list space-y-3
+                            rounded-xl transition"
                         id="task-list-{{ $column->id }}"
+                        data-task-dropzone="true"
+                        data-column-id="{{ $column->id }}"
+                        data-column-name="{{ $column->name }}"
                     >
                         @foreach($column->tasks as $task)
-                            <x-task-box :task="$task"/>
+                            <x-task-box
+                                :task="$task"
+                                draggable="true"
+                                data-dnd-task="true"
+                                data-task-id="{{ $task->id }}"
+                            />
                         @endforeach
                     </div>
 
