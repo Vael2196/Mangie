@@ -1,4 +1,5 @@
 import './bootstrap';
+import './echo';
 import './task-dnd';
 
 import Alpine from 'alpinejs';

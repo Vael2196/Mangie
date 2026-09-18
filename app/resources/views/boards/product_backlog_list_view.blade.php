@@ -2,254 +2,271 @@
     <meta name="task-move-base" content="{{ url('/tasks') }}">
     <meta name="task-dnd-context" content="backlog">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <x-top-bar title="Product Backlog" :user="$user" />
+    @php
+        $realtimeBoardIds =
+            $boards
+                ->pluck('id')
+                ->values()
+                ->all();
+    @endphp
+
     <div
-        class="mx-auto max-w-[1600px]
-            px-6 py-8 lg:px-8"
-        id="entirePage"
+        data-task-sync-context="backlog"
+        data-realtime-board-ids='@json($realtimeBoardIds)'
     >
+        <x-top-bar title="Product Backlog" :user="$user" />
+        <div
+            class="mx-auto max-w-[1600px]
+                px-6 py-8 lg:px-8"
+            id="entirePage"
+        >
 
-        <div class='flex justify-between mb-2'>
-            <h1
-                class="text-lg font-semibold
-                    text-gray-900 dark:text-white"
-            >
-                Issues:
-                <span id="issues-count">
-                    {{ $backlogIssueCount }}
-                </span>
-            </h1>
-            {{-- Add list to card view dropdown switch here --}}
-            <div class="flex space-x-5">
-                 {{-- Change view switch --}}
-                 <div
-                    class="inline-flex rounded-xl
-                        border border-gray-200
-                        bg-white p-1 shadow-sm
-                        dark:border-gray-700 dark:bg-gray-900"
+            <div class='flex justify-between mb-2'>
+                <h1
+                    class="text-lg font-semibold
+                        text-gray-900 dark:text-white"
                 >
-                    <a
-                        href="{{ route('backlog.show', 'list') }}"
-                        @class([
-                            'flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold transition',
-
-                            'bg-indigo-600 text-white'
-                                => request()->route('view') === 'list',
-
-                            'text-gray-500 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'
-                                => request()->route('view') !== 'list',
-                        ])
+                    Issues:
+                    <span id="issues-count">
+                        {{ $backlogIssueCount }}
+                    </span>
+                </h1>
+                {{-- Add list to card view dropdown switch here --}}
+                <div class="flex space-x-5">
+                    {{-- Change view switch --}}
+                    <div
+                        class="inline-flex rounded-xl
+                            border border-gray-200
+                            bg-white p-1 shadow-sm
+                            dark:border-gray-700 dark:bg-gray-900"
                     >
-                        <span class="material-symbols-rounded text-[19px]">
-                            view_list
-                        </span>
+                        <a
+                            href="{{ route('backlog.show', 'list') }}"
+                            @class([
+                                'flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold transition',
 
-                        List
-                    </a>
+                                'bg-indigo-600 text-white'
+                                    => request()->route('view') === 'list',
+
+                                'text-gray-500 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'
+                                    => request()->route('view') !== 'list',
+                            ])
+                        >
+                            <span class="material-symbols-rounded text-[19px]">
+                                view_list
+                            </span>
+
+                            List
+                        </a>
 
 
-                    <a
-                        href="{{ route('backlog.show', 'card') }}"
-                        @class([
-                            'flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold transition',
+                        <a
+                            href="{{ route('backlog.show', 'card') }}"
+                            @class([
+                                'flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold transition',
 
-                            'bg-indigo-600 text-white'
-                                => request()->route('view') === 'card',
+                                'bg-indigo-600 text-white'
+                                    => request()->route('view') === 'card',
 
-                            'text-gray-500 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'
-                                => request()->route('view') !== 'card',
-                        ])
-                    >
-                        <span class="material-symbols-rounded text-[19px]">
-                            grid_view
-                        </span>
+                                'text-gray-500 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'
+                                    => request()->route('view') !== 'card',
+                            ])
+                        >
+                            <span class="material-symbols-rounded text-[19px]">
+                                grid_view
+                            </span>
 
-                        Cards
-                    </a>
-                </div>
-
-                @php
-                    $criteriaScope = 'backlog';
-                @endphp
-                <x-sort-menu :scope="$criteriaScope" />
-                <x-filter-menu :scope="$criteriaScope" />
-                @php
-                    $backlogDropColumn =
-                        $backlog->columns
-                            ->sortBy('position')
-                            ->first();
-                @endphp
-
-                @foreach($cookies as $key => $value)
-
-                    @if($key === 'sort')
-
-                        @if($value[0])
-                            <x-sort-tag
-                                :scope="$criteriaScope"
-                                key="{{ $value[0] }}"
-                                direction="{{ $value[1] }}"
-                            />
-                        @endif
-
-                    @elseif($value)
-
-                        <x-cookie-tag
-                            :scope="$criteriaScope"
-                            key="{{ $key }}"
-                            tag="{{ $value }}"
-                        />
-
-                    @endif
-
-                @endforeach
-                {{-- Create sprint button --}}
-                <div id="create-sprint-button"><x-secondary-button>Create Sprint</x-secondary-button></div>
-            </div>
-        </div>
-
-        {{-- Product backlog ------------------------------------------------- --}}
-        {{-- List view --}}
-        <div id="task-list">
-            <x-task-list-board
-                data-task-dropzone="true"
-                data-column-id="{{ $backlogDropColumn->id }}"
-                data-board-id="{{ $backlog->id }}"
-            >
-                @foreach ($backlog->columns as $column)
-                    @foreach ($column->tasks as $task)
-
-                        <x-task-list-item
-                            :task="$task"
-                            draggable="true"
-                            data-dnd-task="true"
-                            data-task-id="{{ $task->id }}"
-                        />
-
-                    @endforeach
-                @endforeach
-            </x-task-list-board>
-        </div>
-
-        {{-- ------------------------------------------------------------------ --}}
-
-        {{-- Context Menu --}}
-        <div class="hidden absolute z-30" id="task-context-menu">
-            <div class="2xl:flex 2xl:items-start">
-                {{-- "Move To" Button --}}
-                <div
-                    class='bg-white border px-4 py-2 items-center leading-5 dark:bg-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-500 hover:cursor-pointer focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out rounded flex space-x-3'>
-                    <div class = "text-center"
-                        onmouseover="document.getElementById('contextBoardMenu').classList.toggle('hidden')">Move To
+                            Cards
+                        </a>
                     </div>
-                    <div class="text-center"><i class="fa-solid fa-angle-right"></i></div>
-                </div>
 
-                {{-- Context sub menu (Buttons for each sprint to move to) --}}
-                <div class="hidden shadow-lg" id="contextBoardMenu">
-                    @foreach ($inactive_boards as $board)
-                        <div class='bg-white border px-4 py-2 text-start leading-5 dark:bg-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-500 hover:cursor-pointer focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out flex space-x-3'
-                            id="context-board-menu-{{ $board->id }}">
-                            <h1>{{ $board->name }}</h1>
-                        </div>
-                    @endforeach
-                </div>
-            </div>
-        </div>
-
-        {{-- Link to Form --}}
-        <div class="w-full text-start">
-            <div id="create-task-link" class="block">
-                <div
-                    class = 'px-4 py-2 leading-5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:cursor-pointer focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out rounded flex space-x-3'>
-                    <div class = "text-center"><i class="fa-solid fa-plus"></i></div>
-                    <p class = "lg:block hidden text-sm">Create Issue</p>
-                </div>
-            </div>
-            {{-- Form for submitting  --}}
-            <input id="input-task-field" class="border hidden w-full dark:bg-gray-600 dark:text-white" type="text"
-                placeholder="Enter Task Name" class="w-full" />
-        </div>
-
-        <section class="mt-10">
-
-            <div
-                class="mb-4 flex
-                    items-center justify-between"
-            >
-                <div>
-                    <p
-                        class="text-xs font-semibold
-                            uppercase tracking-wider
-                            text-indigo-600
-                            dark:text-indigo-400"
-                    >
-                        Planning
-                    </p>
-
-                    <h2
-                        class="mt-1 text-xl font-bold
-                            text-gray-900
-                            dark:text-white"
-                    >
-                        Sprints
-                    </h2>
-                </div>
-
-                <div id="create-sprint-button">
-                    <x-secondary-button>
-                        Create Sprint
-                    </x-secondary-button>
-                </div>
-            </div>
-                {{-- Sprint loading list --}}
-            <div class="mb-7" id="sprint-loading-board-list">
-                @foreach ($boards as $board)
                     @php
-                        $sprintDropColumn =
-                            $board->columns
-                                ->firstWhere('name', 'TO DO')
-                            ?? $board->columns
+                        $criteriaScope = 'backlog';
+                    @endphp
+                    <x-sort-menu :scope="$criteriaScope" />
+                    <x-filter-menu :scope="$criteriaScope" />
+                    @php
+                        $backlogDropColumn =
+                            $backlog->columns
                                 ->sortBy('position')
                                 ->first();
                     @endphp
-                    @if ($board->id == 1)
-                        @continue
-                    @endif
-                    <div id="sprint-loading-board-{{ $board->id }}" class="mb-3 sprint-board-status-{{ $board->status }}">
-                        @if ($board->completed == 0)
-                            <x-sprint-loading-board
-                                :board="$board"
-                                :activeSprints="$activeSprints"
-                                data-task-dropzone="true"
-                                data-column-id="{{ $sprintDropColumn->id }}"
-                                data-board-id="{{ $board->id }}"
-                            >
-                                @foreach ($board->columns as $column)
-                                    @foreach ($column->tasks as $task)
-                                        <x-task-list-item
-                                            :task="$task"
-                                            draggable="true"
-                                            data-dnd-task="true"
-                                            data-task-id="{{ $task->id }}"
-                                        />
-                                    @endforeach
-                                @endforeach
-                            </x-sprint-loading-board>
-                        @endif
-                    </div>
-                @endforeach
 
-                {{-- Create sprint input box list view --}}
-                <div class="border min-w-full overflow-x-auto rounded p-3 bg-gray-100 hidden dark:bg-gray-700 dark:text-white" id="create-sprint">
-                    <div class="flex justify-between mb-2">
-                        <input class='border font-semibold text-xl dark:bg-gray-700 dark:text-white dark:placeholder-white' id="create-sprint-input" type="text"
-                            placeholder="Enter Sprint Name"/>
-                    </div>
-                    <p class="text-sm">Add tasks here or from the product backlog</p>
+                    @foreach($cookies as $key => $value)
+
+                        @if($key === 'sort')
+
+                            @if($value[0])
+                                <x-sort-tag
+                                    :scope="$criteriaScope"
+                                    key="{{ $value[0] }}"
+                                    direction="{{ $value[1] }}"
+                                />
+                            @endif
+
+                        @elseif($value)
+
+                            <x-cookie-tag
+                                :scope="$criteriaScope"
+                                key="{{ $key }}"
+                                tag="{{ $value }}"
+                            />
+
+                        @endif
+
+                    @endforeach
+                    {{-- Create sprint button --}}
+                    <div id="create-sprint-button"><x-secondary-button>Create Sprint</x-secondary-button></div>
                 </div>
             </div>
-        </section>
+
+            {{-- Product backlog ------------------------------------------------- --}}
+            {{-- List view --}}
+            <div id="task-list">
+                <x-task-list-board
+                    data-task-dropzone="true"
+                    data-task-list
+                    data-column-id="{{ $backlogDropColumn->id }}"
+                    data-board-id="{{ $backlog->id }}"
+                    data-reorder="false"
+                >
+                    @foreach ($backlog->columns as $column)
+                        @foreach ($column->tasks as $task)
+
+                            <x-task-list-item
+                                :task="$task"
+                                draggable="true"
+                                data-dnd-task="true"
+                                data-task-id="{{ $task->id }}"
+                            />
+
+                        @endforeach
+                    @endforeach
+                </x-task-list-board>
+            </div>
+
+            {{-- ------------------------------------------------------------------ --}}
+
+            {{-- Context Menu --}}
+            <div class="hidden absolute z-30" id="task-context-menu">
+                <div class="2xl:flex 2xl:items-start">
+                    {{-- "Move To" Button --}}
+                    <div
+                        class='bg-white border px-4 py-2 items-center leading-5 dark:bg-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-500 hover:cursor-pointer focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out rounded flex space-x-3'>
+                        <div class = "text-center"
+                            onmouseover="document.getElementById('contextBoardMenu').classList.toggle('hidden')">Move To
+                        </div>
+                        <div class="text-center"><i class="fa-solid fa-angle-right"></i></div>
+                    </div>
+
+                    {{-- Context sub menu (Buttons for each sprint to move to) --}}
+                    <div class="hidden shadow-lg" id="contextBoardMenu">
+                        @foreach ($inactive_boards as $board)
+                            <div class='bg-white border px-4 py-2 text-start leading-5 dark:bg-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-500 hover:cursor-pointer focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out flex space-x-3'
+                                id="context-board-menu-{{ $board->id }}">
+                                <h1>{{ $board->name }}</h1>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+
+            {{-- Link to Form --}}
+            <div class="w-full text-start">
+                <div id="create-task-link" class="block">
+                    <div
+                        class = 'px-4 py-2 leading-5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:cursor-pointer focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out rounded flex space-x-3'>
+                        <div class = "text-center"><i class="fa-solid fa-plus"></i></div>
+                        <p class = "lg:block hidden text-sm">Create Issue</p>
+                    </div>
+                </div>
+                {{-- Form for submitting  --}}
+                <input id="input-task-field" class="border hidden w-full dark:bg-gray-600 dark:text-white" type="text"
+                    placeholder="Enter Task Name" class="w-full" />
+            </div>
+
+            <section class="mt-10">
+
+                <div
+                    class="mb-4 flex
+                        items-center justify-between"
+                >
+                    <div>
+                        <p
+                            class="text-xs font-semibold
+                                uppercase tracking-wider
+                                text-indigo-600
+                                dark:text-indigo-400"
+                        >
+                            Planning
+                        </p>
+
+                        <h2
+                            class="mt-1 text-xl font-bold
+                                text-gray-900
+                                dark:text-white"
+                        >
+                            Sprints
+                        </h2>
+                    </div>
+
+                    <div id="create-sprint-button">
+                        <x-secondary-button>
+                            Create Sprint
+                        </x-secondary-button>
+                    </div>
+                </div>
+                    {{-- Sprint loading list --}}
+                <div class="mb-7" id="sprint-loading-board-list">
+                    @foreach ($boards as $board)
+                        @php
+                            $sprintDropColumn =
+                                $board->columns
+                                    ->firstWhere('name', 'TO DO')
+                                ?? $board->columns
+                                    ->sortBy('position')
+                                    ->first();
+                        @endphp
+                        @if ($board->id == 1)
+                            @continue
+                        @endif
+                        <div id="sprint-loading-board-{{ $board->id }}" class="mb-3 sprint-board-status-{{ $board->status }}">
+                            @if ($board->completed == 0)
+                                <x-sprint-loading-board
+                                    :board="$board"
+                                    :activeSprints="$activeSprints"
+                                    data-task-dropzone="true"
+                                    data-task-list
+                                    data-column-id="{{ $sprintDropColumn->id }}"
+                                    data-board-id="{{ $board->id }}"
+                                    data-reorder="false"
+                                >
+                                    @foreach ($board->columns as $column)
+                                        @foreach ($column->tasks as $task)
+                                            <x-task-list-item
+                                                :task="$task"
+                                                draggable="true"
+                                                data-dnd-task="true"
+                                                data-task-id="{{ $task->id }}"
+                                            />
+                                        @endforeach
+                                    @endforeach
+                                </x-sprint-loading-board>
+                            @endif
+                        </div>
+                    @endforeach
+
+                    {{-- Create sprint input box list view --}}
+                    <div class="border min-w-full overflow-x-auto rounded p-3 bg-gray-100 hidden dark:bg-gray-700 dark:text-white" id="create-sprint">
+                        <div class="flex justify-between mb-2">
+                            <input class='border font-semibold text-xl dark:bg-gray-700 dark:text-white dark:placeholder-white' id="create-sprint-input" type="text"
+                                placeholder="Enter Sprint Name"/>
+                        </div>
+                        <p class="text-sm">Add tasks here or from the product backlog</p>
+                    </div>
+                </div>
+            </section>
+        </div>
     </div>
 
     <script>

@@ -13,6 +13,9 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use App\Charts\BurndownChart;
+use App\Events\TaskMoved;
+use App\Services\TaskMoveService;
+use Illuminate\Support\Facades\Gate;
 
 class BoardController extends Controller
 {
@@ -653,108 +656,63 @@ class BoardController extends Controller
         ]);
     }
 
-    public function moveTask(Request $request, Task $task)
-    {
+    public function moveTask(
+        Request $request,
+        Task $task,
+        TaskMoveService $taskMover
+    ) {
         $validated = $request->validate([
             'target_column_id' => [
                 'required',
                 'integer',
                 'exists:columns,id',
             ],
+
+            'target_position' => [
+                'required',
+                'integer',
+                'min:1',
+            ],
         ]);
 
-        $targetColumn = Column::with('board')
-            ->findOrFail($validated['target_column_id']);
 
         $task->load('column.board');
 
-        $sourceColumnId = $task->column_id;
 
-        if ($targetColumn->board?->completed) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Tasks cannot be moved into a completed sprint.',
-            ], 422);
-        }
+        $targetColumn =
+            Column::with('board')
+                ->findOrFail(
+                    $validated[
+                        'target_column_id'
+                    ]
+                );
 
-        if ($sourceColumnId === $targetColumn->id) {
-            return response()->json([
-                'success' => true,
-                'task' => $task,
-                'source_column_count' =>
-                    Task::where('column_id', $sourceColumnId)->count(),
-                'target_column_count' =>
-                    Task::where('column_id', $targetColumn->id)->count(),
-                'backlog_issue_count' =>
-                    Task::whereHas('column', function ($query) {
-                        $query->where(
-                            'board_id',
-                            self::PRODUCT_BACKLOG_ID
-                        );
-                    })->count(),
-            ]);
-        }
+        Gate::authorize(
+            'update',
+            $task->column->board
+        );
 
-        DB::transaction(function () use (
-            $task,
-            $sourceColumnId,
-            $targetColumn
-        ) {
-            $oldPosition = $task->position ?? 0;
+        Gate::authorize(
+            'update',
+            $targetColumn->board
+        );
 
-            Task::where('column_id', $sourceColumnId)
-                ->where('position', '>', $oldPosition)
-                ->decrement('position');
 
-            $newPosition =
-                (Task::where(
-                    'column_id',
-                    $targetColumn->id
-                )->max('position') ?? 0) + 1;
+        $result =
+            $taskMover->move(
+                $task,
+                $targetColumn,
+                $validated['target_position']
+            );
 
-            $task->column_id = $targetColumn->id;
-            $task->position = $newPosition;
+        broadcast(
+            new TaskMoved($result)
+        )->toOthers();
 
-            if (
-                strtoupper(trim($targetColumn->name))
-                === 'DONE'
-            ) {
-                $task->completed_at = now();
-            } else {
-                $task->completed_at = null;
-            }
-
-            $task->save();
-        });
 
         return response()->json([
             'success' => true,
-
-            'task' => $task->fresh(),
-
-            'source_column_id' => $sourceColumnId,
-
-            'target_column_id' => $targetColumn->id,
-
-            'source_column_count' =>
-                Task::where(
-                    'column_id',
-                    $sourceColumnId
-                )->count(),
-
-            'target_column_count' =>
-                Task::where(
-                    'column_id',
-                    $targetColumn->id
-                )->count(),
-
-            'backlog_issue_count' =>
-                Task::whereHas('column', function ($query) {
-                    $query->where(
-                        'board_id',
-                        self::PRODUCT_BACKLOG_ID
-                    );
-                })->count(),
+            ...$result,
         ]);
     }
 

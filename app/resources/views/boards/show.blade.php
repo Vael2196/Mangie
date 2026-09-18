@@ -4,573 +4,600 @@
     <meta name="task-dnd-context" content="board">
     <!-- Meta tag for CSRF token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <x-top-bar :title="$board->name" :user="$user"/>
+    <div
+    data-task-sync-context="board"
+    data-realtime-board-ids='@json([$board->id])'
+    >
+        <x-top-bar :title="$board->name" :user="$user"/>
 
-    <div class="mx-auto max-w-[1600px] px-6 py-8 lg:px-8">
-        <div class="flex flex-col">
+        <div class="mx-auto max-w-[1600px] px-6 py-8 lg:px-8">
+            <div class="flex flex-col">
 
-            <div
-                class="flex flex-col gap-5 rounded-2xl
-                    border border-gray-200 bg-white
-                    p-5 shadow-sm
-                    lg:flex-row lg:items-center lg:justify-between
-                    dark:border-gray-800 dark:bg-gray-900"
-            >
+                <div
+                    class="flex flex-col gap-5 rounded-2xl
+                        border border-gray-200 bg-white
+                        p-5 shadow-sm
+                        lg:flex-row lg:items-center lg:justify-between
+                        dark:border-gray-800 dark:bg-gray-900"
+                >
 
-                <div class="min-w-0 flex-1">
-                    <p
-                        class="text-xs font-semibold uppercase tracking-wider
-                            text-indigo-600 dark:text-indigo-400"
-                    >
-                        Sprint goal
-                    </p>
-
-                    <p
-                        class="mt-2 max-w-3xl text-sm leading-6
-                            text-gray-600 dark:text-gray-300"
-                    >
-                        @if ($board->status == 1 || $board->completed == 1)
-                            {{ $board->sprint_goal }}
-                        @else
-                            No sprint goal has been set yet.
-                        @endif
-                    </p>
-                </div>
-
-                <div class="flex space-x-8 items-center">
-
-                    @if ($board->completed == 0)
-                        <x-sprint-start-details :board="$board" :daysLeft="$daysLeft"/>
-                    @endif
-
-
-                    {{-- <select id="activateSprint" class="bg-white dark:bg-gray-700 dark:text-white rounded-lg p-2">
-                        @foreach (['INACTIVE', 'ACTIVE'] as $status)
-                            @if ($board->status == 1) {
-                                <option value={{$status}} selected>{{ $status }}</option>
-                            } @else {
-                                <option value={{$status}}>{{$status}}</option>
-                            }
-                            @endif
-                        @endforeach
-                    </select> --}}
-
-                    @if ($board->status == 1)
-                        <p class="lg:block">
-                            @if($daysLeft != null && $daysLeft > 0)
-                                {{ $daysLeft }} days left
-                            @elseif($daysLeft == 0)
-                                Sprint ends today
-                            @else
-                                Sprint has ended
-                            @endif
-                        </p>
-                    @elseif ($board->completed == 1)
-                        <p class="lg:block hidden">Sprint is completed</p>
-                    @else
-                        <p class="lg:block hidden">Sprint is not active</p>
-                    @endif
-
-                    @if ($board->completed == 0 && $board->status == 1)
-                        <form method="POST" action="{{ route('boards.complete', $board->id) }}" onsubmit="return confirm('Are you sure you want to complete the sprint early?')">
-                            @csrf
-                            <button type="submit" class="inline-flex items-center px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-500 rounded-md font-semibold text-xs text-gray-700 dark:text-gray-300 uppercase tracking-widest shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:opacity-25 transition ease-in-out duration-150">
-                                Complete Sprint
-                            </button>
-                        </form>
-                    @endif
-
-                    @if ($board->completed == 1)
-                        <form method="POST" action="{{ route('boards.burndownChart', $board->id) }}">
-                            @csrf
-                            <button type="submit" class="inline-flex items-center px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-500 rounded-md font-semibold text-xs text-gray-700 dark:text-gray-300 uppercase tracking-widest shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:opacity-25 transition ease-in-out duration-150">
-                                Burndown Chart
-                            </button>
-                        </form>
-                    @endif
-
-                    <a class="hover:cursor-pointer"><i class="fa-solid fa-ellipsis"></i></a>
-                </div>
-            </div>
-            <div class="flex space-x-3">
-                <div class="flex flex-wrap items-center gap-3">
-
-                    {{-- User search --}}
-                    <div class="relative">
-                        <input
-                            type="text"
-                            id="user-input"
-                            class="w-64 rounded-xl border border-gray-300
-                                bg-white px-3.5 py-2.5 text-sm
-                                text-gray-900 shadow-sm
-                                placeholder:text-gray-400
-                                focus:border-indigo-500 focus:ring-indigo-500
-                                dark:border-gray-700 dark:bg-gray-900
-                                dark:text-white dark:placeholder:text-gray-500"
-                            placeholder="Add a participant..."
-                            autocomplete="off"
+                    <div class="min-w-0 flex-1">
+                        <p
+                            class="text-xs font-semibold uppercase tracking-wider
+                                text-indigo-600 dark:text-indigo-400"
                         >
-
-                        <ul
-                            id="user-dropdown"
-                            class="absolute left-0 top-full z-50 mt-2 hidden
-                                max-h-56 w-72 overflow-y-auto
-                                rounded-xl border border-gray-200
-                                bg-white p-1.5 shadow-xl
-                                dark:border-gray-700 dark:bg-gray-800"
-                        ></ul>
+                            Sprint goal
+                        </p>
 
                         <p
-                            id="user-error"
-                            class="mt-1.5 hidden text-sm text-red-600 dark:text-red-400"
-                        ></p>
+                            class="mt-2 max-w-3xl text-sm leading-6
+                                text-gray-600 dark:text-gray-300"
+                        >
+                            @if ($board->status == 1 || $board->completed == 1)
+                                {{ $board->sprint_goal }}
+                            @else
+                                No sprint goal has been set yet.
+                            @endif
+                        </p>
                     </div>
 
+                    <div class="flex space-x-8 items-center">
 
-                    {{-- Existing members --}}
-                    <ul id="user-list" class="flex -space-x-2">
-                        @foreach($board->users as $boardUser)
-                            <li
-                                class="flex h-9 w-9 items-center justify-center
-                                    rounded-full border-2 border-white
-                                    bg-indigo-100 text-indigo-600 shadow-sm
-                                    dark:border-gray-900 dark:bg-indigo-950
-                                    dark:text-indigo-400"
-                                title="{{ $boardUser->name }}"
-                                data-user-id="{{ $boardUser->id }}"
-                            >
-                                <span class="material-symbols-rounded text-[22px]">
-                                    account_circle
-                                </span>
-                            </li>
-                        @endforeach
-                    </ul>
-
-                </div>
-
-                @php
-                    $criteriaScope = 'board_' . $board->id;
-                @endphp
-                <x-sort-menu :scope="$criteriaScope" />
-                <x-filter-menu :scope="$criteriaScope" />
-
-                @foreach($cookies as $key => $value)
-
-                    @if($key === 'sort')
-
-                        @if($value[0])
-                            <x-sort-tag
-                                :scope="$criteriaScope"
-                                key="{{ $value[0] }}"
-                                direction="{{ $value[1] }}"
-                            />
+                        @if ($board->completed == 0)
+                            <x-sprint-start-details :board="$board" :daysLeft="$daysLeft"/>
                         @endif
 
-                    @elseif($value)
 
-                        <x-cookie-tag
-                            :scope="$criteriaScope"
-                            key="{{ $key }}"
-                            tag="{{ $value }}"
-                        />
+                        {{-- <select id="activateSprint" class="bg-white dark:bg-gray-700 dark:text-white rounded-lg p-2">
+                            @foreach (['INACTIVE', 'ACTIVE'] as $status)
+                                @if ($board->status == 1) {
+                                    <option value={{$status}} selected>{{ $status }}</option>
+                                } @else {
+                                    <option value={{$status}}>{{$status}}</option>
+                                }
+                                @endif
+                            @endforeach
+                        </select> --}}
 
-                    @endif
+                        @if ($board->status == 1)
+                            <p class="lg:block">
+                                @if($daysLeft != null && $daysLeft > 0)
+                                    {{ $daysLeft }} days left
+                                @elseif($daysLeft == 0)
+                                    Sprint ends today
+                                @else
+                                    Sprint has ended
+                                @endif
+                            </p>
+                        @elseif ($board->completed == 1)
+                            <p class="lg:block hidden">Sprint is completed</p>
+                        @else
+                            <p class="lg:block hidden">Sprint is not active</p>
+                        @endif
 
-                @endforeach
-            </div>
-        </div>
+                        @if ($board->completed == 0 && $board->status == 1)
+                            <form method="POST" action="{{ route('boards.complete', $board->id) }}" onsubmit="return confirm('Are you sure you want to complete the sprint early?')">
+                                @csrf
+                                <button type="submit" class="inline-flex items-center px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-500 rounded-md font-semibold text-xs text-gray-700 dark:text-gray-300 uppercase tracking-widest shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:opacity-25 transition ease-in-out duration-150">
+                                    Complete Sprint
+                                </button>
+                            </form>
+                        @endif
 
-        <div
-            id="columns-container"
-            class="mt-6 flex max-w-full flex-nowrap
-                items-start gap-5 overflow-x-auto
-                rounded-2xl border border-gray-200
-                bg-gradient-to-br from-gray-50 to-indigo-50/40
-                p-5 pb-7
-                dark:border-gray-800
-                dark:from-gray-950 dark:to-indigo-950/20"
-        >
-            <!-- Display columns and tasks -->
-            @foreach($board->columns as $column)
-                <x-task-column :column="$column" :editable="$board->completed == 0">
+                        @if ($board->completed == 1)
+                            <form method="POST" action="{{ route('boards.burndownChart', $board->id) }}">
+                                @csrf
+                                <button type="submit" class="inline-flex items-center px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-500 rounded-md font-semibold text-xs text-gray-700 dark:text-gray-300 uppercase tracking-widest shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:opacity-25 transition ease-in-out duration-150">
+                                    Burndown Chart
+                                </button>
+                            </form>
+                        @endif
 
-                    <div
-                        class="task-list space-y-3
-                            rounded-xl transition"
-                        id="task-list-{{ $column->id }}"
-                        data-task-dropzone="true"
-                        data-column-id="{{ $column->id }}"
-                        data-column-name="{{ $column->name }}"
-                    >
-                        @foreach($column->tasks as $task)
-                            <x-task-box
-                                :task="$task"
-                                draggable="true"
-                                data-dnd-task="true"
-                                data-task-id="{{ $task->id }}"
-                            />
-                        @endforeach
+                        <a class="hover:cursor-pointer"><i class="fa-solid fa-ellipsis"></i></a>
                     </div>
+                </div>
+                <div class="flex space-x-3">
+                    <div class="flex flex-wrap items-center gap-3">
 
-                    @if($board->completed == 0)
-                        <div
-                            class="add-task-section mt-3"
-                            data-column-id="{{ $column->id }}"
-                        >
-                            <button
-                                type="button"
-                                class="add-task-btn flex w-full items-center gap-2
-                                    rounded-lg px-2.5 py-2
-                                    text-sm font-medium text-gray-500
-                                    transition
-                                    hover:bg-gray-200/80 hover:text-gray-700
-                                    dark:text-gray-400
-                                    dark:hover:bg-gray-700
-                                    dark:hover:text-gray-200"
+                        {{-- User search --}}
+                        <div class="relative">
+                            <input
+                                type="text"
+                                id="user-input"
+                                class="w-64 rounded-xl border border-gray-300
+                                    bg-white px-3.5 py-2.5 text-sm
+                                    text-gray-900 shadow-sm
+                                    placeholder:text-gray-400
+                                    focus:border-indigo-500 focus:ring-indigo-500
+                                    dark:border-gray-700 dark:bg-gray-900
+                                    dark:text-white dark:placeholder:text-gray-500"
+                                placeholder="Add a participant..."
+                                autocomplete="off"
                             >
-                                <span class="material-symbols-rounded text-[19px]">
-                                    add
-                                </span>
 
-                                Add a task
-                            </button>
+                            <ul
+                                id="user-dropdown"
+                                class="absolute left-0 top-full z-50 mt-2 hidden
+                                    max-h-56 w-72 overflow-y-auto
+                                    rounded-xl border border-gray-200
+                                    bg-white p-1.5 shadow-xl
+                                    dark:border-gray-700 dark:bg-gray-800"
+                            ></ul>
 
-                            <div class="new-task-editor hidden">
-                                <textarea
-                                    class="new-task-input min-h-[90px] w-full
-                                        resize-none rounded-xl
-                                        border border-gray-200 bg-white
-                                        px-3 py-2.5 text-sm
-                                        text-gray-900 shadow-sm
-                                        placeholder:text-gray-400
-                                        focus:border-indigo-500
-                                        focus:ring-indigo-500
-                                        dark:border-gray-700
-                                        dark:bg-gray-900
-                                        dark:text-white"
-                                    maxlength="255"
-                                    rows="3"
-                                    placeholder="Enter a title for this task..."
-                                ></textarea>
-
-                                <div class="mt-2 flex items-center gap-2">
-
-                                    <button
-                                        type="button"
-                                        class="confirm-add-task
-                                            inline-flex items-center
-                                            rounded-lg bg-indigo-600
-                                            px-3 py-2
-                                            text-sm font-semibold text-white
-                                            transition
-                                            hover:bg-indigo-500
-                                            disabled:cursor-not-allowed
-                                            disabled:opacity-50"
-                                    >
-                                        Add task
-                                    </button>
-
-                                    <button
-                                        type="button"
-                                        class="cancel-add-task
-                                            flex h-9 w-9 items-center
-                                            justify-center rounded-lg
-                                            text-gray-500 transition
-                                            hover:bg-gray-200
-                                            hover:text-gray-700
-                                            dark:text-gray-400
-                                            dark:hover:bg-gray-700
-                                            dark:hover:text-white"
-                                        aria-label="Cancel"
-                                    >
-                                        <span class="material-symbols-rounded text-[21px]">
-                                            close
-                                        </span>
-                                    </button>
-
-                                </div>
-
-                                <p
-                                    class="task-error mt-2 hidden
-                                        text-xs text-red-600
-                                        dark:text-red-400"
-                                ></p>
-                            </div>
+                            <p
+                                id="user-error"
+                                class="mt-1.5 hidden text-sm text-red-600 dark:text-red-400"
+                            ></p>
                         </div>
-                    @endif
-
-                </x-task-column>
-            @endforeach
-
-            <!-- Option to add new columns -->
-            <div
-                id="add-column-section"
-                class="w-72 shrink-0"
-            >
-                {{-- Initial button --}}
-                <button
-                    type="button"
-                    id="add-column-btn"
-                    class="flex w-full items-center justify-center gap-2
-                        rounded-xl border-2 border-dashed
-                        border-gray-300 bg-white/50
-                        px-4 py-3 text-sm font-semibold
-                        text-gray-500 transition
-                        hover:border-indigo-300
-                        hover:bg-indigo-50
-                        hover:text-indigo-600
-                        dark:border-gray-700
-                        dark:bg-gray-900/40
-                        dark:text-gray-400
-                        dark:hover:border-indigo-700
-                        dark:hover:bg-indigo-950/30
-                        dark:hover:text-indigo-400"
-                >
-                    <span class="material-symbols-rounded text-[20px]">
-                        add
-                    </span>
-
-                    Add column
-                </button>
 
 
-                {{-- Replacement editor --}}
-                <div
-                    id="new-column-editor"
-                    class="hidden rounded-2xl
-                        border border-gray-200
-                        bg-gray-100/80 p-3 shadow-sm
-                        dark:border-gray-700
-                        dark:bg-gray-800/80"
-                >
-                    <input
-                        id="new-column-input"
-                        type="text"
-                        class="w-full rounded-xl
-                            border border-gray-300
-                            bg-white px-3.5 py-2.5
-                            text-sm text-gray-900 shadow-sm
-                            placeholder:text-gray-400
-                            focus:border-indigo-500
-                            focus:ring-indigo-500
-                            dark:border-gray-700
-                            dark:bg-gray-900
-                            dark:text-white"
-                        placeholder="Column name..."
-                        autocomplete="off"
-                    >
+                        {{-- Existing members --}}
+                        <ul id="user-list" class="flex -space-x-2">
+                            @foreach($board->users as $boardUser)
+                                <li
+                                    class="flex h-9 w-9 items-center justify-center
+                                        rounded-full border-2 border-white
+                                        bg-indigo-100 text-indigo-600 shadow-sm
+                                        dark:border-gray-900 dark:bg-indigo-950
+                                        dark:text-indigo-400"
+                                    title="{{ $boardUser->name }}"
+                                    data-user-id="{{ $boardUser->id }}"
+                                >
+                                    <span class="material-symbols-rounded text-[22px]">
+                                        account_circle
+                                    </span>
+                                </li>
+                            @endforeach
+                        </ul>
 
-                    <div class="mt-3 flex items-center gap-2">
-                        <button
-                            type="button"
-                            id="confirm-add-column"
-                            class="inline-flex items-center gap-1.5
-                                rounded-lg bg-indigo-600
-                                px-3 py-2 text-sm font-semibold
-                                text-white transition
-                                hover:bg-indigo-500"
-                        >
-                            <span class="material-symbols-rounded text-[18px]">
-                                add
-                            </span>
-
-                            Add
-                        </button>
-
-                        <button
-                            type="button"
-                            id="cancel-add-column"
-                            class="rounded-lg px-3 py-2
-                                text-sm font-semibold text-gray-500
-                                transition hover:bg-gray-200
-                                dark:text-gray-400
-                                dark:hover:bg-gray-700"
-                        >
-                            Cancel
-                        </button>
                     </div>
 
-                    <p
-                        id="new-column-error"
-                        class="mt-2 hidden text-xs
-                            text-red-600 dark:text-red-400"
-                    ></p>
-                </div>
-            </div>
-        </div>
-        {{-- Context Menu --}}
-        <div class="hidden absolute z-30" id="task-context-menu">
-            <div class="2xl:flex 2xl:items-start">
-                {{-- "Move To" Button --}}
-                <div
-                    class='bg-white border px-4 py-2 items-center leading-5 dark:bg-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-500 hover:cursor-pointer focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out rounded flex space-x-3'>
-                    <div class = "text-center"
-                        onmouseover="document.getElementById('contextBoardMenu').classList.toggle('hidden')">Move To
-                    </div>
-                    <div class="text-center"><i class="fa-solid fa-angle-right"></i></div>
-                </div>
+                    @php
+                        $criteriaScope = 'board_' . $board->id;
+                    @endphp
+                    <x-sort-menu :scope="$criteriaScope" />
+                    <x-filter-menu :scope="$criteriaScope" />
 
-                {{-- Context sub menu (Buttons for each sprint to move to) --}}
-                <div class="hidden shadow-lg" id="contextBoardMenu">
-                    @foreach ($board->columns as $column)
-                        <div class='bg-white border px-4 py-2 text-start leading-5 dark:bg-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-500 hover:cursor-pointer focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out flex space-x-3'
-                            id="context-board-menu-{{ $column->id }}">
-                            <h1>{{ $column->name }}</h1>
-                        </div>
+                    @foreach($cookies as $key => $value)
+
+                        @if($key === 'sort')
+
+                            @if($value[0])
+                                <x-sort-tag
+                                    :scope="$criteriaScope"
+                                    key="{{ $value[0] }}"
+                                    direction="{{ $value[1] }}"
+                                />
+                            @endif
+
+                        @elseif($value)
+
+                            <x-cookie-tag
+                                :scope="$criteriaScope"
+                                key="{{ $key }}"
+                                tag="{{ $value }}"
+                            />
+
+                        @endif
+
                     @endforeach
                 </div>
             </div>
-        </div>
-        <div
-            id="delete-column-modal"
-            class="fixed inset-0 z-[120] hidden"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="delete-column-title"
-        >
-
-            {{-- Backdrop --}}
-            <div
-                data-delete-column-backdrop
-                class="absolute inset-0
-                    bg-gray-950/55
-                    backdrop-blur-[2px]"
-            ></div>
-
 
             <div
-                class="relative flex min-h-full
-                    items-center justify-center
-                    p-4"
+                id="columns-container"
+                class="mt-6 flex max-w-full flex-nowrap
+                    items-start gap-5 overflow-x-auto
+                    rounded-2xl border border-gray-200
+                    bg-gradient-to-br from-gray-50 to-indigo-50/40
+                    p-5 pb-7
+                    dark:border-gray-800
+                    dark:from-gray-950 dark:to-indigo-950/20"
+            >
+                <!-- Display columns and tasks -->
+                @foreach($board->columns as $column)
+                    <x-task-column :column="$column" :editable="$board->completed == 0">
+
+                        <div
+                            id="task-list-{{ $column->id }}"
+                            class="task-list
+                                min-h-[72px]
+                                space-y-3
+                                rounded-xl
+                                transition"
+                            data-task-list
+                            data-column-id="{{ $column->id }}"
+                            data-board-id="{{ $board->id }}"
+                            data-reorder="true"
+                        >
+                            @foreach($column->tasks as $task)
+
+                                <x-task-box
+                                    :task="$task"
+                                    data-task-id="{{ $task->id }}"
+                                    data-column-id="{{ $task->column_id }}"
+                                />
+
+                            @endforeach
+
+                            <div
+                                data-empty-drop-marker
+                                class="{{ $column->tasks->isEmpty() ? '' : 'hidden' }}
+                                    pointer-events-none
+                                    flex min-h-[58px]
+                                    items-center justify-center
+                                    rounded-xl
+                                    border-2 border-dashed
+                                    border-gray-200
+                                    px-3 text-xs
+                                    text-gray-400
+                                    dark:border-gray-700
+                                    dark:text-gray-500"
+                            >
+                                Drop a task here
+                            </div>
+                        </div>
+
+                        @if($board->completed == 0)
+                            <div
+                                class="add-task-section mt-3"
+                                data-column-id="{{ $column->id }}"
+                            >
+                                <button
+                                    type="button"
+                                    class="add-task-btn flex w-full items-center gap-2
+                                        rounded-lg px-2.5 py-2
+                                        text-sm font-medium text-gray-500
+                                        transition
+                                        hover:bg-gray-200/80 hover:text-gray-700
+                                        dark:text-gray-400
+                                        dark:hover:bg-gray-700
+                                        dark:hover:text-gray-200"
+                                >
+                                    <span class="material-symbols-rounded text-[19px]">
+                                        add
+                                    </span>
+
+                                    Add a task
+                                </button>
+
+                                <div class="new-task-editor hidden">
+                                    <textarea
+                                        class="new-task-input min-h-[90px] w-full
+                                            resize-none rounded-xl
+                                            border border-gray-200 bg-white
+                                            px-3 py-2.5 text-sm
+                                            text-gray-900 shadow-sm
+                                            placeholder:text-gray-400
+                                            focus:border-indigo-500
+                                            focus:ring-indigo-500
+                                            dark:border-gray-700
+                                            dark:bg-gray-900
+                                            dark:text-white"
+                                        maxlength="255"
+                                        rows="3"
+                                        placeholder="Enter a title for this task..."
+                                    ></textarea>
+
+                                    <div class="mt-2 flex items-center gap-2">
+
+                                        <button
+                                            type="button"
+                                            class="confirm-add-task
+                                                inline-flex items-center
+                                                rounded-lg bg-indigo-600
+                                                px-3 py-2
+                                                text-sm font-semibold text-white
+                                                transition
+                                                hover:bg-indigo-500
+                                                disabled:cursor-not-allowed
+                                                disabled:opacity-50"
+                                        >
+                                            Add task
+                                        </button>
+
+                                        <button
+                                            type="button"
+                                            class="cancel-add-task
+                                                flex h-9 w-9 items-center
+                                                justify-center rounded-lg
+                                                text-gray-500 transition
+                                                hover:bg-gray-200
+                                                hover:text-gray-700
+                                                dark:text-gray-400
+                                                dark:hover:bg-gray-700
+                                                dark:hover:text-white"
+                                            aria-label="Cancel"
+                                        >
+                                            <span class="material-symbols-rounded text-[21px]">
+                                                close
+                                            </span>
+                                        </button>
+
+                                    </div>
+
+                                    <p
+                                        class="task-error mt-2 hidden
+                                            text-xs text-red-600
+                                            dark:text-red-400"
+                                    ></p>
+                                </div>
+                            </div>
+                        @endif
+
+                    </x-task-column>
+                @endforeach
+
+                <!-- Option to add new columns -->
+                <div
+                    id="add-column-section"
+                    class="w-72 shrink-0"
+                >
+                    {{-- Initial button --}}
+                    <button
+                        type="button"
+                        id="add-column-btn"
+                        class="flex w-full items-center justify-center gap-2
+                            rounded-xl border-2 border-dashed
+                            border-gray-300 bg-white/50
+                            px-4 py-3 text-sm font-semibold
+                            text-gray-500 transition
+                            hover:border-indigo-300
+                            hover:bg-indigo-50
+                            hover:text-indigo-600
+                            dark:border-gray-700
+                            dark:bg-gray-900/40
+                            dark:text-gray-400
+                            dark:hover:border-indigo-700
+                            dark:hover:bg-indigo-950/30
+                            dark:hover:text-indigo-400"
+                    >
+                        <span class="material-symbols-rounded text-[20px]">
+                            add
+                        </span>
+
+                        Add column
+                    </button>
+
+
+                    {{-- Replacement editor --}}
+                    <div
+                        id="new-column-editor"
+                        class="hidden rounded-2xl
+                            border border-gray-200
+                            bg-gray-100/80 p-3 shadow-sm
+                            dark:border-gray-700
+                            dark:bg-gray-800/80"
+                    >
+                        <input
+                            id="new-column-input"
+                            type="text"
+                            class="w-full rounded-xl
+                                border border-gray-300
+                                bg-white px-3.5 py-2.5
+                                text-sm text-gray-900 shadow-sm
+                                placeholder:text-gray-400
+                                focus:border-indigo-500
+                                focus:ring-indigo-500
+                                dark:border-gray-700
+                                dark:bg-gray-900
+                                dark:text-white"
+                            placeholder="Column name..."
+                            autocomplete="off"
+                        >
+
+                        <div class="mt-3 flex items-center gap-2">
+                            <button
+                                type="button"
+                                id="confirm-add-column"
+                                class="inline-flex items-center gap-1.5
+                                    rounded-lg bg-indigo-600
+                                    px-3 py-2 text-sm font-semibold
+                                    text-white transition
+                                    hover:bg-indigo-500"
+                            >
+                                <span class="material-symbols-rounded text-[18px]">
+                                    add
+                                </span>
+
+                                Add
+                            </button>
+
+                            <button
+                                type="button"
+                                id="cancel-add-column"
+                                class="rounded-lg px-3 py-2
+                                    text-sm font-semibold text-gray-500
+                                    transition hover:bg-gray-200
+                                    dark:text-gray-400
+                                    dark:hover:bg-gray-700"
+                            >
+                                Cancel
+                            </button>
+                        </div>
+
+                        <p
+                            id="new-column-error"
+                            class="mt-2 hidden text-xs
+                                text-red-600 dark:text-red-400"
+                        ></p>
+                    </div>
+                </div>
+            </div>
+            {{-- Context Menu --}}
+            <div class="hidden absolute z-30" id="task-context-menu">
+                <div class="2xl:flex 2xl:items-start">
+                    {{-- "Move To" Button --}}
+                    <div
+                        class='bg-white border px-4 py-2 items-center leading-5 dark:bg-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-500 hover:cursor-pointer focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out rounded flex space-x-3'>
+                        <div class = "text-center"
+                            onmouseover="document.getElementById('contextBoardMenu').classList.toggle('hidden')">Move To
+                        </div>
+                        <div class="text-center"><i class="fa-solid fa-angle-right"></i></div>
+                    </div>
+
+                    {{-- Context sub menu (Buttons for each sprint to move to) --}}
+                    <div class="hidden shadow-lg" id="contextBoardMenu">
+                        @foreach ($board->columns as $column)
+                            <div class='bg-white border px-4 py-2 text-start leading-5 dark:bg-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-500 hover:cursor-pointer focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out flex space-x-3'
+                                id="context-board-menu-{{ $column->id }}">
+                                <h1>{{ $column->name }}</h1>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+            <div
+                id="delete-column-modal"
+                class="fixed inset-0 z-[120] hidden"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="delete-column-title"
             >
 
+                {{-- Backdrop --}}
                 <div
-                    class="w-full max-w-md
-                        rounded-3xl
-                        border border-gray-200
-                        bg-white p-6
-                        shadow-2xl
-                        dark:border-gray-700
-                        dark:bg-gray-900"
+                    data-delete-column-backdrop
+                    class="absolute inset-0
+                        bg-gray-950/55
+                        backdrop-blur-[2px]"
+                ></div>
+
+
+                <div
+                    class="relative flex min-h-full
+                        items-center justify-center
+                        p-4"
                 >
 
                     <div
-                        class="flex items-start gap-4"
+                        class="w-full max-w-md
+                            rounded-3xl
+                            border border-gray-200
+                            bg-white p-6
+                            shadow-2xl
+                            dark:border-gray-700
+                            dark:bg-gray-900"
                     >
 
                         <div
-                            class="flex h-11 w-11
-                                shrink-0 items-center
-                                justify-center rounded-xl
-                                bg-red-50
-                                text-red-600
-                                dark:bg-red-950/50
-                                dark:text-red-400"
+                            class="flex items-start gap-4"
                         >
-                            <span
-                                class="material-symbols-rounded
-                                    text-[23px]"
+
+                            <div
+                                class="flex h-11 w-11
+                                    shrink-0 items-center
+                                    justify-center rounded-xl
+                                    bg-red-50
+                                    text-red-600
+                                    dark:bg-red-950/50
+                                    dark:text-red-400"
                             >
-                                delete
-                            </span>
-                        </div>
-
-
-                        <div class="min-w-0 flex-1">
-
-                            <h3
-                                id="delete-column-title"
-                                class="text-lg font-bold
-                                    text-gray-900
-                                    dark:text-white"
-                            >
-                                Delete column?
-                            </h3>
-
-                            <p
-                                class="mt-2 text-sm
-                                    leading-6
-                                    text-gray-500
-                                    dark:text-gray-400"
-                            >
-                                The empty column
                                 <span
-                                    id="delete-column-name"
-                                    class="font-semibold
-                                        text-gray-700
-                                        dark:text-gray-200"
-                                ></span>
-                                will be permanently deleted.
-                                This cannot be undone.
-                            </p>
+                                    class="material-symbols-rounded
+                                        text-[23px]"
+                                >
+                                    delete
+                                </span>
+                            </div>
+
+
+                            <div class="min-w-0 flex-1">
+
+                                <h3
+                                    id="delete-column-title"
+                                    class="text-lg font-bold
+                                        text-gray-900
+                                        dark:text-white"
+                                >
+                                    Delete column?
+                                </h3>
+
+                                <p
+                                    class="mt-2 text-sm
+                                        leading-6
+                                        text-gray-500
+                                        dark:text-gray-400"
+                                >
+                                    The empty column
+                                    <span
+                                        id="delete-column-name"
+                                        class="font-semibold
+                                            text-gray-700
+                                            dark:text-gray-200"
+                                    ></span>
+                                    will be permanently deleted.
+                                    This cannot be undone.
+                                </p>
+
+                            </div>
+                        </div>
+
+
+                        <p
+                            id="delete-column-error"
+                            class="mt-4 hidden
+                                rounded-xl
+                                bg-red-50 px-3 py-2
+                                text-sm text-red-600
+                                dark:bg-red-950/40
+                                dark:text-red-400"
+                        ></p>
+
+
+                        <div
+                            class="mt-6 flex
+                                justify-end gap-2"
+                        >
+
+                            <button
+                                type="button"
+                                id="cancel-delete-column"
+                                class="rounded-xl
+                                    px-4 py-2.5
+                                    text-sm font-semibold
+                                    text-gray-600
+                                    transition
+                                    hover:bg-gray-100
+                                    dark:text-gray-300
+                                    dark:hover:bg-gray-800"
+                            >
+                                Cancel
+                            </button>
+
+
+                            <button
+                                type="button"
+                                id="confirm-delete-column"
+                                class="inline-flex
+                                    items-center gap-2
+                                    rounded-xl
+                                    bg-red-600
+                                    px-4 py-2.5
+                                    text-sm font-semibold
+                                    text-white
+                                    shadow-sm transition
+                                    hover:bg-red-500
+                                    disabled:cursor-not-allowed
+                                    disabled:opacity-60"
+                            >
+                                <span
+                                    class="material-symbols-rounded
+                                        text-[18px]"
+                                >
+                                    delete
+                                </span>
+
+                                <span data-delete-label>
+                                    Delete column
+                                </span>
+                            </button>
 
                         </div>
-                    </div>
-
-
-                    <p
-                        id="delete-column-error"
-                        class="mt-4 hidden
-                            rounded-xl
-                            bg-red-50 px-3 py-2
-                            text-sm text-red-600
-                            dark:bg-red-950/40
-                            dark:text-red-400"
-                    ></p>
-
-
-                    <div
-                        class="mt-6 flex
-                            justify-end gap-2"
-                    >
-
-                        <button
-                            type="button"
-                            id="cancel-delete-column"
-                            class="rounded-xl
-                                px-4 py-2.5
-                                text-sm font-semibold
-                                text-gray-600
-                                transition
-                                hover:bg-gray-100
-                                dark:text-gray-300
-                                dark:hover:bg-gray-800"
-                        >
-                            Cancel
-                        </button>
-
-
-                        <button
-                            type="button"
-                            id="confirm-delete-column"
-                            class="inline-flex
-                                items-center gap-2
-                                rounded-xl
-                                bg-red-600
-                                px-4 py-2.5
-                                text-sm font-semibold
-                                text-white
-                                shadow-sm transition
-                                hover:bg-red-500
-                                disabled:cursor-not-allowed
-                                disabled:opacity-60"
-                        >
-                            <span
-                                class="material-symbols-rounded
-                                    text-[18px]"
-                            >
-                                delete
-                            </span>
-
-                            <span data-delete-label>
-                                Delete column
-                            </span>
-                        </button>
 
                     </div>
 
                 </div>
-
             </div>
         </div>
     </div>
