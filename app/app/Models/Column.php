@@ -11,6 +11,13 @@ class Column extends Model
 
     protected $fillable = ['name', 'board_id', 'position', 'color'];
 
+    protected function casts(): array
+    {
+        return [
+            'position' => 'integer',
+        ];
+    }
+
     // Column belongs to Board
     public function board()
     {

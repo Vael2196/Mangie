@@ -117,7 +117,7 @@
 
                     @endforeach
                     {{-- Create sprint button --}}
-                    <div id="create-sprint-button"><x-secondary-button>Create Sprint</x-secondary-button></div>
+                    <div data-create-sprint-button><x-secondary-button>Create Sprint</x-secondary-button></div>
                 </div>
             </div>
 
@@ -136,9 +136,8 @@
 
                             <x-task-box
                                 :task="$task"
-                                draggable="true"
-                                data-dnd-task="true"
                                 data-task-id="{{ $task->id }}"
+                                data-column-id="{{ $task->column_id }}"
                             />
 
                         @endforeach
@@ -163,8 +162,17 @@
                     {{-- Context sub menu (Buttons for each sprint to move to) --}}
                     <div class="hidden shadow-lg" id="contextBoardMenu">
                         @foreach ($inactive_boards as $board)
+                            @php
+                                $targetColumn =
+                                    $board->columns
+                                        ->firstWhere('name', 'TO DO')
+                                    ?? $board->columns
+                                        ->sortBy('position')
+                                        ->first();
+                            @endphp
+                            @continue(!$targetColumn)
                             <div class='bg-white border px-4 py-2 text-start leading-5 dark:bg-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-500 hover:cursor-pointer focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out flex space-x-3'
-                                id="context-board-menu-{{ $board->id }}">
+                                data-target-column-id="{{ $targetColumn->id }}">
                                 <h1>{{ $board->name }}</h1>
                             </div>
                         @endforeach
@@ -210,7 +218,7 @@
                         Sprints
                     </h2>
                 </div>
-                <div id="create-sprint-button">
+                <div data-create-sprint-button>
                         <x-secondary-button>
                             Create Sprint
                         </x-secondary-button>
@@ -245,9 +253,8 @@
                                         @foreach ($column->tasks as $task)
                                             <x-task-box
                                                 :task="$task"
-                                                draggable="true"
-                                                data-dnd-task="true"
                                                 data-task-id="{{ $task->id }}"
+                                                data-column-id="{{ $task->column_id }}"
                                             />
                                         @endforeach
                                     @endforeach
@@ -299,7 +306,7 @@
 
             //Create Sprint
             const createSprint = document.getElementById('create-sprint'); // Box created when clicking on create sprint button
-            const createSprintButton = document.getElementById('create-sprint-button'); // Creates a sprint
+            const createSprintButtons = document.querySelectorAll('[data-create-sprint-button]');
             const createSprintInput = document.getElementById('create-sprint-input'); // Input for name of sprint
 
             // Task Items
@@ -324,9 +331,11 @@
             });
 
             // Create sprint when clicking button ------------------------------------------
-            createSprintButton.addEventListener('click', e => {
-                createSprint.classList.remove('hidden');
-                createSprintInput.focus();
+            createSprintButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    createSprint.classList.remove('hidden');
+                    createSprintInput.focus();
+                });
             });
 
             createSprintInput.addEventListener('focusout', e => {
@@ -416,9 +425,9 @@
 
             // Call moveTasks function when clicking on sub menu button
             for (let child of contextSubMenuChildren) {
-                let subMenuId = Number(child.id.replace('context-board-menu-', ""));
+                let targetColumnId = Number(child.dataset.targetColumnId);
                 child.addEventListener('click', e => {
-                    moveTasks(subMenuId);
+                    moveTasks(targetColumnId);
                 });
             }
 
@@ -437,7 +446,7 @@
                     return;
                 }
 
-                fetch('{{ route('backlog.store') }}', {
+                fetch('{{ route('tasks.store') }}', {
                         method: 'POST',
                         headers: {
                             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')
@@ -483,17 +492,17 @@
 
 
             // Bulk move tasks from backlog to sprint board
-            function moveTasks(board_id) {
-                fetch('{{ route('backlog.moveTasks') }}', {
-                        method: 'POST',
+            function moveTasks(targetColumnId) {
+                fetch('{{ route('tasks.bulk-move') }}', {
+                        method: 'PATCH',
                         headers: {
                             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute(
                                 'content'),
                             'Content-Type': 'application/json'
                         },
                         body: JSON.stringify({
-                            task_ids: JSON.stringify(selectedTaskItems),
-                            board_id: board_id // Num
+                            task_ids: selectedTaskItems,
+                            target_column_id: targetColumnId
                         })
                     })
                     .then(response => {

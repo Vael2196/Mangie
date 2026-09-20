@@ -671,9 +671,9 @@ document.addEventListener('DOMContentLoaded', function () {
             try {
 
                 const response = await fetch(
-                    '{{ route('tasks.update') }}',
+                    '{{ route('tasks.update', ['task' => $task->id]) }}',
                     {
-                        method: 'POST',
+                        method: 'PATCH',
 
                         headers: {
                             'Content-Type':
@@ -693,7 +693,6 @@ document.addEventListener('DOMContentLoaded', function () {
                         },
 
                         body: JSON.stringify({
-                            task_id: taskId,
                             column_id:
                                 Number(columnId),
 
@@ -703,7 +702,9 @@ document.addEventListener('DOMContentLoaded', function () {
                                 description || null,
 
                             assignee:
-                                Number(assignee || 0),
+                                assignee
+                                    ? Number(assignee)
+                                    : null,
 
                             labels:
                                 labels || null,

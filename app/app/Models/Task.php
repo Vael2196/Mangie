@@ -9,7 +9,28 @@ class Task extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['title', 'description', 'column_id', 'position'];
+    protected $fillable = [
+        'title',
+        'description',
+        'column_id',
+        'position',
+        'labels',
+        'priority',
+        'story_points',
+        'time_log',
+        'completed_at',
+    ];
+
+    protected function casts(): array
+    {
+        return [
+            'column_id' => 'integer',
+            'position' => 'integer',
+            'story_points' => 'integer',
+            'time_log' => 'integer',
+            'completed_at' => 'date',
+        ];
+    }
 
     // Task belongs to Column
     public function column()

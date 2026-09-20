@@ -192,7 +192,7 @@
         >
 
             <div
-                data-column-task-count
+                data-task-count-value
                 class="flex h-7 min-w-7 shrink-0
                     items-center justify-center
                     rounded-lg
@@ -377,68 +377,43 @@
                                    dark:border-gray-800"
                         ></div>
 
-                        @if($canDelete)
-
-                            <button
-                                type="button"
-                                data-delete-column
-                                class="flex w-full
-                                       items-center gap-3
-                                       rounded-xl px-3 py-2.5
-                                       text-left text-sm
-                                       font-medium
-                                       text-red-600
-                                       transition
-                                       hover:bg-red-50
-                                       dark:text-red-400
-                                       dark:hover:bg-red-950/40"
+                        <button
+                            type="button"
+                            data-delete-column
+                            @disabled(!$canDelete)
+                            class="flex w-full items-center gap-3
+                                   rounded-xl px-3 py-2.5
+                                   text-left text-sm font-medium
+                                   text-red-600 transition
+                                   hover:bg-red-50
+                                   disabled:cursor-not-allowed
+                                   disabled:text-gray-300
+                                   disabled:hover:bg-transparent
+                                   dark:text-red-400
+                                   dark:hover:bg-red-950/40
+                                   dark:disabled:text-gray-600"
+                            title="{{ $canDelete ? 'Delete column' : 'Remove all tasks before deleting this column' }}"
+                        >
+                            <span
+                                class="material-symbols-rounded
+                                       text-[19px]"
                             >
-                                <span
-                                    class="material-symbols-rounded
-                                           text-[19px]"
-                                >
-                                    delete
-                                </span>
+                                delete
+                            </span>
 
-                                Delete column
-                            </button>
+                            Delete column
+                        </button>
 
-                        @else
-
-                            <button
-                                type="button"
-                                disabled
-                                class="flex w-full
-                                       cursor-not-allowed
-                                       items-center gap-3
-                                       rounded-xl px-3 py-2.5
-                                       text-left text-sm
-                                       font-medium
-                                       text-gray-300
-                                       dark:text-gray-600"
-                                title="Remove all tasks before deleting this column"
-                            >
-                                <span
-                                    class="material-symbols-rounded
-                                           text-[19px]"
-                                >
-                                    delete
-                                </span>
-
-                                Delete column
-                            </button>
-
-                            <p
-                                class="px-3 pb-1 pt-0.5
-                                       text-[11px]
-                                       leading-4
-                                       text-gray-400
-                                       dark:text-gray-500"
-                            >
-                                Move or remove all tasks first.
-                            </p>
-
-                        @endif
+                        <p
+                            data-delete-column-help
+                            class="{{ $canDelete ? 'hidden' : '' }}
+                                   px-3 pb-1 pt-0.5
+                                   text-[11px] leading-4
+                                   text-gray-400
+                                   dark:text-gray-500"
+                        >
+                            Move or remove all tasks first.
+                        </p>
 
 
                         <p

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
@@ -9,7 +10,32 @@ class Board extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'project_id', 'user_id'];
+    protected $fillable = [
+        'name',
+        'project_id',
+        'user_id',
+        'completed',
+        'status',
+        'start_date',
+        'end_date',
+        'duration',
+        'sprint_goal',
+        'total_story_points',
+        'date_ended',
+    ];
+
+    protected function casts(): array
+    {
+        return [
+            'completed' => 'boolean',
+            'status' => 'boolean',
+            'start_date' => 'date',
+            'end_date' => 'date',
+            'date_ended' => 'date',
+            'duration' => 'integer',
+            'total_story_points' => 'integer',
+        ];
+    }
 
     // Board belongs to Project (one to one)
     public function project()
@@ -25,7 +51,26 @@ class Board extends Model
 
     public function users()
     {
-        return $this->belongsToMany(User::class);
+        return $this
+            ->belongsToMany(User::class)
+            ->withTimestamps();
+    }
+
+    public function scopeAccessibleTo(
+        Builder $query,
+        User $user
+    ): Builder {
+        return $query->where(
+            function (Builder $query) use ($user) {
+                $query
+                    ->where('user_id', $user->id)
+                    ->orWhereHas(
+                        'users',
+                        fn (Builder $members) =>
+                            $members->whereKey($user->id)
+                    );
+            }
+        );
     }
 
 }

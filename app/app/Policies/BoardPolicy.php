@@ -12,6 +12,16 @@ class BoardPolicy
         Board $board
     ): bool {
         if (
+            (int) $board->id
+            === (int) config(
+                'mangie.product_backlog_board_id',
+                1
+            )
+        ) {
+            return true;
+        }
+
+        if (
             (int) $board->user_id
             === (int) $user->id
         ) {
@@ -29,9 +39,20 @@ class BoardPolicy
         User $user,
         Board $board
     ): bool {
-        return $this->view(
-            $user,
-            $board
-        );
+        return !$board->completed
+            && $this->view($user, $board);
+    }
+
+    public function delete(
+        User $user,
+        Board $board
+    ): bool {
+        return (int) $board->id
+                !== (int) config(
+                    'mangie.product_backlog_board_id',
+                    1
+                )
+            && (int) $board->user_id
+                === (int) $user->id;
     }
 }

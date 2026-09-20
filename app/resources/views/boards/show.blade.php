@@ -85,8 +85,7 @@
                         @endif
 
                         @if ($board->completed == 1)
-                            <form method="POST" action="{{ route('boards.burndownChart', $board->id) }}">
-                                @csrf
+                            <form method="GET" action="{{ route('boards.burndownChart', $board->id) }}">
                                 <button type="submit" class="inline-flex items-center px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-500 rounded-md font-semibold text-xs text-gray-700 dark:text-gray-300 uppercase tracking-widest shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:opacity-25 transition ease-in-out duration-150">
                                     Burndown Chart
                                 </button>
@@ -2075,16 +2074,16 @@
 
             // Bulk move tasks from backlog to sprint board
             function moveTasks(column_id) {
-                fetch('{{ route('boards.moveTasks') }}', {
-                    method: 'POST',
+                fetch('{{ route('tasks.bulk-move') }}', {
+                    method: 'PATCH',
                     headers: {
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute(
                             'content'),
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        task_ids: JSON.stringify(selectedTaskItems),
-                        column_id: column_id // Num
+                        task_ids: selectedTaskItems,
+                        target_column_id: column_id
                     })
                 })
                 .then(response => {
