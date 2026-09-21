@@ -22,6 +22,7 @@ class Board extends Model
         'sprint_goal',
         'total_story_points',
         'date_ended',
+        'version',
     ];
 
     protected function casts(): array
@@ -34,6 +35,7 @@ class Board extends Model
             'date_ended' => 'date',
             'duration' => 'integer',
             'total_story_points' => 'integer',
+            'version' => 'integer',
         ];
     }
 

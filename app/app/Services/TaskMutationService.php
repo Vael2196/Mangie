@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Column;
 use App\Models\Task;
 use Illuminate\Support\Facades\DB;
+use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 
 class TaskMutationService
 {
@@ -39,18 +40,29 @@ class TaskMutationService
         Task $task,
         Column $targetColumn,
         array $attributes,
-        ?int $assigneeId
+        ?int $assigneeId,
+        ?int $expectedVersion = null
     ): array {
         return DB::transaction(function () use (
             $task,
             $targetColumn,
             $attributes,
-            $assigneeId
+            $assigneeId,
+            $expectedVersion
         ) {
             $task = Task::query()
                 ->whereKey($task->id)
                 ->lockForUpdate()
                 ->firstOrFail();
+
+            if (
+                $expectedVersion !== null
+                && (int) $task->version !== $expectedVersion
+            ) {
+                throw new ConflictHttpException(
+                    'This task changed in another browser. Reopen it and try again.'
+                );
+            }
 
             $moveResult = null;
 
@@ -67,7 +79,10 @@ class TaskMutationService
 
             $task->refresh();
 
-            $task->update($attributes);
+            $task->update([
+                ...$attributes,
+                'version' => DB::raw('version + 1'),
+            ]);
 
             $task->users()->sync(
                 $assigneeId
@@ -78,8 +93,38 @@ class TaskMutationService
             return [
                 'task' => $task
                     ->refresh()
-                    ->load('users'),
+                    ->load('column.board', 'users'),
                 'move' => $moveResult,
+            ];
+        }, 3);
+    }
+
+    public function delete(Task $task): array
+    {
+        return DB::transaction(function () use ($task) {
+            $task = Task::query()
+                ->whereKey($task->id)
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            $columnId = (int) $task->column_id;
+            $position = (int) $task->position;
+            $version = (int) $task->version + 1;
+
+            $task->delete();
+
+            Task::query()
+                ->where('column_id', $columnId)
+                ->where('position', '>', $position)
+                ->decrement('position');
+
+            return [
+                'task_id' => (int) $task->id,
+                'column_id' => $columnId,
+                'version' => $version,
+                'column_count' => Task::query()
+                    ->where('column_id', $columnId)
+                    ->count(),
             ];
         }, 3);
     }

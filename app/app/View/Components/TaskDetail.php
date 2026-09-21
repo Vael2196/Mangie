@@ -5,9 +5,6 @@ namespace App\View\Components;
 use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\View\Component;
-use App\Models\Column;
-use App\Models\Board;
-use App\Models\User;
 
 class TaskDetail extends Component
 {
@@ -20,9 +17,13 @@ class TaskDetail extends Component
      */
     public function __construct($task)
     {
-        $this->task = $task;
-        $this->users = User::all();
-        $this->parent_board = Board::where('id', Column::select('board_id')->where('id', $task->column_id)->get()[0]->board_id)->get()[0];
+        $this->task = $task->loadMissing(
+            'column.board.columns',
+            'column.board.users',
+            'users'
+        );
+        $this->parent_board = $this->task->column->board;
+        $this->users = $this->parent_board->users;
     }
 
     /**

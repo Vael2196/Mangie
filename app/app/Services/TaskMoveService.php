@@ -191,11 +191,13 @@ class TaskMoveService
                         ) === 0
                             ? now()
                             : null,
+                    'version' => DB::raw('version + 1'),
                 ]);
 
 
-            $finalTask =
-                Task::findOrFail($task->id);
+            $finalTask = Task::query()
+                ->with('column.board', 'users')
+                ->findOrFail($task->id);
 
 
             $sourceCount =
@@ -268,6 +270,8 @@ class TaskMoveService
                     $finalTask
                         ->updated_at
                         ?->toISOString(),
+
+                'task' => $finalTask,
             ];
         }, 3);
     }

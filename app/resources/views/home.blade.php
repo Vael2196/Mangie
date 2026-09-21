@@ -1,4 +1,10 @@
 <x-app-layout>
+    <div
+        data-task-sync-context="boards"
+        data-realtime-board-ids='@json($boards->pluck('id')->values())'
+        data-realtime-project-id="{{ $projectId }}"
+        data-page-mode="{{ $pageMode }}"
+    >
     <x-top-bar
         :title="$pageMode === 'dashboard' ? 'Sprint Dashboard' : 'Home'"
         :user="$user"
@@ -367,7 +373,9 @@
                     }
 
 
-                    window.location.reload();
+                    await window.MangieRealtime.applyMutationResponse(data);
+                    boardNameInput.value = '';
+                    createPanel.classList.add('hidden');
 
                 } catch (error) {
 
@@ -380,5 +388,6 @@
 
         });
     </script>
+    </div>
 
 </x-app-layout>

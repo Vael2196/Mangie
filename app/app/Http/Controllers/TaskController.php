@@ -2,10 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\TaskCreated;
+use App\Events\TaskDeleted;
 use App\Events\TaskMoved;
+use App\Events\TaskUpdated;
 use App\Models\Column;
 use App\Models\Task;
 use App\Services\TaskMutationService;
+use App\Support\Realtime\RealtimePayload;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -46,8 +50,25 @@ class TaskController extends Controller
             $validated['title']
         );
 
+        $task->load('column.board', 'users');
+
+        $event = new TaskCreated(
+            RealtimePayload::task(
+                $task,
+                $request->user(),
+                [
+                    'column_id' => (int) $column->id,
+                    'column_count' => $column->tasks()->count(),
+                    'backlog_issue_count' => $this->backlogIssueCount(),
+                ]
+            ),
+            (int) $column->board_id
+        );
+
+        broadcast($event)->toOthers();
+
         return response()->json([
-            'success' => true,
+            ...$event->response(),
             'task' => $task,
         ], 201);
     }
@@ -105,6 +126,11 @@ class TaskController extends Controller
                 'integer',
                 'min:0',
             ],
+            'expected_version' => [
+                'nullable',
+                'integer',
+                'min:1',
+            ],
         ]);
 
         $task->load('column.board');
@@ -132,19 +158,111 @@ class TaskController extends Controller
                 'time_log' =>
                     $validated['timeLog'],
             ],
-            $validated['assignee'] ?? null
+            $validated['assignee'] ?? null,
+            $validated['expected_version'] ?? null
         );
 
+        $events = [];
+
         if ($result['move']) {
-            broadcast(
-                new TaskMoved($result['move'])
-            )->toOthers();
+            $move = $result['move'];
+            $moveTask = $move['task'];
+            unset($move['task']);
+
+            $moveEvent = new TaskMoved(
+                RealtimePayload::task(
+                    $moveTask,
+                    $request->user(),
+                    $move
+                ),
+                [
+                    $move['source_board_id'],
+                    $move['target_board_id'],
+                ]
+            );
+
+            broadcast($moveEvent)->toOthers();
+            $events[] = [
+                'event' => $moveEvent->broadcastAs(),
+                'payload' => $moveEvent->payload,
+            ];
         }
+
+        $updatedTask = $result['task'];
+        $sourceBoardId = $result['move']['source_board_id']
+            ?? (int) $updatedTask->column->board_id;
+        $targetBoardId = (int) $updatedTask->column->board_id;
+
+        $updatedEvent = new TaskUpdated(
+            RealtimePayload::task(
+                $updatedTask,
+                $request->user()
+            ),
+            [$sourceBoardId, $targetBoardId]
+        );
+
+        broadcast($updatedEvent)->toOthers();
+        $events[] = [
+            'event' => $updatedEvent->broadcastAs(),
+            'payload' => $updatedEvent->payload,
+        ];
 
         return response()->json([
             'success' => true,
-            'task' => $result['task'],
+            'event' => $updatedEvent->broadcastAs(),
+            'payload' => $updatedEvent->payload,
+            'mutations' => $events,
+            'task' => $updatedTask,
             'move' => $result['move'],
         ]);
+    }
+
+    public function destroy(
+        Request $request,
+        Task $task
+    ): JsonResponse {
+        $task->load('column.board');
+        Gate::authorize('update', $task->column->board);
+
+        $boardId = (int) $task->column->board_id;
+        $result = $this->tasks->delete($task);
+
+        $event = new TaskDeleted(
+            RealtimePayload::deleted(
+                'task',
+                $result['task_id'],
+                $result['version'],
+                $request->user(),
+                [
+                    'board_id' => $boardId,
+                    'column_id' => $result['column_id'],
+                    'column_count' => $result['column_count'],
+                    'backlog_issue_count' => $this->backlogIssueCount(),
+                ]
+            ),
+            $boardId
+        );
+
+        broadcast($event)->toOthers();
+
+        return response()->json($event->response());
+    }
+
+    private function backlogIssueCount(): int
+    {
+        $backlogBoardId = (int) config(
+            'mangie.product_backlog_board_id',
+            1
+        );
+
+        return Task::query()
+            ->whereHas(
+                'column',
+                fn ($query) => $query->where(
+                    'board_id',
+                    $backlogBoardId
+                )
+            )
+            ->count();
     }
 }

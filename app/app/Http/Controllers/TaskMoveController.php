@@ -6,6 +6,7 @@ use App\Events\TaskMoved;
 use App\Models\Column;
 use App\Models\Task;
 use App\Services\TaskMoveService;
+use App\Support\Realtime\RealtimePayload;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -49,13 +50,16 @@ class TaskMoveController extends Controller
             $validated['target_position']
         );
 
-        broadcast(
-            new TaskMoved($result)
-        )->toOthers();
+        $event = $this->eventFor(
+            $request,
+            $result
+        );
+
+        broadcast($event)->toOthers();
 
         return response()->json([
-            'success' => true,
-            ...$result,
+            ...$event->response(),
+            ...$event->payload['meta'],
         ]);
     }
 
@@ -113,16 +117,42 @@ class TaskMoveController extends Controller
                 PHP_INT_MAX
             );
 
-            broadcast(
-                new TaskMoved($result)
-            )->toOthers();
+            $event = $this->eventFor(
+                $request,
+                $result
+            );
 
-            $results[] = $result;
+            broadcast($event)->toOthers();
+
+            $results[] = [
+                'event' => $event->broadcastAs(),
+                'payload' => $event->payload,
+            ];
         }
 
         return response()->json([
             'success' => true,
-            'moves' => $results,
+            'mutations' => $results,
         ]);
+    }
+
+    private function eventFor(
+        Request $request,
+        array $result
+    ): TaskMoved {
+        $task = $result['task'];
+        unset($result['task']);
+
+        return new TaskMoved(
+            RealtimePayload::task(
+                $task,
+                $request->user(),
+                $result
+            ),
+            [
+                $result['source_board_id'],
+                $result['target_board_id'],
+            ]
+        );
     }
 }

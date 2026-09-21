@@ -2,62 +2,22 @@
 
 namespace App\Events;
 
-use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Broadcasting\PrivateChannel;
-use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
-use Illuminate\Contracts\Events\ShouldDispatchAfterCommit;
-use Illuminate\Foundation\Events\Dispatchable;
-use Illuminate\Queue\SerializesModels;
+use App\Events\Realtime\RealtimeMutation;
 
-class TaskMoved implements
-    ShouldBroadcast,
-    ShouldDispatchAfterCommit
+class TaskMoved extends RealtimeMutation
 {
-    use Dispatchable;
-    use InteractsWithSockets;
-    use SerializesModels;
-
-
-    public function __construct(
-        public array $payload
-    ) {
-    }
-
-
-    public function broadcastOn(): array
+    public function __construct(array $payload, array $boardIds)
     {
-        $boardIds = collect([
-            $this->payload[
-                'source_board_id'
-            ],
-
-            $this->payload[
-                'target_board_id'
-            ],
-        ])
-            ->unique();
-
-
-        return $boardIds
-            ->map(
-                fn ($boardId) =>
-                    new PrivateChannel(
-                        'boards.' . $boardId
-                    )
-            )
-            ->values()
-            ->all();
+        parent::__construct(
+            $payload,
+            collect($boardIds)
+                ->map(fn ($id) => "boards.{$id}")
+                ->all()
+        );
     }
-
 
     public function broadcastAs(): string
     {
         return 'task.moved';
-    }
-
-
-    public function broadcastWith(): array
-    {
-        return $this->payload;
     }
 }

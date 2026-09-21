@@ -19,6 +19,7 @@ class Task extends Model
         'story_points',
         'time_log',
         'completed_at',
+        'version',
     ];
 
     protected function casts(): array
@@ -29,6 +30,7 @@ class Task extends Model
             'story_points' => 'integer',
             'time_log' => 'integer',
             'completed_at' => 'date',
+            'version' => 'integer',
         ];
     }
 

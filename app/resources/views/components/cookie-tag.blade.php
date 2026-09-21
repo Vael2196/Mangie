@@ -15,6 +15,8 @@
     <button
         type="button"
         id="cookie-tag-{{ $scope }}-{{ $key }}"
+        data-remove-filter="{{ $key }}"
+        data-scope="{{ $scope }}"
         class="flex h-5 w-5 items-center justify-center
                rounded-md text-gray-400 transition
                hover:bg-gray-200 hover:text-red-500
@@ -28,26 +30,3 @@
 
     <span>{{ $tag }}</span>
 </div>
-
-
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-    const scope = @js($scope);
-    const key = @js($key);
-
-    const button = document.getElementById(
-        `cookie-tag-${scope}-${key}`
-    );
-
-    if (!button) {
-        return;
-    }
-
-    button.addEventListener('click', () => {
-        document.cookie =
-            `${scope}_${key}=; Max-Age=0; path=/; SameSite=Lax`;
-
-        window.location.reload();
-    });
-});
-</script>

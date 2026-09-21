@@ -2,9 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\ColumnColourChanged;
+use App\Events\ColumnCopied;
+use App\Events\ColumnCreated;
+use App\Events\ColumnDeleted;
+use App\Events\ColumnRenamed;
 use App\Models\Board;
 use App\Models\Column;
 use App\Services\ColumnMutationService;
+use App\Support\Realtime\RealtimePayload;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -45,9 +51,18 @@ class ColumnController extends Controller
             $validated['name']
         );
 
+        $event = new ColumnCreated(
+            RealtimePayload::column(
+                $column,
+                $request->user()
+            ),
+            (int) $board->id
+        );
+
+        broadcast($event)->toOthers();
+
         return response()->json([
-            'success' => true,
-            'column' => $column,
+            ...$event->response(),
         ], 201);
     }
 
@@ -74,12 +89,19 @@ class ColumnController extends Controller
             $validated['name']
         );
 
+        $event = new ColumnRenamed(
+            RealtimePayload::column(
+                $column,
+                $request->user()
+            ),
+            (int) $column->board_id
+        );
+
+        broadcast($event)->toOthers();
+
         return response()->json([
-            'success' => true,
-            'column' => [
-                'id' => $column->id,
-                'name' => $column->name,
-            ],
+            ...$event->response(),
+            'column' => $column,
         ]);
     }
 
@@ -113,13 +135,24 @@ class ColumnController extends Controller
             $validated['color']
         );
 
+        $event = new ColumnColourChanged(
+            RealtimePayload::column(
+                $column,
+                $request->user()
+            ),
+            (int) $column->board_id
+        );
+
+        broadcast($event)->toOthers();
+
         return response()->json([
-            'success' => true,
+            ...$event->response(),
             'column' => $column,
         ]);
     }
 
     public function copy(
+        Request $request,
         Column $column
     ): JsonResponse {
         $column->load('board');
@@ -128,23 +161,51 @@ class ColumnController extends Controller
 
         $copiedColumn = $this->columns->copy($column);
 
+        $event = new ColumnCopied(
+            RealtimePayload::column(
+                $copiedColumn,
+                $request->user(),
+                ['source_column_id' => (int) $column->id]
+            ),
+            (int) $copiedColumn->board_id
+        );
+
+        broadcast($event)->toOthers();
+
         return response()->json([
-            'success' => true,
+            ...$event->response(),
             'column' => $copiedColumn,
         ], 201);
     }
 
     public function destroy(
+        Request $request,
         Column $column
     ): JsonResponse {
         $column->load('board');
 
         Gate::authorize('update', $column->board);
 
+        $boardId = (int) $column->board_id;
+        $payload = RealtimePayload::deleted(
+            'column',
+            (int) $column->id,
+            (int) $column->version + 1,
+            $request->user(),
+            [
+                'board_id' => $boardId,
+                'position' => (int) $column->position,
+            ]
+        );
+
         $this->columns->delete($column);
 
+        $event = new ColumnDeleted($payload, $boardId);
+
+        broadcast($event)->toOthers();
+
         return response()->json([
-            'success' => true,
+            ...$event->response(),
         ]);
     }
 }

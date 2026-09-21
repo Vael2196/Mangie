@@ -9,12 +9,19 @@ class Column extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'board_id', 'position', 'color'];
+    protected $fillable = [
+        'name',
+        'board_id',
+        'position',
+        'color',
+        'version',
+    ];
 
     protected function casts(): array
     {
         return [
             'position' => 'integer',
+            'version' => 'integer',
         ];
     }
 

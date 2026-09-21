@@ -1,6 +1,6 @@
 @props(['scope'])
 
-<div class="relative">
+<div class="relative" data-task-filter data-scope="{{ $scope }}">
     <button
         type="button"
         id="task-filter-button-{{ $scope }}"
@@ -155,73 +155,3 @@
         </div>
     </div>
 </div>
-
-
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-    const scope = @js($scope);
-
-    const button = document.getElementById(
-        `task-filter-button-${scope}`
-    );
-
-    const menu = document.getElementById(
-        `task-filter-menu-${scope}`
-    );
-
-    if (!button || !menu) {
-        return;
-    }
-
-
-    function setCookie(key, value) {
-        document.cookie =
-            `${scope}_${key}=${encodeURIComponent(value)}; ` +
-            `path=/; SameSite=Lax`;
-    }
-
-
-    button.addEventListener('click', event => {
-        event.stopPropagation();
-
-        window.dispatchEvent(
-            new CustomEvent('mangie:popover-open', {
-                detail: menu.id
-            })
-        );
-
-        menu.classList.toggle('hidden');
-    });
-
-
-    menu.addEventListener('click', event => {
-        event.stopPropagation();
-    });
-
-
-    window.addEventListener('mangie:popover-open', event => {
-        if (event.detail !== menu.id) {
-            menu.classList.add('hidden');
-        }
-    });
-
-
-    document.addEventListener('click', () => {
-        menu.classList.add('hidden');
-    });
-
-
-    menu
-        .querySelectorAll('[data-filter-choice]')
-        .forEach(item => {
-            item.addEventListener('click', () => {
-                setCookie(
-                    item.dataset.filterKey,
-                    item.dataset.filterValue
-                );
-
-                window.location.reload();
-            });
-        });
-});
-</script>

@@ -5,7 +5,6 @@ namespace App\View\Components;
 use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\View\Component;
-use App\Models\Column;
 
 class TaskBox extends Component
 {
@@ -14,8 +13,8 @@ class TaskBox extends Component
 
     public function __construct($task)
     {
-        $this->task = $task;
-        $this->column = Column::where('id', $task->column_id)->get()[0];
+        $this->task = $task->loadMissing('column');
+        $this->column = $this->task->column;
     }
 
     /**

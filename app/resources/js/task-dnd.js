@@ -1,4 +1,5 @@
 import Sortable from 'sortablejs';
+import { jsonRequest } from './http';
 
 
 const LIST_SELECTOR =
@@ -45,7 +46,7 @@ function refreshEmptyMarker(list) {
 }
 
 
-function refreshAllEmptyMarkers() {
+export function refreshAllEmptyMarkers() {
 
     document
         .querySelectorAll(
@@ -75,7 +76,7 @@ function findBoardList(boardId) {
 }
 
 
-function setColumnCount(
+export function setColumnCount(
     columnId,
     count
 ) {
@@ -123,7 +124,7 @@ function setColumnCount(
 }
 
 
-function setIssueCount(count) {
+export function setIssueCount(count) {
 
     const counter =
         document.getElementById(
@@ -156,7 +157,7 @@ function updateCounts(data) {
 }
 
 
-function insertAtPosition(
+export function insertAtPosition(
     list,
     item,
     position
@@ -214,61 +215,16 @@ async function sendMove(
     targetColumnId,
     targetPosition
 ) {
-    const headers = {
-        'X-CSRF-TOKEN':
-            csrfToken(),
-
-        'Content-Type':
-            'application/json',
-
-        'Accept':
-            'application/json',
-    };
-
-    const socketId =
-        window.Echo?.socketId?.();
-
-    if (socketId) {
-        headers['X-Socket-ID'] =
-            socketId;
-    }
-
-
-    const response =
-        await fetch(
-            `/tasks/${taskId}/move`,
-            {
-                method: 'PATCH',
-
-                headers,
-
-                body: JSON.stringify({
-                    target_column_id:
-                        targetColumnId,
-
-                    target_position:
-                        targetPosition,
-                }),
-            }
-        );
-
-
-    const data =
-        await response.json();
-
-
-    if (
-        !response.ok ||
-        !data.success
-    ) {
-        throw new Error(
-            data.message
-            ?? 'Could not move task.'
-        );
-    }
-
-
-    return data;
+    return jsonRequest(
+        `/tasks/${taskId}/move`,
+        {
+            method: 'PATCH',
+            body: {
+                target_column_id: targetColumnId,
+                target_position: targetPosition,
+            },
+        }
+    );
 }
 
 
@@ -300,7 +256,7 @@ function restoreOriginalPosition(
 }
 
 
-function initSortable(list) {
+export function initSortable(list) {
 
     if (list.dataset.sortableReady) {
         return;
@@ -458,6 +414,9 @@ function initSortable(list) {
 
                 updateCounts(data);
 
+                await window.MangieRealtime
+                    ?.applyMutationResponse?.(data);
+
             } catch (error) {
 
                 console.error(
@@ -608,7 +567,10 @@ function subscribeRealtime() {
             )
             .listen(
                 '.task.moved',
-                applyRemoteMove
+                payload => applyRemoteMove({
+                    ...payload.meta,
+                    task_id: payload.entity.id,
+                })
             );
 
     });
@@ -630,6 +592,5 @@ document.addEventListener(
 
         refreshAllEmptyMarkers();
 
-        subscribeRealtime();
     }
 );

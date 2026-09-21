@@ -6,7 +6,9 @@ use App\Http\Controllers\BoardMemberController;
 use App\Http\Controllers\ColumnController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\RealtimeFragmentController;
 use App\Http\Controllers\TaskController;
+use App\Http\Controllers\TaskCriteriaController;
 use App\Http\Controllers\TaskMoveController;
 use Illuminate\Support\Facades\Route;
 
@@ -139,6 +141,41 @@ Route::middleware('auth')->group(function () {
         '/tasks/{task}',
         [TaskController::class, 'update']
     )->name('tasks.update');
+
+    Route::delete(
+        '/tasks/{task}',
+        [TaskController::class, 'destroy']
+    )->name('tasks.destroy');
+
+    Route::get(
+        '/tasks/{task}/fragment/{variant}',
+        [RealtimeFragmentController::class, 'task']
+    )->name('tasks.fragment');
+
+    Route::get(
+        '/tasks/{task}/detail',
+        [RealtimeFragmentController::class, 'detail']
+    )->name('tasks.detail');
+
+    Route::get(
+        '/columns/{column}/fragment',
+        [RealtimeFragmentController::class, 'column']
+    )->name('columns.fragment');
+
+    Route::get(
+        '/boards/{board}/fragment/{variant}',
+        [RealtimeFragmentController::class, 'board']
+    )->name('boards.fragment');
+
+    Route::put(
+        '/task-criteria/{scope}',
+        [TaskCriteriaController::class, 'update']
+    )->name('task-criteria.update');
+
+    Route::delete(
+        '/task-criteria/{scope}',
+        [TaskCriteriaController::class, 'destroy']
+    )->name('task-criteria.destroy');
 
     Route::get(
         '/backlog/{view}',

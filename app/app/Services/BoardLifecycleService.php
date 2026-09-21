@@ -24,6 +24,7 @@ class BoardLifecycleService
                 'completed' => true,
                 'status' => false,
                 'date_ended' => $board->end_date,
+                'version' => DB::raw('version + 1'),
             ]);
         }
 
@@ -82,13 +83,14 @@ class BoardLifecycleService
                 'sprint_goal' => $sprintGoal,
                 'status' => true,
                 'total_story_points' => $totalStoryPoints,
+                'version' => DB::raw('version + 1'),
             ]);
 
             return $board->refresh();
         }, 3);
     }
 
-    public function complete(Board $board): Board
+    public function complete(Board $board): array
     {
         return DB::transaction(function () use ($board) {
             $board = Board::query()
@@ -97,7 +99,10 @@ class BoardLifecycleService
                 ->firstOrFail();
 
             if ($board->completed) {
-                return $board;
+                return [
+                    'board' => $board,
+                    'moved_tasks' => collect(),
+                ];
             }
 
             $backlogBoardId = (int) config(
@@ -143,6 +148,7 @@ class BoardLifecycleService
                     'column_id' => $backlogColumn->id,
                     'position' => $nextBacklogPosition,
                     'completed_at' => null,
+                    'version' => DB::raw('version + 1'),
                 ]);
             }
 
@@ -150,9 +156,19 @@ class BoardLifecycleService
                 'completed' => true,
                 'status' => false,
                 'date_ended' => now()->toDateString(),
+                'version' => DB::raw('version + 1'),
             ]);
 
-            return $board->refresh();
+            return [
+                'board' => $board->refresh(),
+                'moved_tasks' => $tasksToReturn
+                    ->map(
+                        fn (Task $task) => $task
+                            ->refresh()
+                            ->load('column.board', 'users')
+                    )
+                    ->values(),
+            ];
         }, 3);
     }
 }

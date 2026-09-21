@@ -3,9 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Charts\BurndownChart;
+use App\Events\BoardCompleted;
+use App\Events\BoardCreated;
+use App\Events\BoardDeleted;
+use App\Events\BoardUpdated;
 use App\Models\Board;
 use App\Services\BoardLifecycleService;
 use App\Services\TaskCriteriaService;
+use App\Support\Realtime\RealtimePayload;
+use App\Support\Realtime\TaskRealtimeData;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -52,11 +58,14 @@ class BoardController extends Controller
                 !$board->completed && $board->status
         );
 
+        $projectId = (int) ($boards->first()?->project_id ?? 1);
+
         return view('home', compact(
             'user',
             'boards',
             'activeSprints',
-            'pageMode'
+            'pageMode',
+            'projectId'
         ));
     }
 
@@ -99,9 +108,18 @@ class BoardController extends Controller
             return $board->load('columns');
         }, 3);
 
+        $event = new BoardCreated(
+            RealtimePayload::board(
+                $board,
+                $request->user()
+            ),
+            (int) $board->project_id
+        );
+
+        broadcast($event)->toOthers();
+
         return response()->json([
-            'success' => true,
-            'board' => $board,
+            ...$event->response(),
         ], 201);
     }
 
@@ -114,6 +132,7 @@ class BoardController extends Controller
         $this->lifecycle->endIfExpired($board);
 
         $criteria = $this->criteria->get(
+            $request,
             "board_{$board->id}"
         );
 
@@ -173,13 +192,17 @@ class BoardController extends Controller
 
         $user = $request->user();
         $cookies = $criteria['tags'];
+        $taskCriteria = $criteria;
+        $projectId = (int) $board->project_id;
 
         return view('boards.show', compact(
             'board',
             'daysLeft',
             'activeSprints',
             'user',
-            'cookies'
+            'cookies',
+            'taskCriteria',
+            'projectId'
         ));
     }
 
@@ -203,13 +226,26 @@ class BoardController extends Controller
 
         $board->update([
             'status' => $validated['status'],
+            'version' => DB::raw('version + 1'),
         ]);
 
+        $board->refresh();
+
+        $event = new BoardUpdated(
+            RealtimePayload::board(
+                $board,
+                $request->user()
+            ),
+            (int) $board->project_id,
+            (int) $board->id
+        );
+
+        broadcast($event)->toOthers();
+
         return response()->json([
-            'success' => true,
+            ...$event->response(),
             'message' =>
                 'Board status updated successfully.',
-            'board' => $board->refresh(),
         ]);
     }
 
@@ -240,11 +276,22 @@ class BoardController extends Controller
 
         Gate::authorize('update', $board);
 
-        $this->lifecycle->start(
+        $board = $this->lifecycle->start(
             $board,
             $validated['end_date'],
             $validated['sprint_goal']
         );
+
+        $event = new BoardUpdated(
+            RealtimePayload::board(
+                $board,
+                $request->user()
+            ),
+            (int) $board->project_id,
+            (int) $board->id
+        );
+
+        broadcast($event)->toOthers();
 
         return back()->with(
             'success',
@@ -253,11 +300,43 @@ class BoardController extends Controller
     }
 
     public function completeBoard(
+        Request $request,
         Board $board
     ): RedirectResponse {
         Gate::authorize('update', $board);
 
-        $this->lifecycle->complete($board);
+        $result = $this->lifecycle->complete($board);
+        $board = $result['board'];
+        $backlogBoardId = (int) config(
+            'mangie.product_backlog_board_id',
+            1
+        );
+
+        $event = new BoardCompleted(
+            RealtimePayload::board(
+                $board,
+                $request->user(),
+                [
+                    'moved_tasks' => $result['moved_tasks']
+                        ->map(fn ($task) => TaskRealtimeData::from($task))
+                        ->all(),
+                    'backlog_board_id' => $backlogBoardId,
+                    'backlog_issue_count' => \App\Models\Task::query()
+                        ->whereHas(
+                            'column',
+                            fn ($query) => $query->where(
+                                'board_id',
+                                $backlogBoardId
+                            )
+                        )
+                        ->count(),
+                ]
+            ),
+            (int) $board->project_id,
+            [(int) $board->id, $backlogBoardId]
+        );
+
+        broadcast($event)->toOthers();
 
         return redirect()
             ->route('home')
@@ -268,11 +347,28 @@ class BoardController extends Controller
     }
 
     public function destroy(
+        Request $request,
         Board $board
     ): RedirectResponse {
         Gate::authorize('delete', $board);
 
+        $boardId = (int) $board->id;
+        $projectId = (int) $board->project_id;
+        $payload = RealtimePayload::deleted(
+            'board',
+            $boardId,
+            (int) $board->version + 1,
+            $request->user(),
+            ['project_id' => $projectId]
+        );
+
         $board->delete();
+
+        broadcast(new BoardDeleted(
+            $payload,
+            $projectId,
+            $boardId
+        ))->toOthers();
 
         return redirect()
             ->route('home')

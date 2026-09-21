@@ -2,57 +2,86 @@
 
 namespace App\Services;
 
+use Illuminate\Http\Request;
+
 class TaskCriteriaService
 {
-    public function get(string $scope): array
+    private const PRIORITIES = ['Low', 'Medium', 'High'];
+
+    private const LABELS = [
+        'API', 'Backend', 'Frontend', 'UI/UX', 'Database',
+    ];
+
+    private const SORT_LABELS = [
+        'title' => 'Title',
+        'description' => 'Description',
+        'priority' => 'Priority',
+        'labels' => 'Labels',
+        'story_points' => 'Story Points',
+        'time_log' => 'Time Log',
+    ];
+
+    public function get(Request $request, string $scope): array
     {
-        $readCookie = function (string $name) use ($scope): string {
-            $value = $_COOKIE["{$scope}_{$name}"] ?? '';
+        return $this->normalise(
+            (array) $request->session()->get(
+                $this->sessionKey($request, $scope),
+                []
+            )
+        );
+    }
 
-            return rawurldecode($value);
-        };
+    public function put(
+        Request $request,
+        string $scope,
+        array $criteria
+    ): array {
+        $criteria = $this->normalise($criteria);
 
-        $priority = $readCookie('priority');
-        $label = $readCookie('label');
-        $sortField = $readCookie('sort');
-        $sortDirection = $readCookie('direction');
+        $request->session()->put(
+            $this->sessionKey($request, $scope),
+            $this->storedValues($criteria)
+        );
 
-        $validPriorities = [
-            'Low',
-            'Medium',
-            'High',
-        ];
+        return $criteria;
+    }
 
-        $validLabels = [
-            'API',
-            'Backend',
-            'Frontend',
-            'UI/UX',
-            'Database',
-        ];
+    public function clear(Request $request, string $scope): array
+    {
+        $request->session()->forget(
+            $this->sessionKey($request, $scope)
+        );
 
-        $sortLabels = [
-            'title' => 'Title',
-            'description' => 'Description',
-            'priority' => 'Priority',
-            'labels' => 'Labels',
-            'story_points' => 'Story Points',
-            'time_log' => 'Time Log',
-        ];
+        return $this->normalise([]);
+    }
 
-        if (!in_array($priority, $validPriorities, true)) {
-            $priority = '';
-        }
+    private function normalise(array $values): array
+    {
+        $priority = in_array(
+            $values['priority'] ?? '',
+            self::PRIORITIES,
+            true
+        ) ? $values['priority'] : '';
 
-        if (!in_array($label, $validLabels, true)) {
-            $label = '';
-        }
+        $label = in_array(
+            $values['label'] ?? '',
+            self::LABELS,
+            true
+        ) ? $values['label'] : '';
 
-        if (!array_key_exists($sortField, $sortLabels)) {
+        $sortField = array_key_exists(
+            $values['sortField'] ?? '',
+            self::SORT_LABELS
+        ) ? $values['sortField'] : '';
+
+        $sortDirection = in_array(
+            $values['sortDirection'] ?? '',
+            ['asc', 'desc'],
+            true
+        ) ? $values['sortDirection'] : '';
+
+        if ($sortField === '' || $sortDirection === '') {
             $sortField = '';
-        }
-
-        if (!in_array($sortDirection, ['asc', 'desc'], true)) {
             $sortDirection = '';
         }
 
@@ -61,17 +90,40 @@ class TaskCriteriaService
             'label' => $label,
             'sortField' => $sortField,
             'sortDirection' => $sortDirection,
-
+            'active' => $priority !== ''
+                || $label !== ''
+                || $sortField !== '',
             'tags' => [
                 'priority' => $priority,
                 'label' => $label,
                 'sort' => [
                     $sortField !== ''
-                        ? $sortLabels[$sortField]
+                        ? self::SORT_LABELS[$sortField]
                         : '',
                     $sortDirection,
                 ],
             ],
         ];
+    }
+
+    private function storedValues(array $criteria): array
+    {
+        return [
+            'priority' => $criteria['priority'],
+            'label' => $criteria['label'],
+            'sortField' => $criteria['sortField'],
+            'sortDirection' => $criteria['sortDirection'],
+        ];
+    }
+
+    private function sessionKey(
+        Request $request,
+        string $scope
+    ): string {
+        return sprintf(
+            'task_criteria.%d.%s',
+            $request->user()->id,
+            $scope
+        );
     }
 }

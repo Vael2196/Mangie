@@ -36,7 +36,10 @@ class ColumnMutationService
         Column $column,
         string $name
     ): Column {
-        $column->update(['name' => $name]);
+        $column->update([
+            'name' => $name,
+            'version' => DB::raw('version + 1'),
+        ]);
 
         return $column->refresh();
     }
@@ -45,7 +48,10 @@ class ColumnMutationService
         Column $column,
         string $color
     ): Column {
-        $column->update(['color' => $color]);
+        $column->update([
+            'color' => $color,
+            'version' => DB::raw('version + 1'),
+        ]);
 
         return $column->refresh();
     }
@@ -72,12 +78,14 @@ class ColumnMutationService
             $newColumn = $column->replicate([
                 'id',
                 'position',
+                'version',
                 'created_at',
                 'updated_at',
             ]);
 
             $newColumn->name = $column->name . ' copy';
             $newColumn->position = $column->position + 1;
+            $newColumn->version = 1;
             $newColumn->save();
 
             foreach ($column->tasks as $task) {
@@ -85,6 +93,7 @@ class ColumnMutationService
                     'id',
                     'column_id',
                     'position',
+                    'version',
                     'created_at',
                     'updated_at',
                 ]);
@@ -92,6 +101,7 @@ class ColumnMutationService
                 $newTask->column_id = $newColumn->id;
                 $newTask->position = $task->position;
                 $newTask->completed_at = null;
+                $newTask->version = 1;
                 $newTask->save();
 
                 $newTask->users()->sync(
@@ -99,7 +109,9 @@ class ColumnMutationService
                 );
             }
 
-            return $newColumn->refresh();
+            return $newColumn
+                ->refresh()
+                ->load('tasks.users', 'board');
         }, 3);
     }
 

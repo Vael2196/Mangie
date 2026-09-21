@@ -15,6 +15,8 @@
     <button
         type="button"
         id="sort-tag-{{ $scope }}"
+        data-remove-sort
+        data-scope="{{ $scope }}"
         class="flex h-5 w-5 items-center justify-center
                rounded-md text-gray-400 transition
                hover:bg-gray-200 hover:text-red-500
@@ -34,28 +36,3 @@
             : 'arrow_downward' }}
     </span>
 </div>
-
-
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-    const scope = @js($scope);
-
-    const button = document.getElementById(
-        `sort-tag-${scope}`
-    );
-
-    if (!button) {
-        return;
-    }
-
-    button.addEventListener('click', () => {
-        document.cookie =
-            `${scope}_sort=; Max-Age=0; path=/; SameSite=Lax`;
-
-        document.cookie =
-            `${scope}_direction=; Max-Age=0; path=/; SameSite=Lax`;
-
-        window.location.reload();
-    });
-});
-</script>

@@ -19,7 +19,10 @@ class BacklogController extends Controller
         Request $request,
         string $view
     ): View {
-        $criteria = $this->criteria->get('backlog');
+        $criteria = $this->criteria->get(
+            $request,
+            'backlog'
+        );
 
         $priority = $criteria['priority'];
         $label = $criteria['label'];
@@ -125,6 +128,8 @@ class BacklogController extends Controller
         };
 
         $cookies = $criteria['tags'];
+        $taskCriteria = $criteria;
+        $projectId = (int) $backlog->project_id;
 
         return view($viewName, compact(
             'backlog',
@@ -133,7 +138,9 @@ class BacklogController extends Controller
             'inactive_boards',
             'activeSprints',
             'user',
-            'cookies'
+            'cookies',
+            'taskCriteria',
+            'projectId'
         ));
     }
 }

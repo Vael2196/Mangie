@@ -25,3 +25,13 @@ Broadcast::channel(
             );
     }
 );
+
+Broadcast::channel(
+    'projects.{projectId}',
+    function (User $user, int $projectId) {
+        return Board::query()
+            ->where('project_id', $projectId)
+            ->accessibleTo($user)
+            ->exists();
+    }
+);

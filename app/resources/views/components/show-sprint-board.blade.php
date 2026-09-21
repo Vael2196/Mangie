@@ -24,6 +24,8 @@
 </div> -->
 
 <div
+    id="sprint-card-{{ $board->id }}"
+    data-board-id="{{ $board->id }}"
     class="group relative flex min-h-44 flex-col overflow-hidden
            rounded-2xl border border-gray-200
            bg-white p-5 shadow-sm

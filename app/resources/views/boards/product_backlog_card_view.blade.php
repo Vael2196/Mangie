@@ -13,6 +13,13 @@
     <div
         data-task-sync-context="backlog"
         data-realtime-board-ids='@json($realtimeBoardIds)'
+        data-realtime-project-id="{{ $projectId }}"
+        data-task-criteria
+        data-task-criteria-scope="backlog"
+        data-priority="{{ $taskCriteria['priority'] }}"
+        data-label="{{ $taskCriteria['label'] }}"
+        data-sort-field="{{ $taskCriteria['sortField'] }}"
+        data-sort-direction="{{ $taskCriteria['sortDirection'] }}"
     >
         <x-top-bar title="Product Backlog" :user="$user"/>
         <div
@@ -459,7 +466,7 @@
                         })
                     })
                     .then(response => response.json())
-                    .then(data => {
+                    .then(async data => {
                         if (data.success) {
                             // // Insert task into the task list of the first column
                             // const newTask = `<tr class = "px-4 py-2 text-start leading-5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 hover:cursor-pointer focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out rounded" id = "task-list-item-${data.task.id}">
@@ -482,7 +489,7 @@
                             // taskColumn.insertAdjacentHTML('beforeend', newTask);
                             // issuesNo.innerHTML = `Issues: ${parseInt(issuesNo.innerHTML.split(":")[1]) + 1}`;
                             inputTaskField.value = '';
-                            location.reload();
+                            await window.MangieRealtime.applyMutationResponse(data);
                         } else {
                             console.error('Error adding task:', data.message);
                         }
@@ -509,7 +516,7 @@
                         responseClone = response.clone();
                         return response.json();
                     })
-                    .then(data => {
+                    .then(async data => {
                         if (data.success) {
                             // // Get product backlog if endpoint is 1
                             // let endPointBoard;
@@ -535,7 +542,7 @@
                             // Reset Selected task items
                             selectedTaskItems = [];
 
-                            location.reload();
+                            await window.MangieRealtime.applyMutationResponse(data);
 
                         } else {
                             console.error('Error moving tasks:', data.message);
@@ -578,7 +585,7 @@
                         })
                     })
                     .then(response => response.json())
-                    .then(data => {
+                    .then(async data => {
                         if (data.success) {
                             // const sprintList = document.getElementById('sprint-loading-board-list');
                             // // Add the new board dynamically to the page
@@ -596,7 +603,7 @@
                             // sprintList.insertAdjacentHTML('beforeend', new_sprint_board)
                             // Clear the input field
                             createSprintInput.value = '';
-                            location.reload();
+                            await window.MangieRealtime.applyMutationResponse(data);
                         } else {
                             console.error('Error creating board:', data.message);
                         }

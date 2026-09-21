@@ -92,6 +92,8 @@
     id="column-{{ $column->id }}"
     data-column-id="{{ $column->id }}"
     data-column-name="{{ $column->name }}"
+    data-column-version="{{ $column->version ?? 1 }}"
+    data-column-position="{{ $column->position }}"
     {{ $attributes->merge([
         'class' =>
             'flex h-max min-h-40 w-72 shrink-0 flex-col
