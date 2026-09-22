@@ -1,7 +1,10 @@
 <?php
 
+use App\Events\BoardUpdated;
+use App\Events\ColumnRenamed;
 use App\Events\TaskCreated;
 use App\Events\TaskMoved;
+use App\Events\TaskUpdated;
 use App\Models\Board;
 use App\Models\Column;
 use App\Models\Project;
@@ -12,6 +15,19 @@ use Illuminate\Support\Facades\Event;
 function taskMutationBoard(User $owner): array
 {
     $project = Project::create(['name' => 'Realtime Project']);
+
+    /*
+     * Board ID 1 is intentionally the shared Product Backlog. Create it
+     * before the sprint so this fixture exercises normal board membership
+     * authorization instead of the backlog exception in BoardPolicy.
+     */
+    $backlog = Board::create([
+        'name' => 'Product Backlog',
+        'project_id' => $project->id,
+        'user_id' => $owner->id,
+    ]);
+    $backlog->users()->attach($owner);
+
     $board = Board::create([
         'name' => 'Sprint 1',
         'project_id' => $project->id,
@@ -32,6 +48,19 @@ function taskMutationBoard(User $owner): array
 
     return compact('project', 'board', 'todo', 'done');
 }
+
+it('retains private channels after queued event serialization', function () {
+    $event = new TaskCreated(
+        ['entity' => ['id' => 99]],
+        42
+    );
+
+    /** @var TaskCreated $restored */
+    $restored = unserialize(serialize($event));
+
+    expect($restored->broadcastOn())
+        ->toHaveCount(1);
+});
 
 it('authorizes members and returns the shared mutation contract', function () {
     Event::fake([TaskCreated::class]);
@@ -134,4 +163,78 @@ it('rejects a stale task detail save', function () {
 
     expect($task->fresh()->title)->toBe('Current title')
         ->and($task->fresh()->version)->toBe(3);
+});
+
+it('updates a current task detail and increments its integer version', function () {
+    Event::fake([TaskUpdated::class]);
+
+    $owner = User::factory()->create();
+    ['todo' => $todo] = taskMutationBoard($owner);
+    $task = Task::create([
+        'title' => 'Old title',
+        'column_id' => $todo->id,
+        'position' => 1,
+    ]);
+
+    $this->actingAs($owner)
+        ->patchJson("/tasks/{$task->id}", [
+            'column_id' => $todo->id,
+            'title' => 'Updated title',
+            'description' => 'Updated description',
+            'assignee' => null,
+            'labels' => 'Backend',
+            'priority' => 'High',
+            'storyPoint' => 5,
+            'timeLog' => 2,
+            'expected_version' => 1,
+        ])
+        ->assertOk()
+        ->assertJsonPath('event', 'task.updated')
+        ->assertJsonPath('payload.entity.version', 2);
+
+    expect($task->fresh()->title)->toBe('Updated title')
+        ->and($task->fresh()->version)->toBe(2);
+
+    Event::assertDispatched(TaskUpdated::class);
+});
+
+it('renames a column and increments its integer version', function () {
+    Event::fake([ColumnRenamed::class]);
+
+    $owner = User::factory()->create();
+    ['todo' => $todo] = taskMutationBoard($owner);
+
+    $this->actingAs($owner)
+        ->patchJson("/columns/{$todo->id}/name", [
+            'name' => 'READY',
+        ])
+        ->assertOk()
+        ->assertJsonPath('event', 'column.renamed')
+        ->assertJsonPath('payload.entity.version', 2);
+
+    expect($todo->fresh()->name)->toBe('READY')
+        ->and($todo->fresh()->version)->toBe(2);
+
+    Event::assertDispatched(ColumnRenamed::class);
+});
+
+it('updates board status and increments its integer version', function () {
+    Event::fake([BoardUpdated::class]);
+
+    $owner = User::factory()->create();
+    ['board' => $board] = taskMutationBoard($owner);
+
+    $this->actingAs($owner)
+        ->postJson('/boards/updateStatus', [
+            'board_id' => $board->id,
+            'status' => true,
+        ])
+        ->assertOk()
+        ->assertJsonPath('event', 'board.updated')
+        ->assertJsonPath('payload.entity.version', 2);
+
+    expect($board->fresh()->status)->toBeTrue()
+        ->and($board->fresh()->version)->toBe(2);
+
+    Event::assertDispatched(BoardUpdated::class);
 });

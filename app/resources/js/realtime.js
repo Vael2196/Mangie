@@ -21,6 +21,10 @@ const subscribedBoards = new Set();
 function listen(channel) {
     events.forEach(event => {
         channel.listen(`.${event}`, payload => {
+            if (import.meta.env.DEV) {
+                console.debug(`[realtime] received ${event}`, payload);
+            }
+
             void applyMutation(event, payload);
 
             if (event === 'board.created') {
@@ -38,7 +42,23 @@ function subscribeBoard(boardId) {
     }
 
     subscribedBoards.add(boardId);
-    listen(window.Echo.private(`boards.${boardId}`));
+    const channelName = `boards.${boardId}`;
+    const channel = window.Echo.private(channelName);
+
+    channel
+        .subscribed(() => {
+            if (import.meta.env.DEV) {
+                console.info(`[realtime] subscribed ${channelName}`);
+            }
+        })
+        .error(error => {
+            console.error(
+                `[realtime] could not subscribe ${channelName}`,
+                error
+            );
+        });
+
+    listen(channel);
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -65,6 +85,22 @@ document.addEventListener('DOMContentLoaded', () => {
     const projectId = Number(root.dataset.realtimeProjectId);
 
     if (projectId) {
-        listen(window.Echo.private(`projects.${projectId}`));
+        const channelName = `projects.${projectId}`;
+        const channel = window.Echo.private(channelName);
+
+        channel
+            .subscribed(() => {
+                if (import.meta.env.DEV) {
+                    console.info(`[realtime] subscribed ${channelName}`);
+                }
+            })
+            .error(error => {
+                console.error(
+                    `[realtime] could not subscribe ${channelName}`,
+                    error
+                );
+            });
+
+        listen(channel);
     }
 });

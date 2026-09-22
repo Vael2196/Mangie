@@ -81,7 +81,7 @@ class TaskMutationService
 
             $task->update([
                 ...$attributes,
-                'version' => DB::raw('version + 1'),
+                'version' => (int) $task->version + 1,
             ]);
 
             $task->users()->sync(

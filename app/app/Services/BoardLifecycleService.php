@@ -13,22 +13,27 @@ class BoardLifecycleService
 {
     public function endIfExpired(Board $board): Board
     {
-        if (
-            !$board->completed
-            && $board->end_date
-            && now()->startOfDay()->gt(
-                Carbon::parse($board->end_date)->endOfDay()
-            )
-        ) {
-            $board->update([
-                'completed' => true,
-                'status' => false,
-                'date_ended' => $board->end_date,
-                'version' => DB::raw('version + 1'),
-            ]);
+        if (!$this->isExpired($board)) {
+            return $board->refresh();
         }
 
-        return $board->refresh();
+        return DB::transaction(function () use ($board) {
+            $board = Board::query()
+                ->whereKey($board->id)
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            if ($this->isExpired($board)) {
+                $board->update([
+                    'completed' => true,
+                    'status' => false,
+                    'date_ended' => $board->end_date,
+                    'version' => (int) $board->version + 1,
+                ]);
+            }
+
+            return $board->refresh();
+        }, 3);
     }
 
     public function start(
@@ -83,7 +88,7 @@ class BoardLifecycleService
                 'sprint_goal' => $sprintGoal,
                 'status' => true,
                 'total_story_points' => $totalStoryPoints,
-                'version' => DB::raw('version + 1'),
+                'version' => (int) $board->version + 1,
             ]);
 
             return $board->refresh();
@@ -148,7 +153,7 @@ class BoardLifecycleService
                     'column_id' => $backlogColumn->id,
                     'position' => $nextBacklogPosition,
                     'completed_at' => null,
-                    'version' => DB::raw('version + 1'),
+                    'version' => (int) $task->version + 1,
                 ]);
             }
 
@@ -156,7 +161,7 @@ class BoardLifecycleService
                 'completed' => true,
                 'status' => false,
                 'date_ended' => now()->toDateString(),
-                'version' => DB::raw('version + 1'),
+                'version' => (int) $board->version + 1,
             ]);
 
             return [
@@ -170,5 +175,14 @@ class BoardLifecycleService
                     ->values(),
             ];
         }, 3);
+    }
+
+    private function isExpired(Board $board): bool
+    {
+        return !$board->completed
+            && $board->end_date
+            && now()->startOfDay()->gt(
+                Carbon::parse($board->end_date)->endOfDay()
+            );
     }
 }

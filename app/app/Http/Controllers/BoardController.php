@@ -224,12 +224,22 @@ class BoardController extends Controller
 
         Gate::authorize('update', $board);
 
-        $board->update([
-            'status' => $validated['status'],
-            'version' => DB::raw('version + 1'),
-        ]);
+        $board = DB::transaction(function () use (
+            $board,
+            $validated
+        ) {
+            $board = Board::query()
+                ->whereKey($board->id)
+                ->lockForUpdate()
+                ->firstOrFail();
 
-        $board->refresh();
+            $board->update([
+                'status' => $validated['status'],
+                'version' => (int) $board->version + 1,
+            ]);
+
+            return $board->refresh();
+        }, 3);
 
         $event = new BoardUpdated(
             RealtimePayload::board(

@@ -36,24 +36,38 @@ class ColumnMutationService
         Column $column,
         string $name
     ): Column {
-        $column->update([
-            'name' => $name,
-            'version' => DB::raw('version + 1'),
-        ]);
+        return DB::transaction(function () use ($column, $name) {
+            $column = Column::query()
+                ->whereKey($column->id)
+                ->lockForUpdate()
+                ->firstOrFail();
 
-        return $column->refresh();
+            $column->update([
+                'name' => $name,
+                'version' => (int) $column->version + 1,
+            ]);
+
+            return $column->refresh();
+        }, 3);
     }
 
     public function recolour(
         Column $column,
         string $color
     ): Column {
-        $column->update([
-            'color' => $color,
-            'version' => DB::raw('version + 1'),
-        ]);
+        return DB::transaction(function () use ($column, $color) {
+            $column = Column::query()
+                ->whereKey($column->id)
+                ->lockForUpdate()
+                ->firstOrFail();
 
-        return $column->refresh();
+            $column->update([
+                'color' => $color,
+                'version' => (int) $column->version + 1,
+            ]);
+
+            return $column->refresh();
+        }, 3);
     }
 
     public function copy(Column $column): Column

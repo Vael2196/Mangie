@@ -191,7 +191,7 @@ class TaskMoveService
                         ) === 0
                             ? now()
                             : null,
-                    'version' => DB::raw('version + 1'),
+                    'version' => (int) $task->version + 1,
                 ]);
 
 

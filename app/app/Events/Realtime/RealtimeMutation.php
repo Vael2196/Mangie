@@ -19,7 +19,7 @@ abstract class RealtimeMutation implements
 
     public function __construct(
         public readonly array $payload,
-        private readonly array $channelNames
+        protected readonly array $channelNames
     ) {
     }
 
