@@ -2,14 +2,20 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\UserProfileUpdated;
 use App\Http\Requests\ProfileUpdateRequest;
+use App\Models\Board;
+use App\Models\User;
+use App\Support\Realtime\RealtimePayload;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Redirect;
-use Illuminate\View\View;
-use App\Models\User;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
+use Illuminate\View\View;
 
 class ProfileController extends Controller
 {
@@ -28,13 +34,57 @@ class ProfileController extends Controller
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
-        $request->user()->fill($request->validated());
+        $user = $request->user();
+        $validated = $request->validated();
+        $oldAvatarPath = $user->avatar_path;
+        $newAvatarPath = null;
 
-        if ($request->user()->isDirty('email')) {
-            $request->user()->email_verified_at = null;
+        $user->fill([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+        ]);
+
+        if ($user->isDirty('email')) {
+            $user->email_verified_at = null;
         }
 
-        $request->user()->save();
+        if (!empty($validated['avatar_data'])) {
+            $newAvatarPath = $this->storeAvatar(
+                $validated['avatar_data']
+            );
+            $user->avatar_path = $newAvatarPath;
+        } elseif ($validated['remove_avatar'] ?? false) {
+            $user->avatar_path = null;
+        }
+
+        try {
+            $user->save();
+        } catch (\Throwable $exception) {
+            if ($newAvatarPath) {
+                Storage::disk('public')->delete($newAvatarPath);
+            }
+
+            throw $exception;
+        }
+
+        if (
+            $oldAvatarPath
+            && $oldAvatarPath !== $user->avatar_path
+        ) {
+            Storage::disk('public')->delete($oldAvatarPath);
+        }
+
+        $boards = Board::query()
+            ->accessibleTo($user)
+            ->get(['id', 'project_id']);
+
+        if ($boards->isNotEmpty()) {
+            broadcast(new UserProfileUpdated(
+                RealtimePayload::user($user, $user),
+                $boards->pluck('id')->all(),
+                $boards->pluck('project_id')->unique()->all()
+            ))->toOthers();
+        }
 
         return Redirect::route('profile.edit')->with('status', 'profile-updated');
     }
@@ -49,6 +99,12 @@ class ProfileController extends Controller
         ]);
 
         $user = $request->user();
+
+        if ($user->avatar_path) {
+            Storage::disk('public')->delete(
+                $user->avatar_path
+            );
+        }
 
         Auth::logout();
 
@@ -133,5 +189,43 @@ class ProfileController extends Controller
         User::where('id', $id)->firstOrFail()->delete();
 
         return Redirect::route('profile.add-user')->with('status', 'user-removed');
+    }
+
+    private function storeAvatar(string $data): string
+    {
+        if (!preg_match(
+            '/^data:image\/jpeg;base64,(.+)$/s',
+            $data,
+            $matches
+        )) {
+            throw ValidationException::withMessages([
+                'avatar_data' =>
+                    'The cropped profile photo is invalid.',
+            ]);
+        }
+
+        $contents = base64_decode($matches[1], true);
+
+        if (
+            $contents === false
+            || strlen($contents) > 2 * 1024 * 1024
+            || !str_starts_with($contents, "\xFF\xD8\xFF")
+        ) {
+            throw ValidationException::withMessages([
+                'avatar_data' =>
+                    'The cropped profile photo is invalid or too large.',
+            ]);
+        }
+
+        $path = 'avatars/' . Str::uuid() . '.jpg';
+
+        if (!Storage::disk('public')->put($path, $contents)) {
+            throw ValidationException::withMessages([
+                'avatar_data' =>
+                    'The profile photo could not be saved.',
+            ]);
+        }
+
+        return $path;
     }
 }

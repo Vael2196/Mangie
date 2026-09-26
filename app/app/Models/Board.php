@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Facades\Storage;
 
 class Board extends Model
 {
@@ -22,6 +23,8 @@ class Board extends Model
         'sprint_goal',
         'total_story_points',
         'date_ended',
+        'background_color',
+        'background_image_path',
         'version',
     ];
 
@@ -72,6 +75,17 @@ class Board extends Model
                             $members->whereKey($user->id)
                     );
             }
+        );
+    }
+
+    public function getBackgroundImageUrlAttribute(): ?string
+    {
+        if (!$this->background_image_path) {
+            return null;
+        }
+
+        return Storage::disk('public')->url(
+            $this->background_image_path
         );
     }
 

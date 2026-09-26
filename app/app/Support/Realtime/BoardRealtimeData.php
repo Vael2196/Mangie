@@ -20,6 +20,9 @@ final class BoardRealtimeData
             'duration' => (int) $board->duration,
             'sprint_goal' => $board->sprint_goal,
             'total_story_points' => (int) $board->total_story_points,
+            'background_color' => $board->background_color
+                ?: config('mangie.default_board_background', '#eef2ff'),
+            'background_image_url' => $board->background_image_url,
             'version' => (int) $board->version,
             'updated_at' => $board->updated_at?->toISOString(),
         ];

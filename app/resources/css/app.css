@@ -32,3 +32,21 @@
 body.task-dragging {
     cursor: grabbing;
 }
+
+.board-surface {
+    background-color: var(--board-background-color, #eef2ff);
+    background-image:
+        linear-gradient(rgb(255 255 255 / 0.14), rgb(255 255 255 / 0.14)),
+        var(--board-background-image, none);
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-attachment: fixed;
+    transition: background-color 180ms ease-in-out;
+}
+
+.dark .board-surface {
+    background-image:
+        linear-gradient(rgb(3 7 18 / 0.32), rgb(3 7 18 / 0.32)),
+        var(--board-background-image, none);
+}

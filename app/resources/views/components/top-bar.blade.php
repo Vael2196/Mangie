@@ -10,8 +10,10 @@
            dark:border-gray-800 dark:bg-gray-900/90"
 >
     <div
-        class="flex min-h-20 items-center justify-between
-               gap-6 px-6 lg:px-8"
+        @class([
+            'flex min-h-20 items-center justify-between gap-6 px-6 lg:px-8',
+            'pl-20 lg:pl-20' => request()->routeIs('boards.show'),
+        ])
     >
 
         <div>
@@ -46,15 +48,7 @@
                            dark:text-gray-200 dark:hover:border-indigo-800
                            dark:hover:bg-indigo-950/50"
                 >
-                    <span
-                        class="flex h-9 w-9 items-center justify-center
-                               rounded-lg bg-indigo-100 text-indigo-600
-                               dark:bg-indigo-950 dark:text-indigo-400"
-                    >
-                        <span class="material-symbols-rounded text-[22px]">
-                            account_circle
-                        </span>
-                    </span>
+                    <x-user-avatar :user="$user" size="md" />
 
                     <span class="hidden sm:block">
                         {{ $user->name }}
@@ -83,19 +77,25 @@
                         class="border-b border-gray-100 px-4 py-4
                                dark:border-gray-700"
                     >
-                        <p
-                            class="font-semibold text-gray-900
-                                   dark:text-white"
-                        >
-                            {{ $user->name }}
-                        </p>
+                        <div class="flex items-center gap-3">
+                            <x-user-avatar :user="$user" size="lg" />
 
-                        <p
-                            class="mt-0.5 truncate text-sm
-                                   text-gray-500 dark:text-gray-400"
-                        >
-                            {{ $user->email }}
-                        </p>
+                            <div class="min-w-0">
+                                <p
+                                    class="truncate font-semibold text-gray-900
+                                           dark:text-white"
+                                >
+                                    {{ $user->name }}
+                                </p>
+
+                                <p
+                                    class="mt-0.5 truncate text-sm
+                                           text-gray-500 dark:text-gray-400"
+                                >
+                                    {{ $user->email }}
+                                </p>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="p-2">

@@ -67,6 +67,7 @@ class BacklogController extends Controller
                         $query->orderBy('position');
                     }
                 },
+                'columns.tasks.users',
             ])
             ->findOrFail($backlogId);
 
@@ -83,6 +84,7 @@ class BacklogController extends Controller
                     $query->orderBy('position'),
                 'columns.tasks' => fn ($query) =>
                     $query->orderBy('position'),
+                'columns.tasks.users',
             ])
             ->where(function ($query) use (
                 $user,

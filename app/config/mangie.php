@@ -6,4 +6,6 @@ return [
             'PRODUCT_BACKLOG_BOARD_ID',
             1
         ),
+
+    'default_board_background' => '#eef2ff',
 ];

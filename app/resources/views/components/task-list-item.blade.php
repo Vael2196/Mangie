@@ -26,6 +26,19 @@
 
     <td class="border-b border-gray-200 py-3 dark:border-gray-700">
         <div class="flex justify-end gap-2 px-4">
+            @if($task->users->isNotEmpty())
+                <div class="mr-1 flex -space-x-1.5" aria-label="Assigned users">
+                    @foreach($task->users->take(2) as $assignee)
+                        <x-user-avatar
+                            :user="$assignee"
+                            size="xs"
+                            ring
+                            title="{{ $assignee->name }}"
+                        />
+                    @endforeach
+                </div>
+            @endif
+
             @if((int) $column->board_id !== (int) config('mangie.product_backlog_board_id', 1))
                 <x-status-icon name="{{ $column->name }}" />
             @endif

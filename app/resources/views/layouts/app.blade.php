@@ -30,40 +30,127 @@
     class="min-h-screen bg-gray-50 font-sans text-gray-900 antialiased
            dark:bg-gray-950 dark:text-gray-100"
 >
-    <div class="flex min-h-screen">
+    @php
+        $usesOverlayNavigation = request()->routeIs('boards.show');
+    @endphp
+
+    <div
+        class="flex min-h-screen"
+        x-data="{
+            boardNavOpen: false,
+            boardNavTimer: null,
+            openBoardNav() {
+                window.clearTimeout(this.boardNavTimer);
+                this.boardNavOpen = true;
+            },
+            closeBoardNav() {
+                window.clearTimeout(this.boardNavTimer);
+                this.boardNavOpen = false;
+            },
+            scheduleBoardNavClose() {
+                window.clearTimeout(this.boardNavTimer);
+                this.boardNavTimer = window.setTimeout(() => {
+                    this.boardNavOpen = false;
+                }, 1600);
+            },
+        }"
+        @keydown.escape.window="closeBoardNav()"
+    >
+
+        @if ($usesOverlayNavigation)
+            <button
+                type="button"
+                @click="openBoardNav()"
+                @mouseenter="openBoardNav()"
+                @mouseleave="scheduleBoardNavClose()"
+                class="fixed left-4 top-4 z-[95]
+                    flex h-11 w-11 items-center justify-center
+                    rounded-xl border border-gray-200 bg-white/95
+                    text-gray-700 shadow-lg backdrop-blur transition
+                    hover:border-indigo-300 hover:bg-indigo-50
+                    hover:text-indigo-700
+                    dark:border-gray-700 dark:bg-gray-900/95
+                    dark:text-gray-200 dark:hover:border-indigo-700
+                    dark:hover:bg-indigo-950/60 dark:hover:text-indigo-300"
+                aria-label="Open navigation"
+                aria-controls="workspace-navigation"
+                :aria-expanded="boardNavOpen"
+            >
+                <span class="material-symbols-rounded text-[23px]">
+                    menu_open
+                </span>
+            </button>
+        @endif
 
         <aside
-            class="sticky top-0 z-40 flex h-screen w-20 shrink-0 flex-col
-                   border-r border-gray-200/80 bg-white/95 px-3 py-5
-                   shadow-sm backdrop-blur
-                   lg:w-64
-                   dark:border-gray-800 dark:bg-gray-900/95"
+            id="workspace-navigation"
+            @if ($usesOverlayNavigation)
+                x-cloak
+                x-show="boardNavOpen"
+                x-transition:enter="transition ease-out duration-200"
+                x-transition:enter-start="-translate-x-full opacity-0"
+                x-transition:enter-end="translate-x-0 opacity-100"
+                x-transition:leave="transition ease-in duration-200"
+                x-transition:leave-start="translate-x-0 opacity-100"
+                x-transition:leave-end="-translate-x-full opacity-0"
+                @mouseenter="openBoardNav()"
+                @mouseleave="scheduleBoardNavClose()"
+            @endif
+            @class([
+                'flex h-screen shrink-0 flex-col border-r border-gray-200/80 bg-white/95 px-3 py-5 shadow-xl backdrop-blur dark:border-gray-800 dark:bg-gray-900/95',
+                'fixed inset-y-0 left-0 z-[100] w-64' => $usesOverlayNavigation,
+                'sticky top-0 z-40 w-20 shadow-sm lg:w-64' => !$usesOverlayNavigation,
+            ])
         >
 
-            <a
-                href="/"
-                class="mb-8 flex h-11 items-center justify-center gap-3
-                       rounded-xl lg:justify-start lg:px-3"
-            >
-                <span
-                    class="flex h-9 w-9 shrink-0 items-center justify-center
-                           rounded-lg bg-indigo-600 text-white shadow-sm"
+            <div class="mb-8 flex items-center gap-2">
+                <a
+                    href="/"
+                    @class([
+                        'flex h-11 min-w-0 flex-1 items-center gap-3 rounded-xl lg:justify-start lg:px-3',
+                        'justify-start px-3' => $usesOverlayNavigation,
+                        'justify-center' => !$usesOverlayNavigation,
+                    ])
                 >
                     <span
-                        class="material-symbols-rounded text-[22px]"
-                        aria-hidden="true"
+                        class="flex h-9 w-9 shrink-0 items-center justify-center
+                            rounded-lg bg-indigo-600 text-white shadow-sm"
                     >
-                        view_kanban
+                        <span
+                            class="material-symbols-rounded text-[22px]"
+                            aria-hidden="true"
+                        >
+                            view_kanban
+                        </span>
                     </span>
-                </span>
 
-                <span
-                    class="hidden text-xl font-bold tracking-tight
-                           text-gray-900 lg:block dark:text-white"
-                >
-                    Mangie
-                </span>
-            </a>
+                    <span
+                        @class([
+                            'text-xl font-bold tracking-tight text-gray-900 dark:text-white',
+                            'block' => $usesOverlayNavigation,
+                            'hidden lg:block' => !$usesOverlayNavigation,
+                        ])
+                    >
+                        Mangie
+                    </span>
+                </a>
+
+                @if ($usesOverlayNavigation)
+                    <button
+                        type="button"
+                        @click="closeBoardNav()"
+                        class="flex h-9 w-9 shrink-0 items-center justify-center
+                            rounded-lg text-gray-400 transition hover:bg-gray-100
+                            hover:text-gray-700 dark:hover:bg-gray-800
+                            dark:hover:text-white"
+                        aria-label="Close navigation"
+                    >
+                        <span class="material-symbols-rounded text-[21px]">
+                            close
+                        </span>
+                    </button>
+                @endif
+            </div>
 
             <nav class="flex flex-1 flex-col gap-2">
                 <x-side-bar-link
@@ -71,6 +158,7 @@
                     :link="route('home')"
                     icon="home"
                     :active="request()->routeIs('home')"
+                    :expanded="$usesOverlayNavigation"
                 />
 
                 <x-side-bar-link
@@ -78,6 +166,7 @@
                     :link="route('backlog.show', 'list')"
                     icon="inventory_2"
                     :active="request()->routeIs('backlog.show')"
+                    :expanded="$usesOverlayNavigation"
                 />
 
                 <x-side-bar-link
@@ -85,13 +174,16 @@
                     :link="route('dashboard')"
                     icon="view_kanban"
                     :active="request()->routeIs('dashboard')"
+                    :expanded="$usesOverlayNavigation"
                 />
             </nav>
 
             <div
-                class="hidden border-t border-gray-200 pt-5
-                       text-xs leading-5 text-gray-400
-                       lg:block dark:border-gray-800 dark:text-gray-500"
+                @class([
+                    'border-t border-gray-200 pt-5 text-xs leading-5 text-gray-400 dark:border-gray-800 dark:text-gray-500',
+                    'block' => $usesOverlayNavigation,
+                    'hidden lg:block' => !$usesOverlayNavigation,
+                ])
             >
                 <p class="font-medium text-gray-500 dark:text-gray-400">
                     Mangie
@@ -100,7 +192,7 @@
             </div>
         </aside>
 
-        <div class="min-w-0 flex-1">
+        <div class="min-w-0 flex-1 {{ $usesOverlayNavigation ? 'w-full' : '' }}">
             <main class="min-h-screen">
                 {{ $slot }}
             </main>

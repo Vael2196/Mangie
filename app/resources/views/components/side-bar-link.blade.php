@@ -12,16 +12,20 @@
     'name',
     'link',
     'icon',
-    'active' => false
+    'active' => false,
+    'expanded' => false,
 ])
 
 <a
     href="{{ $link }}"
     @class([
-        'group flex min-h-11 items-center justify-center
+        'group flex min-h-11 items-center
          gap-3 rounded-xl px-3 py-2.5
          text-sm font-semibold transition
          lg:justify-start',
+
+        'justify-start' => $expanded,
+        'justify-center' => !$expanded,
 
         'bg-indigo-50 text-indigo-700
          ring-1 ring-indigo-100
@@ -55,7 +59,11 @@
         {{ $icon }}
     </span>
 
-    <span class="hidden lg:block">
+    <span @class([
+        'lg:block',
+        'block' => $expanded,
+        'hidden' => !$expanded,
+    ])>
         {{ $name }}
     </span>
 </a>

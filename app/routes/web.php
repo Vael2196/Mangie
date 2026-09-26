@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\BacklogController;
 use App\Http\Controllers\BoardController;
+use App\Http\Controllers\BoardAppearanceController;
 use App\Http\Controllers\BoardMemberController;
 use App\Http\Controllers\ColumnController;
 use App\Http\Controllers\ProfileController;
@@ -96,6 +97,11 @@ Route::middleware('auth')->group(function () {
         '/boards/{board}',
         [BoardController::class, 'destroy']
     )->name('boards.destroy');
+
+    Route::patch(
+        '/boards/{board}/appearance',
+        [BoardAppearanceController::class, 'update']
+    )->name('boards.appearance.update');
 
     Route::post(
         '/columns/store',

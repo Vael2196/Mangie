@@ -55,9 +55,23 @@
             <span class="material-symbols-rounded text-[19px]">more_horiz</span>
         </button>
 
-        <span
-            class="material-symbols-rounded text-[24px] text-indigo-400"
-            title="Assigned user"
-        >account_circle</span>
+        @if($task->users->isNotEmpty())
+            <div class="flex -space-x-1.5" aria-label="Assigned users">
+                @foreach($task->users->take(2) as $assignee)
+                    <x-user-avatar
+                        :user="$assignee"
+                        size="xs"
+                        ring
+                        title="{{ $assignee->name }}"
+                    />
+                @endforeach
+            </div>
+        @else
+            <span
+                class="material-symbols-rounded text-[21px] text-gray-300
+                       dark:text-gray-600"
+                title="Unassigned"
+            >person_off</span>
+        @endif
     </div>
 </div>

@@ -14,6 +14,10 @@
             </div>
 
             <div class="mt-4">
+                <div class="mb-4 flex justify-center">
+                    <x-user-avatar :user="$user" size="xl" />
+                </div>
+
                 <div class="mb-6 text-gray-800 dark:text-gray-100">
                     <h1>Username: {{$user->name}}</h1>
                     @if (Auth::user()->admin == 1)
@@ -50,4 +54,3 @@
         </div>
     </div>
 </div>
-

@@ -25,7 +25,7 @@ class BoardMemberController extends Controller
         );
 
         $users = User::query()
-            ->select(['id', 'name'])
+            ->select(['id', 'name', 'avatar_path'])
             ->when(
                 $query !== '',
                 fn ($builder) =>
@@ -86,6 +86,7 @@ class BoardMemberController extends Controller
             'user' => [
                 'id' => $user->id,
                 'name' => $user->name,
+                'avatar_url' => $user->avatar_url,
             ],
         ], 201);
     }

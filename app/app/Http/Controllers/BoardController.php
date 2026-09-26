@@ -18,6 +18,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 class BoardController extends Controller
@@ -168,6 +169,7 @@ class BoardController extends Controller
                     $query->orderBy('position');
                 }
             },
+            'columns.tasks.users',
         ]);
 
         $daysLeft = null;
@@ -372,7 +374,13 @@ class BoardController extends Controller
             ['project_id' => $projectId]
         );
 
+        $backgroundImagePath = $board->background_image_path;
+
         $board->delete();
+
+        if ($backgroundImagePath) {
+            Storage::disk('public')->delete($backgroundImagePath);
+        }
 
         broadcast(new BoardDeleted(
             $payload,

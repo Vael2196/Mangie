@@ -7,6 +7,7 @@ import {
     setIssueCount,
 } from './task-dnd';
 import { enhanceRemoteColumn } from './remote-column-ui';
+import { updateUserAvatars } from './user-avatar';
 
 const seenEvents = new Set();
 
@@ -220,6 +221,25 @@ function deleteColumn(payload) {
     document.getElementById(`column-${payload.entity.id}`)?.remove();
 }
 
+function applyBoardAppearance(board) {
+    const surface = document.querySelector('[data-board-surface]');
+
+    if (!surface) {
+        return;
+    }
+
+    const color = board.background_color || '#eef2ff';
+    const image = board.background_image_url;
+
+    surface.dataset.boardBackgroundColor = color;
+    surface.dataset.boardBackgroundImage = image ?? '';
+    surface.style.setProperty('--board-background-color', color);
+    surface.style.setProperty(
+        '--board-background-image',
+        image ? `url(${JSON.stringify(image)})` : 'none'
+    );
+}
+
 async function applyBoardMutation(event, payload) {
     if (event === 'board.completed') {
         for (const task of payload.meta.moved_tasks ?? []) {
@@ -239,6 +259,11 @@ async function applyBoardMutation(event, payload) {
         if (currentBoardId === Number(payload.entity.id)) {
             if (event === 'board.deleted') {
                 window.location.assign('/home');
+            } else if (
+                event === 'board.updated'
+                && payload.meta?.appearance_changed
+            ) {
+                applyBoardAppearance(payload.entity);
             } else {
                 window.location.reload();
             }
@@ -333,6 +358,11 @@ export async function applyMutation(event, payload) {
 
     if (payload.event_id) {
         seenEvents.add(payload.event_id);
+    }
+
+    if (event === 'user.profile-updated') {
+        updateUserAvatars(payload.entity);
+        return;
     }
 
     if (['task.created', 'task.updated', 'task.moved'].includes(event)) {

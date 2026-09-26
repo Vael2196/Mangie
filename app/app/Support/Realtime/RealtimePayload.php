@@ -49,6 +49,19 @@ final class RealtimePayload
         );
     }
 
+    public static function user(
+        User $user,
+        ?User $actor,
+        array $meta = []
+    ): array {
+        return self::make(
+            'user',
+            UserRealtimeData::from($user),
+            $actor,
+            $meta
+        );
+    }
+
     public static function deleted(
         string $type,
         int $id,
@@ -94,6 +107,7 @@ final class RealtimePayload
         return [
             'id' => (int) $actor->id,
             'name' => $actor->name,
+            'avatar_url' => $actor->avatar_url,
         ];
     }
 }

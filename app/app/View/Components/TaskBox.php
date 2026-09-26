@@ -13,7 +13,10 @@ class TaskBox extends Component
 
     public function __construct($task)
     {
-        $this->task = $task->loadMissing('column');
+        $this->task = $task->loadMissing(
+            'column',
+            'users'
+        );
         $this->column = $this->task->column;
     }
 

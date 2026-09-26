@@ -14,6 +14,7 @@ const events = [
     'board.updated',
     'board.completed',
     'board.deleted',
+    'user.profile-updated',
 ];
 
 const subscribedBoards = new Set();

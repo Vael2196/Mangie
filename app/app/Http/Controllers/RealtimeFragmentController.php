@@ -70,6 +70,7 @@ class RealtimeFragmentController extends Controller
         );
 
         $tasks = $column->tasks()
+            ->with('users')
             ->when(
                 $criteria['priority'] !== '',
                 fn ($query) => $query->where(
@@ -135,6 +136,7 @@ class RealtimeFragmentController extends Controller
         $board->load([
             'columns' => fn ($query) => $query->orderBy('position'),
             'columns.tasks' => fn ($query) => $query->orderBy('position'),
+            'columns.tasks.users',
         ]);
 
         $activeSprints = Board::query()

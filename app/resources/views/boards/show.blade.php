@@ -17,6 +17,13 @@
     >
         <x-top-bar :title="$board->name" :user="$user"/>
 
+        <div
+            data-board-surface
+            data-board-background-color="{{ $board->background_color }}"
+            data-board-background-image="{{ $board->background_image_url }}"
+            class="board-surface min-h-[calc(100vh-5rem)]"
+            style="--board-background-color: {{ $board->background_color ?: config('mangie.default_board_background', '#eef2ff') }}; --board-background-image: {{ $board->background_image_url ? 'url(' . json_encode($board->background_image_url) . ')' : 'none' }};"
+        >
         <div class="mx-auto max-w-[1600px] px-6 py-8 lg:px-8">
             <div class="flex flex-col">
 
@@ -99,7 +106,124 @@
                             </form>
                         @endif
 
-                        <a class="hover:cursor-pointer"><i class="fa-solid fa-ellipsis"></i></a>
+                        @if ($board->completed == 0)
+                            <div class="relative">
+                                <button
+                                    type="button"
+                                    data-board-appearance-toggle
+                                    aria-expanded="false"
+                                    class="inline-flex h-10 items-center gap-2 rounded-xl
+                                        border border-gray-300 bg-white px-3
+                                        text-sm font-semibold text-gray-700 shadow-sm
+                                        transition hover:bg-gray-50
+                                        dark:border-gray-600 dark:bg-gray-800
+                                        dark:text-gray-200 dark:hover:bg-gray-700"
+                                >
+                                    <span class="material-symbols-rounded text-[20px]">
+                                        palette
+                                    </span>
+                                    Background
+                                </button>
+
+                                <div
+                                    data-board-appearance-panel
+                                    data-endpoint="{{ route('boards.appearance.update', $board) }}"
+                                    class="absolute right-0 top-full z-[90] mt-3 hidden
+                                        w-80 rounded-2xl border border-gray-200
+                                        bg-white p-4 shadow-2xl
+                                        dark:border-gray-700 dark:bg-gray-900"
+                                >
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <p class="font-bold text-gray-900 dark:text-white">
+                                                Board background
+                                            </p>
+                                            <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
+                                                This setting applies only to this board.
+                                            </p>
+                                        </div>
+
+                                        <button
+                                            type="button"
+                                            data-board-appearance-close
+                                            class="flex h-8 w-8 items-center justify-center rounded-lg
+                                                text-gray-400 hover:bg-gray-100 hover:text-gray-700
+                                                dark:hover:bg-gray-800 dark:hover:text-white"
+                                            aria-label="Close background settings"
+                                        >
+                                            <span class="material-symbols-rounded text-[20px]">close</span>
+                                        </button>
+                                    </div>
+
+                                    <p class="mt-4 text-xs font-semibold uppercase tracking-wider
+                                        text-gray-500 dark:text-gray-400">
+                                        Colour
+                                    </p>
+
+                                    <div class="mt-2 grid grid-cols-4 gap-2">
+                                        @foreach ([
+                                            '#eef2ff', '#dbeafe', '#ccfbf1', '#dcfce7',
+                                            '#fef3c7', '#ffedd5', '#ffe4e6', '#f3e8ff',
+                                        ] as $backgroundColor)
+                                            <button
+                                                type="button"
+                                                data-board-background-color="{{ $backgroundColor }}"
+                                                class="h-11 rounded-xl border-2 border-white
+                                                    shadow-sm ring-1 ring-gray-200 transition
+                                                    hover:scale-105 focus:outline-none focus:ring-2
+                                                    focus:ring-indigo-500 dark:border-gray-800
+                                                    dark:ring-gray-700"
+                                                style="background-color: {{ $backgroundColor }}"
+                                                aria-label="Use {{ $backgroundColor }} as the board background"
+                                            ></button>
+                                        @endforeach
+                                    </div>
+
+                                    <p class="mt-5 text-xs font-semibold uppercase tracking-wider
+                                        text-gray-500 dark:text-gray-400">
+                                        Photo
+                                    </p>
+
+                                    <label
+                                        class="mt-2 flex cursor-pointer items-center justify-center gap-2
+                                            rounded-xl border-2 border-dashed border-gray-300
+                                            px-3 py-3 text-sm font-semibold text-gray-600
+                                            transition hover:border-indigo-400 hover:bg-indigo-50
+                                            hover:text-indigo-700 dark:border-gray-700
+                                            dark:text-gray-300 dark:hover:border-indigo-600
+                                            dark:hover:bg-indigo-950/40 dark:hover:text-indigo-300"
+                                    >
+                                        <span class="material-symbols-rounded text-[20px]">add_photo_alternate</span>
+                                        Choose a photo
+                                        <input
+                                            type="file"
+                                            data-board-background-image
+                                            class="sr-only"
+                                            accept="image/jpeg,image/png,image/webp"
+                                        >
+                                    </label>
+
+                                    <button
+                                        type="button"
+                                        data-board-background-reset
+                                        class="mt-3 w-full rounded-xl px-3 py-2.5
+                                            text-sm font-semibold text-gray-500 transition
+                                            hover:bg-gray-100 hover:text-gray-700
+                                            dark:text-gray-400 dark:hover:bg-gray-800
+                                            dark:hover:text-gray-200"
+                                    >
+                                        Restore default
+                                    </button>
+
+                                    <p
+                                        data-board-appearance-status
+                                        class="mt-2 hidden text-center text-xs font-medium
+                                            text-gray-500 dark:text-gray-400"
+                                        role="status"
+                                    ></p>
+                                </div>
+                            </div>
+                        @endif
                     </div>
                 </div>
                 <div class="flex space-x-3">
@@ -141,17 +265,15 @@
                         <ul id="user-list" class="flex -space-x-2">
                             @foreach($board->users as $boardUser)
                                 <li
-                                    class="flex h-9 w-9 items-center justify-center
-                                        rounded-full border-2 border-white
-                                        bg-indigo-100 text-indigo-600 shadow-sm
-                                        dark:border-gray-900 dark:bg-indigo-950
-                                        dark:text-indigo-400"
+                                    class="flex"
                                     title="{{ $boardUser->name }}"
                                     data-user-id="{{ $boardUser->id }}"
                                 >
-                                    <span class="material-symbols-rounded text-[22px]">
-                                        account_circle
-                                    </span>
+                                    <x-user-avatar
+                                        :user="$boardUser"
+                                        size="md"
+                                        ring
+                                    />
                                 </li>
                             @endforeach
                         </ul>
@@ -195,10 +317,10 @@
                 class="mt-6 flex max-w-full flex-nowrap
                     items-start gap-5 overflow-x-auto
                     rounded-2xl border border-gray-200
-                    bg-gradient-to-br from-gray-50 to-indigo-50/40
+                    bg-white/40 backdrop-blur-sm
                     p-5 pb-7
                     dark:border-gray-800
-                    dark:from-gray-950 dark:to-indigo-950/20"
+                    dark:bg-gray-950/55"
             >
                 <!-- Display columns and tasks -->
                 @foreach($board->columns as $column)
@@ -482,6 +604,7 @@
                 </div>
             </div>
         </div>
+        </div>
     </div>
 
     <script>
@@ -605,10 +728,24 @@
                             'dark:text-gray-200 dark:hover:bg-indigo-950/50 dark:hover:text-indigo-300'
                         );
 
+                    const identity = document.createElement('span');
+                    identity.className = 'flex min-w-0 items-center gap-2.5';
+
+                    if (window.MangieAvatars) {
+                        identity.appendChild(
+                            window.MangieAvatars.create(
+                                user,
+                                'h-7 w-7 text-[10px]'
+                            )
+                        );
+                    }
+
                     const name = document.createElement('span');
+                    name.className = 'truncate';
                     name.textContent = user.name;
 
-                    item.appendChild(name);
+                    identity.appendChild(name);
+                    item.appendChild(identity);
 
                     if (alreadyAdded) {
                         const status = document.createElement('span');
@@ -730,18 +867,16 @@
                     newIcon.dataset.userId = user.id;
                     newIcon.title = user.name;
 
-                    newIcon.className =
-                        'flex h-9 w-9 items-center justify-center ' +
-                        'rounded-full border-2 border-white ' +
-                        'bg-indigo-100 text-indigo-600 shadow-sm ' +
-                        'dark:border-gray-900 dark:bg-indigo-950 ' +
-                        'dark:text-indigo-400';
+                    newIcon.className = 'flex';
 
-                    newIcon.innerHTML = `
-                        <span class="material-symbols-rounded text-[22px]">
-                            account_circle
-                        </span>
-                    `;
+                    if (window.MangieAvatars) {
+                        const avatar = window.MangieAvatars.create(
+                            data.user,
+                            'h-9 w-9 text-xs ring-2 ring-white dark:ring-gray-900'
+                        );
+
+                        newIcon.appendChild(avatar);
+                    }
 
                     userList.appendChild(newIcon);
 
