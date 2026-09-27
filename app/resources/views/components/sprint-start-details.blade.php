@@ -1,3 +1,22 @@
+@props([
+    'board',
+    'daysLeft' => null,
+])
+
+@php
+    if ($daysLeft === null && $board->end_date) {
+        $daysLeft = (int) ceil(
+            now()
+                ->startOfDay()
+                ->diffInDays(
+                    \Carbon\Carbon::parse($board->end_date)
+                        ->startOfDay(),
+                    false
+                )
+        );
+    }
+@endphp
+
 <div x-data="{ open: false }" class="shrink-0">
     @if($board->status == 0)
         <button
@@ -26,18 +45,20 @@
                 <span class="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500"></span>
             </span>
             Sprint active
-            <span class="font-normal text-emerald-600/80 dark:text-emerald-400/80">
-                ·
-                @if($daysLeft > 1)
-                    {{ $daysLeft }} days left
-                @elseif($daysLeft === 1)
-                    1 day left
-                @elseif($daysLeft === 0)
-                    ends today
-                @else
-                    overdue
-                @endif
-            </span>
+            @if($daysLeft !== null)
+                <span class="font-normal text-emerald-600/80 dark:text-emerald-400/80">
+                    ·
+                    @if($daysLeft > 1)
+                        {{ $daysLeft }} days left
+                    @elseif($daysLeft === 1)
+                        1 day left
+                    @elseif($daysLeft === 0)
+                        ends today
+                    @else
+                        overdue
+                    @endif
+                </span>
+            @endif
         </div>
     @endif
 
@@ -73,25 +94,31 @@
                            dark:border-gray-700 dark:bg-gray-900"
                 >
                     <div
-                        class="relative overflow-hidden border-b border-gray-100
-                               bg-gradient-to-br from-indigo-600 to-violet-600
-                               px-6 py-6 text-white dark:border-gray-800"
+                        class="border-b border-gray-200 bg-white px-6 py-5
+                               dark:border-gray-800 dark:bg-gray-900"
                     >
-                        <div class="absolute -right-8 -top-10 h-32 w-32 rounded-full bg-white/10"></div>
-                        <div class="relative flex items-start justify-between gap-4">
-                            <div class="flex items-center gap-3">
-                                <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/15 ring-1 ring-white/20">
-                                    <span class="material-symbols-rounded text-[24px]">sprint</span>
-                                </div>
-                                <div>
-                                    <p class="text-xs font-semibold uppercase tracking-widest text-indigo-100">Ready to focus?</p>
-                                    <h2 id="start-sprint-title" class="mt-1 text-xl font-bold">Start {{ $board->name }}</h2>
-                                </div>
+                        <div class="flex items-start justify-between gap-4">
+                            <div>
+                                <p class="text-xs font-semibold uppercase tracking-widest
+                                          text-indigo-600 dark:text-indigo-400">
+                                    Sprint planning
+                                </p>
+                                <h2
+                                    id="start-sprint-title"
+                                    class="mt-1 text-xl font-bold text-gray-900 dark:text-white"
+                                >
+                                    Start {{ $board->name }}
+                                </h2>
+                                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                    Set the team focus and choose when this sprint should end.
+                                </p>
                             </div>
                             <button
                                 type="button"
                                 @click="open = false"
-                                class="flex h-9 w-9 items-center justify-center rounded-xl text-indigo-100 transition hover:bg-white/15 hover:text-white"
+                                class="flex h-9 w-9 items-center justify-center rounded-xl
+                                       text-gray-400 transition hover:bg-gray-100 hover:text-gray-700
+                                       dark:hover:bg-gray-800 dark:hover:text-white"
                                 aria-label="Close"
                             >
                                 <span class="material-symbols-rounded text-[21px]">close</span>
@@ -99,7 +126,12 @@
                         </div>
                     </div>
 
-                    <form method="POST" action="{{ route('boards.startSprint') }}" class="space-y-5 p-6">
+                    <form
+                        method="POST"
+                        action="{{ route('boards.startSprint') }}"
+                        data-start-sprint-form
+                        class="space-y-5 p-6"
+                    >
                         @csrf
                         <input type="hidden" name="board_id" value="{{ $board->id }}">
 
@@ -148,6 +180,14 @@
                             </div>
                         </div>
 
+                        <p
+                            data-start-sprint-error
+                            class="hidden rounded-xl border border-red-200 bg-red-50 px-3.5 py-3
+                                   text-sm font-medium text-red-700
+                                   dark:border-red-900 dark:bg-red-950/40 dark:text-red-300"
+                            role="alert"
+                        ></p>
+
                         <div class="flex items-center justify-end gap-2 border-t border-gray-100 pt-5 dark:border-gray-800">
                             <button
                                 type="button"
@@ -158,10 +198,11 @@
                             </button>
                             <button
                                 type="submit"
+                                data-start-sprint-submit
                                 class="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-200 dark:focus:ring-indigo-950"
                             >
                                 <span class="material-symbols-rounded text-[19px]">play_arrow</span>
-                                Start sprint
+                                <span data-start-sprint-submit-text>Start sprint</span>
                             </button>
                         </div>
                     </form>

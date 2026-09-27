@@ -4,6 +4,7 @@ import { applyMutationResponse } from './realtime-reconciler';
 const modal = () => document.getElementById('task-modal');
 const content = () => modal()?.querySelector('[data-task-modal-content]');
 const detailForm = () => content()?.querySelector('[data-task-detail]');
+const autosaveTimers = new WeakMap();
 
 function field(form, name) {
     return form.querySelector(`[data-task-field="${name}"]`);
@@ -70,6 +71,29 @@ function updateDirtyState(form) {
     form.dataset.dirty = snapshot(form) === form.dataset.initialState ? '0' : '1';
 }
 
+function clearAutosave(form) {
+    const timer = autosaveTimers.get(form);
+
+    if (timer) {
+        window.clearTimeout(timer);
+        autosaveTimers.delete(form);
+    }
+}
+
+function scheduleAutosave(form, delay = 350) {
+    clearAutosave(form);
+
+    const timer = window.setTimeout(() => {
+        autosaveTimers.delete(form);
+
+        if (form.isConnected && form.dataset.dirty === '1') {
+            void saveTask(form, { quiet: true });
+        }
+    }, delay);
+
+    autosaveTimers.set(form, timer);
+}
+
 function showTaskError(form, message) {
     const error = form.querySelector('[data-task-error]');
 
@@ -125,6 +149,12 @@ function openPopover(trigger, menu) {
 }
 
 function closeModal() {
+    const form = detailForm();
+
+    if (form) {
+        clearAutosave(form);
+    }
+
     closePopovers();
     modal()?.classList.add('hidden');
     document.body.classList.remove('overflow-hidden');
@@ -134,30 +164,31 @@ function closeModal() {
     }
 }
 
-function requestClose({ backdrop = false } = {}) {
+async function requestClose() {
     const form = detailForm();
 
-    if (!form || form.dataset.dirty !== '1') {
+    if (!form) {
         closeModal();
         return;
     }
 
-    if (backdrop) {
-        showTaskError(form, 'Save or discard your changes before closing this task.');
-        form.animate(
-            [
-                { transform: 'translateX(0)' },
-                { transform: 'translateX(-5px)' },
-                { transform: 'translateX(5px)' },
-                { transform: 'translateX(0)' },
-            ],
-            { duration: 180 }
-        );
+    updateDirtyState(form);
+
+    if (form.dataset.saving === '1') {
+        form.dataset.closeAfterSave = '1';
         return;
     }
 
-    if (window.confirm('Discard your unsaved task changes?')) {
+    if (form.dataset.dirty !== '1') {
         closeModal();
+        return;
+    }
+
+    form.dataset.closeAfterSave = '1';
+    const saved = await saveTask(form, { quiet: true });
+
+    if (!saved && form.isConnected) {
+        delete form.dataset.closeAfterSave;
     }
 }
 
@@ -241,29 +272,53 @@ export async function refreshOpenTask(taskId) {
     initializeTaskDetail(detailForm());
 }
 
-async function saveTask(form) {
+async function saveTask(form, { quiet = false } = {}) {
+    if (!form?.isConnected) {
+        return false;
+    }
+
+    updateDirtyState(form);
+
+    if (form.dataset.saving === '1') {
+        form.dataset.saveQueued = '1';
+        return false;
+    }
+
+    if (form.dataset.dirty !== '1') {
+        if (form.dataset.closeAfterSave === '1') {
+            closeModal();
+        }
+
+        return true;
+    }
+
+    clearAutosave(form);
+
     const payload = taskPayload(form);
+    const submittedState = JSON.stringify(payload);
     const error = form.querySelector('[data-task-error]');
     const success = form.querySelector('[data-task-success]');
     const button = form.querySelector('[data-save-task]');
 
     if (!payload.title) {
         showTaskError(form, 'Task title cannot be empty.');
-        return;
+        return false;
     }
 
     if (payload.sections.some(section => !section.title)) {
         showTaskError(form, 'Every section with content needs a title.');
-        return;
+        return false;
     }
 
     if (payload.checklists.some(checklist => !checklist.title)) {
         showTaskError(form, 'Every checklist needs a title.');
-        return;
+        return false;
     }
 
     error.classList.add('hidden');
     success.classList.add('hidden');
+    form.dataset.saving = '1';
+    form.dataset.localMutation = '1';
     button.disabled = true;
     button.querySelector('[data-save-text]').textContent = 'Saving...';
 
@@ -276,12 +331,24 @@ async function saveTask(form) {
             },
         });
 
-        form.dataset.localMutation = '1';
         await applyMutationResponse(data);
-        delete form.dataset.localMutation;
         form.dataset.taskVersion = data.payload.entity.version;
-        rememberCleanState(form);
-        success.classList.remove('hidden');
+        form.dataset.initialState = submittedState;
+        updateDirtyState(form);
+
+        if (!quiet || form.dataset.dirty !== '1') {
+            success.textContent = 'Task saved successfully.';
+            success.classList.remove('hidden');
+        }
+
+        if (
+            form.dataset.closeAfterSave === '1'
+            && form.dataset.dirty !== '1'
+        ) {
+            closeModal();
+        }
+
+        return form.dataset.dirty !== '1';
     } catch (requestError) {
         showTaskError(
             form,
@@ -289,10 +356,22 @@ async function saveTask(form) {
                 ? 'Someone updated this task first. Close and reopen it to see their changes.'
                 : requestError.message
         );
+        return false;
     } finally {
-        delete form.dataset.localMutation;
-        button.disabled = false;
-        button.querySelector('[data-save-text]').textContent = 'Save changes';
+        if (form.isConnected) {
+            const saveAgain = form.dataset.saveQueued === '1'
+                || form.dataset.dirty === '1';
+
+            delete form.dataset.localMutation;
+            delete form.dataset.saving;
+            delete form.dataset.saveQueued;
+            button.disabled = false;
+            button.querySelector('[data-save-text]').textContent = 'Save changes';
+
+            if (saveAgain && error.classList.contains('hidden')) {
+                scheduleAutosave(form, 150);
+            }
+        }
     }
 }
 
@@ -617,6 +696,27 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    document.addEventListener('focusout', event => {
+        const target = event.target;
+        const form = target.closest('[data-task-detail]');
+
+        if (
+            !form
+            || !target.matches([
+                '[data-task-field]',
+                '[data-section-title]',
+                '[data-section-content]',
+                '[data-checklist-title]',
+                '[data-checklist-item-content]',
+            ].join(', '))
+        ) {
+            return;
+        }
+
+        updateDirtyState(form);
+        scheduleAutosave(form);
+    });
+
     document.addEventListener('change', event => {
         const form = event.target.closest('[data-task-detail]');
 
@@ -630,6 +730,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         updateDirtyState(form);
+        scheduleAutosave(form);
     });
 
     document.addEventListener('click', event => {
@@ -682,6 +783,7 @@ document.addEventListener('DOMContentLoaded', () => {
             labelOptionButton.querySelector('[data-label-check]')?.classList.toggle('invisible', !selected);
             renderSelectedLabels(form);
             updateDirtyState(form);
+            scheduleAutosave(form);
             closePopovers();
             return;
         }
@@ -740,6 +842,7 @@ document.addEventListener('DOMContentLoaded', () => {
             removeSection.closest('[data-task-section]').remove();
             updateEmptyStates(form);
             updateDirtyState(form);
+            scheduleAutosave(form, 0);
             return;
         }
 
@@ -757,6 +860,7 @@ document.addEventListener('DOMContentLoaded', () => {
             removeChecklist.closest('[data-task-checklist]').remove();
             updateEmptyStates(form);
             updateDirtyState(form);
+            scheduleAutosave(form, 0);
             return;
         }
 
@@ -777,6 +881,7 @@ document.addEventListener('DOMContentLoaded', () => {
             removeChecklistItem.closest('[data-checklist-item]').remove();
             updateChecklistProgress(checklist);
             updateDirtyState(form);
+            scheduleAutosave(form, 0);
             return;
         }
 

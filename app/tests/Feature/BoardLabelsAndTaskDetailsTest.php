@@ -1,14 +1,14 @@
 <?php
 
-use AppEventsBoardUpdated;
-use AppEventsTaskUpdated;
-use AppModelsBoard;
-use AppModelsBoardLabel;
-use AppModelsColumn;
-use AppModelsProject;
-use AppModelsTask;
-use AppModelsUser;
-use IlluminateSupportFacadesEvent;
+use App\Events\BoardUpdated;
+use App\Events\TaskUpdated;
+use App\Models\Board;
+use App\Models\BoardLabel;
+use App\Models\Column;
+use App\Models\Project;
+use App\Models\Task;
+use App\Models\User;
+use Illuminate\Support\Facades\Event;
 
 function labelFeatureBoard(User $owner, string $name): array
 {

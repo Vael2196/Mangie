@@ -283,7 +283,7 @@ class BoardController extends Controller
 
     public function startSprint(
         Request $request
-    ): RedirectResponse {
+    ): JsonResponse|RedirectResponse {
         $validated = $request->validate([
             'board_id' => [
                 'required',
@@ -324,6 +324,14 @@ class BoardController extends Controller
         );
 
         broadcast($event)->toOthers();
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                ...$event->response(),
+                'message' =>
+                    'Sprint started successfully.',
+            ]);
+        }
 
         return back()->with(
             'success',

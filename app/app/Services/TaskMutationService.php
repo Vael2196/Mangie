@@ -32,7 +32,8 @@ class TaskMutationService
                 'title' => $title,
                 'column_id' => $column->id,
                 'position' => $position + 1,
-            ]);
+                'version' => 1,
+            ])->refresh();
         }, 3);
     }
 
