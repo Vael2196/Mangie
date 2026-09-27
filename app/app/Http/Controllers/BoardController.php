@@ -106,7 +106,18 @@ class BoardController extends Controller
                 $request->user()->id,
             ]);
 
-            return $board->load('columns');
+            foreach (
+                config('mangie.standard_labels', [])
+                as $index => $label
+            ) {
+                $board->labels()->create([
+                    'name' => $label['name'],
+                    'color' => $label['color'],
+                    'position' => $index + 1,
+                ]);
+            }
+
+            return $board->load('columns', 'labels');
         }, 3);
 
         $event = new BoardCreated(
@@ -144,6 +155,7 @@ class BoardController extends Controller
 
         $board->load([
             'users',
+            'labels',
             'columns' => function ($query) {
                 $query
                     ->withCount('tasks')
@@ -160,7 +172,10 @@ class BoardController extends Controller
                 }
 
                 if ($label !== '') {
-                    $query->where('labels', $label);
+                    $query->whereHas(
+                        'boardLabels',
+                        fn ($labels) => $labels->whereKey($label)
+                    );
                 }
 
                 if ($sortBy !== '' && $sortDirection !== '') {
@@ -170,6 +185,8 @@ class BoardController extends Controller
                 }
             },
             'columns.tasks.users',
+            'columns.tasks.boardLabels',
+            'columns.tasks.checklists.items',
         ]);
 
         $daysLeft = null;
@@ -194,6 +211,9 @@ class BoardController extends Controller
 
         $user = $request->user();
         $cookies = $criteria['tags'];
+        $cookies['label'] = $label === ''
+            ? ''
+            : ($board->labels->firstWhere('id', $label)?->name ?? '');
         $taskCriteria = $criteria;
         $projectId = (int) $board->project_id;
 

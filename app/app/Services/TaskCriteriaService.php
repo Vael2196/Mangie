@@ -8,10 +8,6 @@ class TaskCriteriaService
 {
     private const PRIORITIES = ['Low', 'Medium', 'High'];
 
-    private const LABELS = [
-        'API', 'Backend', 'Frontend', 'UI/UX', 'Database',
-    ];
-
     private const SORT_LABELS = [
         'title' => 'Title',
         'description' => 'Description',
@@ -63,11 +59,15 @@ class TaskCriteriaService
             true
         ) ? $values['priority'] : '';
 
-        $label = in_array(
-            $values['label'] ?? '',
-            self::LABELS,
-            true
-        ) ? $values['label'] : '';
+        $labelValue = filter_var(
+            $values['label'] ?? null,
+            FILTER_VALIDATE_INT,
+            ['options' => ['min_range' => 1]]
+        );
+
+        $label = $labelValue === false
+            ? ''
+            : (int) $labelValue;
 
         $sortField = array_key_exists(
             $values['sortField'] ?? '',

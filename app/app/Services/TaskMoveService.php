@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Board;
+use App\Models\BoardLabel;
 use App\Models\Column;
 use App\Models\Task;
 use Illuminate\Support\Collection;
@@ -194,9 +195,31 @@ class TaskMoveService
                     'version' => (int) $task->version + 1,
                 ]);
 
+            if (
+                (int) $sourceColumn->board_id
+                !== (int) $targetColumn->board_id
+            ) {
+                $labelNames = $task->boardLabels()
+                    ->pluck('name');
+
+                $targetLabels = BoardLabel::query()
+                    ->where('board_id', $targetColumn->board_id)
+                    ->whereIn('name', $labelNames)
+                    ->orderBy('position')
+                    ->get();
+
+                $task->boardLabels()->sync(
+                    $targetLabels->pluck('id')->all()
+                );
+
+                $task->updateQuietly([
+                    'labels' => $targetLabels->first()?->name,
+                ]);
+            }
+
 
             $finalTask = Task::query()
-                ->with('column.board', 'users')
+                ->with('column.board', 'users', 'boardLabels')
                 ->findOrFail($task->id);
 
 

@@ -91,7 +91,10 @@
                         $criteriaScope = 'backlog';
                     @endphp
                     <x-sort-menu :scope="$criteriaScope" />
-                    <x-filter-menu :scope="$criteriaScope" />
+                    <x-filter-menu
+                        :scope="$criteriaScope"
+                        :labels="$backlog->labels"
+                    />
                     @php
                         $backlogDropColumn =
                             $backlog->columns

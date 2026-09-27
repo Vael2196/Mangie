@@ -19,6 +19,9 @@ class Task extends Model
         'story_points',
         'time_log',
         'completed_at',
+        'start_at',
+        'due_at',
+        'due_complete',
         'version',
     ];
 
@@ -30,6 +33,9 @@ class Task extends Model
             'story_points' => 'integer',
             'time_log' => 'integer',
             'completed_at' => 'date',
+            'start_at' => 'datetime',
+            'due_at' => 'datetime',
+            'due_complete' => 'boolean',
             'version' => 'integer',
         ];
     }
@@ -44,5 +50,23 @@ class Task extends Model
     public function users()
     {
         return $this->belongsToMany(User::class, 'task_users');
+    }
+
+    public function boardLabels()
+    {
+        return $this->belongsToMany(BoardLabel::class)
+            ->orderBy('position');
+    }
+
+    public function sections()
+    {
+        return $this->hasMany(TaskSection::class)
+            ->orderBy('position');
+    }
+
+    public function checklists()
+    {
+        return $this->hasMany(TaskChecklist::class)
+            ->orderBy('position');
     }
 }

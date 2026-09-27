@@ -56,6 +56,11 @@ class User extends Authenticatable
         return $this->belongsToMany(Board::class, 'board_user')->withTimestamps();
     }
 
+    public function labelLibraries()
+    {
+        return $this->hasMany(LabelLibrary::class);
+    }
+
     public function getAvatarUrlAttribute(): ?string
     {
         if (!$this->avatar_path) {

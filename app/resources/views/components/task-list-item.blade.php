@@ -43,9 +43,13 @@
                 <x-status-icon name="{{ $column->name }}" />
             @endif
 
-            @if($task->labels)
-                <x-status-icon name="{{ $task->labels }}" />
-            @endif
+            @foreach($task->boardLabels as $label)
+                <x-status-icon
+                    :name="$label->name"
+                    :color="$label->color"
+                    data-board-label-id="{{ $label->id }}"
+                />
+            @endforeach
 
             @if($task->priority)
                 <x-status-icon name="{{ $task->priority }}" />

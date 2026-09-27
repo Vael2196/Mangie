@@ -41,14 +41,20 @@ class TaskMutationService
         Column $targetColumn,
         array $attributes,
         ?int $assigneeId,
-        ?int $expectedVersion = null
+        ?int $expectedVersion = null,
+        ?array $labelIds = null,
+        ?array $sections = null,
+        ?array $checklists = null
     ): array {
         return DB::transaction(function () use (
             $task,
             $targetColumn,
             $attributes,
             $assigneeId,
-            $expectedVersion
+            $expectedVersion,
+            $labelIds,
+            $sections,
+            $checklists
         ) {
             $task = Task::query()
                 ->whereKey($task->id)
@@ -90,10 +96,61 @@ class TaskMutationService
                     : []
             );
 
+            if ($labelIds !== null) {
+                $task->boardLabels()->sync($labelIds);
+                $task->load('boardLabels');
+                $task->updateQuietly([
+                    'labels' => $task->boardLabels->first()?->name,
+                ]);
+            }
+
+            if ($sections !== null) {
+                $task->sections()->delete();
+
+                foreach ($sections as $index => $section) {
+                    $task->sections()->create([
+                        'title' => $section['title'],
+                        'content' => $section['content'] ?? null,
+                        'position' => $index + 1,
+                    ]);
+                }
+            }
+
+            if ($checklists !== null) {
+                $task->checklists()->delete();
+
+                foreach ($checklists as $checklistIndex => $checklist) {
+                    $createdChecklist = $task->checklists()->create([
+                        'title' => $checklist['title'],
+                        'position' => $checklistIndex + 1,
+                    ]);
+
+                    foreach (
+                        $checklist['items'] ?? []
+                        as $itemIndex => $item
+                    ) {
+                        $isComplete = (bool) ($item['is_complete'] ?? false);
+
+                        $createdChecklist->items()->create([
+                            'content' => $item['content'],
+                            'is_complete' => $isComplete,
+                            'completed_at' => $isComplete ? now() : null,
+                            'position' => $itemIndex + 1,
+                        ]);
+                    }
+                }
+            }
+
             return [
                 'task' => $task
                     ->refresh()
-                    ->load('column.board', 'users'),
+                    ->load(
+                        'column.board',
+                        'users',
+                        'boardLabels',
+                        'sections',
+                        'checklists.items'
+                    ),
                 'move' => $moveResult,
             ];
         }, 3);

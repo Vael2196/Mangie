@@ -25,7 +25,7 @@ it('stores criteria separately for each authenticated user and scope', function 
     $this->actingAs($bob)
         ->putJson('/task-criteria/backlog', [
             'priority' => 'Low',
-            'label' => 'Backend',
+            'label' => 7,
             'sortField' => null,
             'sortDirection' => null,
         ])

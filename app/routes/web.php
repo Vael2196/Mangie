@@ -4,8 +4,10 @@ use App\Http\Controllers\BacklogController;
 use App\Http\Controllers\BoardController;
 use App\Http\Controllers\BoardAppearanceController;
 use App\Http\Controllers\BoardMemberController;
+use App\Http\Controllers\BoardLabelController;
 use App\Http\Controllers\ColumnController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\LabelLibraryController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\RealtimeFragmentController;
 use App\Http\Controllers\TaskController;
@@ -102,6 +104,31 @@ Route::middleware('auth')->group(function () {
         '/boards/{board}/appearance',
         [BoardAppearanceController::class, 'update']
     )->name('boards.appearance.update');
+
+    Route::post(
+        '/boards/{board}/labels',
+        [BoardLabelController::class, 'store']
+    )->name('boards.labels.store');
+
+    Route::delete(
+        '/board-labels/{boardLabel}',
+        [BoardLabelController::class, 'destroy']
+    )->name('board-labels.destroy');
+
+    Route::post(
+        '/boards/{board}/labels/import',
+        [BoardLabelController::class, 'import']
+    )->name('boards.labels.import');
+
+    Route::post(
+        '/boards/{board}/label-libraries',
+        [LabelLibraryController::class, 'store']
+    )->name('label-libraries.store');
+
+    Route::delete(
+        '/label-libraries/{labelLibrary}',
+        [LabelLibraryController::class, 'destroy']
+    )->name('label-libraries.destroy');
 
     Route::post(
         '/columns/store',

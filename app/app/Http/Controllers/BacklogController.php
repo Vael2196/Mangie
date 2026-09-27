@@ -52,7 +52,10 @@ class BacklogController extends Controller
                     }
 
                     if ($label !== '') {
-                        $query->where('labels', $label);
+                        $query->whereHas(
+                            'boardLabels',
+                            fn ($labels) => $labels->whereKey($label)
+                        );
                     }
 
                     if (
@@ -67,7 +70,10 @@ class BacklogController extends Controller
                         $query->orderBy('position');
                     }
                 },
+                'labels',
                 'columns.tasks.users',
+                'columns.tasks.boardLabels',
+                'columns.tasks.checklists.items',
             ])
             ->findOrFail($backlogId);
 
@@ -85,6 +91,8 @@ class BacklogController extends Controller
                 'columns.tasks' => fn ($query) =>
                     $query->orderBy('position'),
                 'columns.tasks.users',
+                'columns.tasks.boardLabels',
+                'columns.tasks.checklists.items',
             ])
             ->where(function ($query) use (
                 $user,
@@ -130,6 +138,9 @@ class BacklogController extends Controller
         };
 
         $cookies = $criteria['tags'];
+        $cookies['label'] = $label === ''
+            ? ''
+            : ($backlog->labels->firstWhere('id', $label)?->name ?? '');
         $taskCriteria = $criteria;
         $projectId = (int) $backlog->project_id;
 

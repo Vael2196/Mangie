@@ -15,7 +15,9 @@ class TaskListItem extends Component
     {
         $this->task = $task->loadMissing(
             'column',
-            'users'
+            'users',
+            'boardLabels',
+            'checklists.items'
         );
         $this->column = $this->task->column;
     }

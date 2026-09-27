@@ -7,6 +7,7 @@ use App\Events\TaskDeleted;
 use App\Events\TaskMoved;
 use App\Events\TaskUpdated;
 use App\Models\Column;
+use App\Models\BoardLabel;
 use App\Models\Task;
 use App\Services\TaskMutationService;
 use App\Support\Realtime\RealtimePayload;
@@ -14,6 +15,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 
 class TaskController extends Controller
 {
@@ -99,13 +101,13 @@ class TaskController extends Controller
             'labels' => [
                 'nullable',
                 'string',
-                Rule::in([
-                    'API',
-                    'Backend',
-                    'Frontend',
-                    'UI/UX',
-                    'Database',
-                ]),
+                'max:50',
+            ],
+            'label_ids' => ['sometimes', 'array', 'max:50'],
+            'label_ids.*' => [
+                'integer',
+                'distinct',
+                'exists:board_labels,id',
             ],
             'priority' => [
                 'nullable',
@@ -126,6 +128,36 @@ class TaskController extends Controller
                 'integer',
                 'min:0',
             ],
+            'start_at' => ['nullable', 'date'],
+            'due_at' => ['nullable', 'date'],
+            'due_complete' => ['sometimes', 'boolean'],
+            'sections' => ['sometimes', 'array', 'max:20'],
+            'sections.*.title' => [
+                'required',
+                'string',
+                'max:120',
+            ],
+            'sections.*.content' => [
+                'nullable',
+                'string',
+                'max:5000',
+            ],
+            'checklists' => ['sometimes', 'array', 'max:20'],
+            'checklists.*.title' => [
+                'required',
+                'string',
+                'max:120',
+            ],
+            'checklists.*.items' => ['sometimes', 'array', 'max:100'],
+            'checklists.*.items.*.content' => [
+                'required',
+                'string',
+                'max:500',
+            ],
+            'checklists.*.items.*.is_complete' => [
+                'sometimes',
+                'boolean',
+            ],
             'expected_version' => [
                 'nullable',
                 'integer',
@@ -142,24 +174,75 @@ class TaskController extends Controller
         Gate::authorize('update', $task->column->board);
         Gate::authorize('update', $targetColumn->board);
 
+        $labelIds = null;
+
+        if (array_key_exists('label_ids', $validated)) {
+            $labelIds = array_map(
+                'intval',
+                $validated['label_ids']
+            );
+        } elseif (array_key_exists('labels', $validated)) {
+            $legacyLabel = $validated['labels'] ?? null;
+            $labelIds = [];
+
+            if ($legacyLabel) {
+                $legacyLabelId = BoardLabel::query()
+                    ->where('board_id', $targetColumn->board_id)
+                    ->where('name', $legacyLabel)
+                    ->value('id');
+
+                if ($legacyLabelId) {
+                    $labelIds[] = (int) $legacyLabelId;
+                }
+            }
+        }
+
+        if ($labelIds !== null) {
+            $validLabelCount = BoardLabel::query()
+                ->where('board_id', $targetColumn->board_id)
+                ->whereIn('id', $labelIds)
+                ->count();
+
+            if ($validLabelCount !== count($labelIds)) {
+                throw ValidationException::withMessages([
+                    'label_ids' =>
+                        'Every selected label must belong to this board.',
+                ]);
+            }
+        }
+
+        $attributes = [
+            'title' => $validated['title'],
+            'description' =>
+                $validated['description'] ?? null,
+            'priority' =>
+                $validated['priority'] ?? null,
+            'story_points' =>
+                $validated['storyPoint'],
+            'time_log' =>
+                $validated['timeLog'],
+        ];
+
+        foreach ([
+            'start_at',
+            'due_at',
+            'due_complete',
+        ] as $optionalAttribute) {
+            if (array_key_exists($optionalAttribute, $validated)) {
+                $attributes[$optionalAttribute] =
+                    $validated[$optionalAttribute];
+            }
+        }
+
         $result = $this->tasks->update(
             $task,
             $targetColumn,
-            [
-                'title' => $validated['title'],
-                'description' =>
-                    $validated['description'] ?? null,
-                'labels' =>
-                    $validated['labels'] ?? null,
-                'priority' =>
-                    $validated['priority'] ?? null,
-                'story_points' =>
-                    $validated['storyPoint'],
-                'time_log' =>
-                    $validated['timeLog'],
-            ],
+            $attributes,
             $validated['assignee'] ?? null,
-            $validated['expected_version'] ?? null
+            $validated['expected_version'] ?? null,
+            $labelIds,
+            $validated['sections'] ?? null,
+            $validated['checklists'] ?? null
         );
 
         $events = [];

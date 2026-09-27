@@ -24,7 +24,12 @@ class RealtimeFragmentController extends Controller
     ): JsonResponse {
         abort_unless(in_array($variant, ['card', 'list'], true), 404);
 
-        $task->load('column.board', 'users');
+        $task->load(
+            'column.board',
+            'users',
+            'boardLabels',
+            'checklists.items'
+        );
         Gate::authorize('view', $task->column->board);
 
         $view = $variant === 'card'
@@ -43,7 +48,11 @@ class RealtimeFragmentController extends Controller
         $task->load(
             'column.board.columns',
             'column.board.users',
-            'users'
+            'column.board.labels',
+            'users',
+            'boardLabels',
+            'sections',
+            'checklists.items'
         );
 
         Gate::authorize('view', $task->column->board);
@@ -70,7 +79,7 @@ class RealtimeFragmentController extends Controller
         );
 
         $tasks = $column->tasks()
-            ->with('users')
+            ->with('users', 'boardLabels', 'checklists.items')
             ->when(
                 $criteria['priority'] !== '',
                 fn ($query) => $query->where(
@@ -80,9 +89,11 @@ class RealtimeFragmentController extends Controller
             )
             ->when(
                 $criteria['label'] !== '',
-                fn ($query) => $query->where(
-                    'labels',
-                    $criteria['label']
+                fn ($query) => $query->whereHas(
+                    'boardLabels',
+                    fn ($labels) => $labels->whereKey(
+                        $criteria['label']
+                    )
                 )
             )
             ->when(
@@ -137,6 +148,8 @@ class RealtimeFragmentController extends Controller
             'columns' => fn ($query) => $query->orderBy('position'),
             'columns.tasks' => fn ($query) => $query->orderBy('position'),
             'columns.tasks.users',
+            'columns.tasks.boardLabels',
+            'columns.tasks.checklists.items',
         ]);
 
         $activeSprints = Board::query()

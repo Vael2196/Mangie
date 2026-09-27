@@ -61,6 +61,12 @@ class Board extends Model
             ->withTimestamps();
     }
 
+    public function labels()
+    {
+        return $this->hasMany(BoardLabel::class)
+            ->orderBy('position');
+    }
+
     public function scopeAccessibleTo(
         Builder $query,
         User $user

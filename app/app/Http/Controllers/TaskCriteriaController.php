@@ -27,9 +27,8 @@ class TaskCriteriaController extends Controller
             ],
             'label' => [
                 'nullable',
-                Rule::in([
-                    'API', 'Backend', 'Frontend', 'UI/UX', 'Database',
-                ]),
+                'integer',
+                'min:1',
             ],
             'sortField' => [
                 'nullable',

@@ -51,7 +51,10 @@ function matchesCriteria(task) {
     }
 
     return (!criteria.priority || task.priority === criteria.priority)
-        && (!criteria.label || task.labels === criteria.label);
+        && (
+            !criteria.label
+            || (task.label_ids ?? []).includes(Number(criteria.label))
+        );
 }
 
 function currentVersion(element) {

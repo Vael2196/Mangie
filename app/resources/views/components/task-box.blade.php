@@ -29,9 +29,13 @@
         </p>
 
         <div class="mt-3 flex flex-wrap gap-1.5">
-            @if($task->labels)
-                <x-status-icon name="{{ $task->labels }}"/>
-            @endif
+            @foreach($task->boardLabels as $label)
+                <x-status-icon
+                    :name="$label->name"
+                    :color="$label->color"
+                    data-board-label-id="{{ $label->id }}"
+                />
+            @endforeach
 
             @if((int) $column->board_id !== (int) config('mangie.product_backlog_board_id', 1))
                 <x-status-icon name="{{ $column->name }}"/>
@@ -39,6 +43,28 @@
 
             @if($task->priority)
                 <x-status-icon name="{{ $task->priority }}"/>
+            @endif
+
+            @if($task->due_at)
+                <x-status-icon
+                    :name="$task->due_complete
+                        ? 'Due complete'
+                        : $task->due_at->format('M j')"
+                    class="{{ !$task->due_complete && $task->due_at->isPast()
+                        ? '!border-red-200 !bg-red-50 !text-red-700 dark:!border-red-900 dark:!bg-red-950/60 dark:!text-red-300'
+                        : '' }}"
+                />
+            @endif
+
+            @php
+                $checklistItems = $task->checklists
+                    ->flatMap(fn ($checklist) => $checklist->items);
+            @endphp
+
+            @if($checklistItems->isNotEmpty())
+                <x-status-icon
+                    name="{{ $checklistItems->where('is_complete', true)->count() }}/{{ $checklistItems->count() }} checklist"
+                />
             @endif
         </div>
     </div>

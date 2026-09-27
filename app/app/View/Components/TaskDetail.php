@@ -12,6 +12,8 @@ class TaskDetail extends Component
     public $task;
     public $users;
     public $parent_board;
+    public $labelLibraries;
+    public $labelColors;
     /**
      * Create a new component instance.
      */
@@ -20,10 +22,21 @@ class TaskDetail extends Component
         $this->task = $task->loadMissing(
             'column.board.columns',
             'column.board.users',
-            'users'
+            'column.board.labels',
+            'users',
+            'boardLabels',
+            'sections',
+            'checklists.items'
         );
         $this->parent_board = $this->task->column->board;
         $this->users = $this->parent_board->users;
+        $this->labelLibraries = request()
+            ->user()
+            ->labelLibraries()
+            ->with('items')
+            ->orderBy('name')
+            ->get();
+        $this->labelColors = config('mangie.label_colors', []);
     }
 
     /**

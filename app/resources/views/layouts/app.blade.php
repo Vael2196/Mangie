@@ -212,6 +212,7 @@
             class="fixed inset-0 bg-gray-950/55 backdrop-blur-[2px]"
         ></div>
         <div
+            data-task-modal-shell
             class="relative flex min-h-full items-start justify-center p-4
                    sm:items-center sm:p-6"
         >

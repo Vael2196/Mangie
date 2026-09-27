@@ -29,6 +29,20 @@ class BacklogSeeder extends Seeder
                 'created_at' => now(),
                 'updated_at' => now()
             ]);
+
+            foreach (
+                config('mangie.standard_labels', [])
+                as $index => $label
+            ) {
+                DB::table('board_labels')->insert([
+                    'board_id' => $id,
+                    'name' => $label['name'],
+                    'color' => $label['color'],
+                    'position' => $index + 1,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
         });
     }
 }

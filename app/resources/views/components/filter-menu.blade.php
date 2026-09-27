@@ -1,4 +1,7 @@
-@props(['scope'])
+@props([
+    'scope',
+    'labels' => collect(),
+])
 
 <div class="relative" data-task-filter data-scope="{{ $scope }}">
     <button
@@ -133,12 +136,13 @@
                            bg-white p-1.5 shadow-xl
                            dark:border-gray-700 dark:bg-gray-800"
                 >
-                    @foreach (['API', 'Backend', 'Frontend', 'UI/UX', 'Database'] as $label)
+                    @forelse ($labels as $label)
                         <button
                             type="button"
                             data-filter-choice
                             data-filter-key="label"
-                            data-filter-value="{{ $label }}"
+                            data-filter-value="{{ $label->id }}"
+                            data-board-label-id="{{ $label->id }}"
                             class="block w-full rounded-lg
                                    px-3 py-2 text-left text-sm
                                    text-gray-700 transition
@@ -147,9 +151,19 @@
                                    dark:hover:bg-indigo-950/40
                                    dark:hover:text-indigo-300"
                         >
-                            {{ $label }}
+                            <span class="flex items-center gap-2">
+                                <span
+                                    class="h-2.5 w-2.5 rounded-full"
+                                    style="background-color: {{ $label->color }}"
+                                ></span>
+                                {{ $label->name }}
+                            </span>
                         </button>
-                    @endforeach
+                    @empty
+                        <p class="px-3 py-2 text-xs text-gray-400">
+                            No labels on this board
+                        </p>
+                    @endforelse
                 </div>
             </div>
         </div>

@@ -55,52 +55,27 @@
                         </p>
                     </div>
 
-                    <div class="flex space-x-8 items-center">
+                    <div class="flex flex-wrap items-center justify-end gap-3">
 
                         @if ($board->completed == 0)
                             <x-sprint-start-details :board="$board" :daysLeft="$daysLeft"/>
                         @endif
 
 
-                        {{-- <select id="activateSprint" class="bg-white dark:bg-gray-700 dark:text-white rounded-lg p-2">
-                            @foreach (['INACTIVE', 'ACTIVE'] as $status)
-                                @if ($board->status == 1) {
-                                    <option value={{$status}} selected>{{ $status }}</option>
-                                } @else {
-                                    <option value={{$status}}>{{$status}}</option>
-                                }
-                                @endif
-                            @endforeach
-                        </select> --}}
-
-                        @if ($board->status == 1)
-                            <p class="lg:block">
-                                @if($daysLeft != null && $daysLeft > 0)
-                                    {{ $daysLeft }} days left
-                                @elseif($daysLeft == 0)
-                                    Sprint ends today
-                                @else
-                                    Sprint has ended
-                                @endif
-                            </p>
-                        @elseif ($board->completed == 1)
-                            <p class="lg:block hidden">Sprint is completed</p>
-                        @else
-                            <p class="lg:block hidden">Sprint is not active</p>
-                        @endif
-
                         @if ($board->completed == 0 && $board->status == 1)
                             <form method="POST" action="{{ route('boards.complete', $board->id) }}" onsubmit="return confirm('Are you sure you want to complete the sprint early?')">
                                 @csrf
-                                <button type="submit" class="inline-flex items-center px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-500 rounded-md font-semibold text-xs text-gray-700 dark:text-gray-300 uppercase tracking-widest shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:opacity-25 transition ease-in-out duration-150">
-                                    Complete Sprint
+                                <button type="submit" class="inline-flex h-10 items-center gap-2 rounded-xl border border-gray-300 bg-white px-3.5 text-sm font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50 focus:outline-none focus:ring-4 focus:ring-indigo-100 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700 dark:focus:ring-indigo-950">
+                                    <span class="material-symbols-rounded text-[18px]">flag</span>
+                                    Complete sprint
                                 </button>
                             </form>
                         @endif
 
                         @if ($board->completed == 1)
                             <form method="GET" action="{{ route('boards.burndownChart', $board->id) }}">
-                                <button type="submit" class="inline-flex items-center px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-500 rounded-md font-semibold text-xs text-gray-700 dark:text-gray-300 uppercase tracking-widest shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:opacity-25 transition ease-in-out duration-150">
+                                <button type="submit" class="inline-flex h-10 items-center gap-2 rounded-xl border border-gray-300 bg-white px-3.5 text-sm font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700">
+                                    <span class="material-symbols-rounded text-[18px]">monitoring</span>
                                     Burndown Chart
                                 </button>
                             </form>
@@ -226,7 +201,7 @@
                         @endif
                     </div>
                 </div>
-                <div class="flex space-x-3">
+                <div class="mt-3 flex flex-wrap items-center gap-3">
                     <div class="flex flex-wrap items-center gap-3">
 
                         {{-- User search --}}
@@ -284,7 +259,10 @@
                         $criteriaScope = 'board_' . $board->id;
                     @endphp
                     <x-sort-menu :scope="$criteriaScope" />
-                    <x-filter-menu :scope="$criteriaScope" />
+                    <x-filter-menu
+                        :scope="$criteriaScope"
+                        :labels="$board->labels"
+                    />
 
                     @foreach($cookies as $key => $value)
 
@@ -314,13 +292,11 @@
 
             <div
                 id="columns-container"
+                data-board-pan
                 class="mt-6 flex max-w-full flex-nowrap
                     items-start gap-5 overflow-x-auto
-                    rounded-2xl border border-gray-200
-                    bg-white/40 backdrop-blur-sm
-                    p-5 pb-7
-                    dark:border-gray-800
-                    dark:bg-gray-950/55"
+                    rounded-2xl border p-5 pb-7
+                    board-canvas-panel"
             >
                 <!-- Display columns and tasks -->
                 @foreach($board->columns as $column)
