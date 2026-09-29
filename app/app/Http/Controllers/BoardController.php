@@ -44,9 +44,14 @@ class BoardController extends Controller
         string $pageMode
     ): View {
         $user = $request->user();
+        $backlogId = (int) config(
+            'mangie.product_backlog_board_id',
+            1
+        );
 
         $boards = Board::query()
             ->accessibleTo($user)
+            ->where('boards.id', '<>', $backlogId)
             ->orderByDesc('created_at')
             ->get();
 
@@ -54,19 +59,68 @@ class BoardController extends Controller
             $this->lifecycle->endIfExpired($board);
         }
 
-        $activeSprints = $boards->contains(
-            fn (Board $board) =>
-                !$board->completed && $board->status
+        $filtersSubmitted = $request->boolean('filters');
+        $showInactive = $filtersSubmitted
+            ? $request->boolean('show_inactive')
+            : $pageMode === 'dashboard';
+
+        $requestedOwnership = $request->input(
+            'ownership',
+            []
         );
 
-        $projectId = (int) ($boards->first()?->project_id ?? 1);
+        if (!is_array($requestedOwnership)) {
+            $requestedOwnership = [$requestedOwnership];
+        }
+
+        $ownership = $filtersSubmitted
+            ? array_values(array_intersect(
+                ['owned', 'shared'],
+                $requestedOwnership
+            ))
+            : ['owned', 'shared'];
+
+        $boards = $boards
+            ->filter(function (Board $board) use (
+                $user,
+                $showInactive,
+                $ownership
+            ): bool {
+                $active = !$board->completed
+                    && $board->status;
+
+                if (!$showInactive && !$active) {
+                    return false;
+                }
+
+                $owned = (int) $board->user_id
+                    === (int) $user->id;
+
+                return $owned
+                    ? in_array('owned', $ownership, true)
+                    : in_array('shared', $ownership, true);
+            })
+            ->values();
+
+        $projectId = (int) (
+            $boards->first()?->project_id
+            ?? Board::query()
+                ->whereKey($backlogId)
+                ->value('project_id')
+            ?? 1
+        );
+
+        $boardFilters = [
+            'showInactive' => $showInactive,
+            'ownership' => $ownership,
+        ];
 
         return view('home', compact(
             'user',
             'boards',
-            'activeSprints',
             'pageMode',
-            'projectId'
+            'projectId',
+            'boardFilters'
         ));
     }
 

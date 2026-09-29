@@ -19,6 +19,38 @@ function context() {
     return root()?.dataset.taskSyncContext;
 }
 
+function matchesBoardListFilters(board) {
+    const syncRoot = root();
+
+    if (!syncRoot || context() !== 'boards') {
+        return true;
+    }
+
+    const active = Boolean(board.status) && !Boolean(board.completed);
+    const showInactive = syncRoot.dataset.boardFilterShowInactive === '1';
+
+    if (!showInactive && !active) {
+        return false;
+    }
+
+    const owned = Number(board.owner_id)
+        === Number(syncRoot.dataset.currentUserId);
+
+    return owned
+        ? syncRoot.dataset.boardFilterOwned === '1'
+        : syncRoot.dataset.boardFilterShared === '1';
+}
+
+function updateBoardListEmptyState() {
+    const hasBoards = Boolean(
+        document.querySelector('.card-view-sprint [data-board-id]')
+    );
+
+    document
+        .getElementById('sprint-empty-state')
+        ?.classList.toggle('hidden', hasBoards);
+}
+
 function taskVariant() {
     return document.querySelector('tbody[data-task-list]') ? 'list' : 'card';
 }
@@ -280,8 +312,12 @@ async function applyBoardMutation(event, payload) {
             `[data-board-id="${boardId}"]`
         );
 
-        if (event === 'board.deleted' || payload.entity.completed) {
+        if (
+            event === 'board.deleted'
+            || !matchesBoardListFilters(payload.entity)
+        ) {
             existing.forEach(element => element.remove());
+            updateBoardListEmptyState();
             return;
         }
 
@@ -304,11 +340,14 @@ async function applyBoardMutation(event, payload) {
                 const current = container.querySelector(selector);
                 current ? current.replaceWith(fresh) : container.appendChild(fresh);
             } catch (error) {
-                if (error.status !== 403) {
+                if (error.status === 403) {
+                    existing.forEach(element => element.remove());
+                } else {
                     throw error;
                 }
             }
         }
+        updateBoardListEmptyState();
         return;
     }
 

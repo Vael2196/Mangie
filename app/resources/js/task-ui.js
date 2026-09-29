@@ -245,7 +245,6 @@ export async function openTask(taskId) {
 
     const form = detailForm();
     initializeTaskDetail(form);
-    field(form, 'title')?.focus();
 }
 
 export async function refreshOpenTask(taskId) {

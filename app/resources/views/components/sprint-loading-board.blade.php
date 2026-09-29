@@ -9,11 +9,7 @@
             {{ $board->name }}
         </h1>
 
-        @if ($activeSprints >= 1)
-            @if ($board->status == 1)
-                <x-sprint-start-details :board="$board"/>
-            @endif
-        @elseif ($board->completed == 0)
+        @if ($board->completed == 0)
             <x-sprint-start-details :board="$board"/>
         @endif
     </div>

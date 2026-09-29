@@ -49,7 +49,15 @@ function initialisePopover(wrapper, buttonSelector, menuSelector) {
         menu.classList.toggle('hidden');
     });
 
-    menu.addEventListener('click', event => event.stopPropagation());
+    menu.addEventListener('click', event => {
+        const choice = event.target.closest(
+            '[data-filter-choice], [data-sort-choice]'
+        );
+
+        if (!choice) {
+            event.stopPropagation();
+        }
+    });
 
     window.addEventListener('mangie:popover-open', event => {
         if (event.detail !== menu.id) {

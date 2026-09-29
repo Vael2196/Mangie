@@ -589,7 +589,7 @@
                         },
                         body: JSON.stringify({
                             name: sprintTitle,
-                            project_id: 1 // Change later maybe
+                            project_id: {{ $projectId }}
                         })
                     })
                     .then(response => response.json())

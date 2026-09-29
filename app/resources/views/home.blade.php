@@ -4,6 +4,10 @@
         data-realtime-board-ids='@json($boards->pluck('id')->values())'
         data-realtime-project-id="{{ $projectId }}"
         data-page-mode="{{ $pageMode }}"
+        data-current-user-id="{{ $user->id }}"
+        data-board-filter-show-inactive="{{ $boardFilters['showInactive'] ? '1' : '0' }}"
+        data-board-filter-owned="{{ in_array('owned', $boardFilters['ownership'], true) ? '1' : '0' }}"
+        data-board-filter-shared="{{ in_array('shared', $boardFilters['ownership'], true) ? '1' : '0' }}"
     >
     <x-top-bar
         :title="$pageMode === 'dashboard' ? 'Sprint Dashboard' : 'Home'"
@@ -41,6 +45,74 @@
 
 
             <div class="flex flex-wrap items-center gap-3">
+
+                <form
+                    method="GET"
+                    action="{{ $pageMode === 'dashboard' ? route('dashboard') : route('home') }}"
+                    class="flex flex-wrap items-center gap-3 rounded-xl
+                        border border-gray-200 bg-white px-3 py-2 shadow-sm
+                        dark:border-gray-700 dark:bg-gray-900"
+                    aria-label="Filter sprint boards"
+                >
+                    <input type="hidden" name="filters" value="1">
+
+                    <label class="inline-flex cursor-pointer items-center gap-2
+                        text-sm font-medium text-gray-600 dark:text-gray-300">
+                        <input
+                            type="checkbox"
+                            name="show_inactive"
+                            value="1"
+                            data-sprint-filter
+                            class="rounded border-gray-300 text-indigo-600
+                                focus:ring-indigo-500 dark:border-gray-600
+                                dark:bg-gray-800"
+                            @checked($boardFilters['showInactive'])
+                        >
+                        Show inactive / completed
+                    </label>
+
+                    <span class="hidden h-5 w-px bg-gray-200 dark:bg-gray-700 sm:block"></span>
+
+                    <label class="inline-flex cursor-pointer items-center gap-2
+                        text-sm font-medium text-gray-600 dark:text-gray-300">
+                        <input
+                            type="checkbox"
+                            name="ownership[]"
+                            value="owned"
+                            data-sprint-filter
+                            class="rounded border-gray-300 text-indigo-600
+                                focus:ring-indigo-500 dark:border-gray-600
+                                dark:bg-gray-800"
+                            @checked(in_array('owned', $boardFilters['ownership'], true))
+                        >
+                        Created by me
+                    </label>
+
+                    <label class="inline-flex cursor-pointer items-center gap-2
+                        text-sm font-medium text-gray-600 dark:text-gray-300">
+                        <input
+                            type="checkbox"
+                            name="ownership[]"
+                            value="shared"
+                            data-sprint-filter
+                            class="rounded border-gray-300 text-indigo-600
+                                focus:ring-indigo-500 dark:border-gray-600
+                                dark:bg-gray-800"
+                            @checked(in_array('shared', $boardFilters['ownership'], true))
+                        >
+                        Shared with me
+                    </label>
+
+                    <button
+                        type="submit"
+                        class="rounded-lg bg-gray-100 px-2.5 py-1.5
+                            text-xs font-semibold text-gray-600 transition
+                            hover:bg-gray-200 dark:bg-gray-800
+                            dark:text-gray-300 dark:hover:bg-gray-700"
+                    >
+                        Apply
+                    </button>
+                </form>
 
                 <div
                     class="inline-flex rounded-xl border border-gray-200
@@ -118,7 +190,7 @@
                     <input
                         type="hidden"
                         name="project_id"
-                        value="1"
+                        value="{{ $projectId }}"
                     >
 
                     <input
@@ -177,28 +249,26 @@
         @endif
 
         <div
+            id="sprint-empty-state"
+            @class([
+                'mb-5 rounded-2xl border border-dashed border-gray-300',
+                'bg-white/60 px-6 py-10 text-center text-sm text-gray-500',
+                'dark:border-gray-700 dark:bg-gray-900/50 dark:text-gray-400',
+                'hidden' => $boards->isNotEmpty(),
+            ])
+        >
+            No sprint boards match the selected filters.
+        </div>
+
+        <div
             class="card-view-sprint grid grid-cols-1
                 gap-5
                 sm:grid-cols-2
                 xl:grid-cols-3
                 2xl:grid-cols-4"
         >
-            @if ($activeSprints < 1 && Str::contains(url()->current(), '/home'))
-                <h>There are no active sprints</h>
-            @endif
            @foreach($boards as $board)
-                @if($board->id == 1)
-                    @continue
-                @endif
-                @if($pageMode === 'dashboard')
-                    <x-show-sprint-board :board="$board"/>
-                @elseif($pageMode === 'home')
-                    @if($activeSprints && $board->status == 1)
-                        <x-show-sprint-board :board="$board"/>
-                    @elseif(!$activeSprints && $board->completed == 0)
-                        <x-show-sprint-board :board="$board"/>
-                    @endif
-                @endif
+                <x-show-sprint-board :board="$board"/>
             @endforeach
         </div>
 
@@ -213,19 +283,8 @@
                 <table class="w-full">
                     <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
                     @foreach($boards as $board)
-                    @if($board->id == 1)
-                        @continue
-                    @endif
-                    @if($pageMode === 'dashboard')
                         <x-show-sprint-board-list :board="$board"/>
-                    @elseif($pageMode === 'home')
-                        @if($activeSprints && $board->status == 1)
-                            <x-show-sprint-board-list :board="$board"/>
-                        @elseif(!$activeSprints && $board->completed == 0)
-                            <x-show-sprint-board-list :board="$board"/>
-                        @endif
-                    @endif
-                @endforeach
+                    @endforeach
                     </tbody>
                 </table>
             </div>
@@ -246,6 +305,13 @@
             const cancelCreateButton = document.getElementById('cancel-create-board');
             const createForm = document.getElementById('new-board-form');
             const boardNameInput = document.getElementById('board-name');
+
+            document.querySelectorAll('[data-sprint-filter]')
+                .forEach(input => {
+                    input.addEventListener('change', () => {
+                        input.form?.requestSubmit();
+                    });
+                });
 
 
             function setView(view) {
@@ -353,7 +419,7 @@
 
                             body: JSON.stringify({
                                 name: boardName,
-                                project_id: 1
+                                project_id: {{ $projectId }}
                             })
                         }
                     );

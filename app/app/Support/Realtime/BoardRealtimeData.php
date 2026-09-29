@@ -11,6 +11,7 @@ final class BoardRealtimeData
         return [
             'id' => (int) $board->id,
             'project_id' => (int) $board->project_id,
+            'owner_id' => (int) $board->user_id,
             'name' => $board->name,
             'status' => (bool) $board->status,
             'completed' => (bool) $board->completed,

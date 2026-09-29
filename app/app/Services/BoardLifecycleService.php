@@ -57,19 +57,6 @@ class BoardLifecycleService
                 ]);
             }
 
-            $anotherSprintIsActive = Board::query()
-                ->where('project_id', $board->project_id)
-                ->where('id', '<>', $board->id)
-                ->where('status', true)
-                ->where('completed', false)
-                ->exists();
-
-            if ($anotherSprintIsActive) {
-                throw ValidationException::withMessages([
-                    'board' => 'Another sprint is already active.',
-                ]);
-            }
-
             $start = now()->startOfDay();
             $end = Carbon::parse($endDate)->startOfDay();
 

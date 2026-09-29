@@ -52,26 +52,29 @@ it('starts a sprint through the json modal request', function () {
     Event::assertDispatched(BoardUpdated::class);
 });
 
-it('returns a visible validation error when another sprint is active', function () {
+it('allows more than one sprint to be active', function () {
     Event::fake([BoardUpdated::class]);
 
     $owner = User::factory()->create();
     $project = Project::create(['name' => 'Active sprint project']);
-    sprintStartBoard($owner, $project, 'Active sprint')->update([
+    $active = sprintStartBoard($owner, $project, 'Active sprint');
+    $active->update([
         'status' => true,
+        'end_date' => now()->addWeek()->toDateString(),
     ]);
     $candidate = sprintStartBoard($owner, $project, 'Candidate sprint');
 
     $this->actingAs($owner)
         ->postJson('/boards/startSprint', [
             'board_id' => $candidate->id,
-            'sprint_goal' => 'This should be blocked.',
+            'sprint_goal' => 'Run this sprint in parallel.',
             'end_date' => now()->addWeek()->toDateString(),
         ])
-        ->assertUnprocessable()
-        ->assertJsonValidationErrors('board');
+        ->assertOk()
+        ->assertJsonPath('payload.entity.status', true);
 
-    expect($candidate->fresh()->status)->toBeFalse();
+    expect($active->fresh()->status)->toBeTrue()
+        ->and($candidate->fresh()->status)->toBeTrue();
 });
 
 it('renders an active sprint without a precomputed days-left value', function () {

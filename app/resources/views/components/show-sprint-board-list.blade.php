@@ -12,12 +12,14 @@
         @endif
     </td>
     <td class="py-2 border-b-2 w-20">
-        <form method="POST" action="{{ route('boards.destroy', $board->id) }}" onsubmit="return confirm('Are you sure you want to delete this board?')">
-            @csrf
-            @method('delete')
-            <button class="bg-red-600 hover:bg-red-400 text-white text-sm py-1 px-2 rounded-full">
-                Delete
-            </button>
-        </form>
+        @can('delete', $board)
+            <form method="POST" action="{{ route('boards.destroy', $board->id) }}" onsubmit="return confirm('Are you sure you want to delete this board?')">
+                @csrf
+                @method('delete')
+                <button class="bg-red-600 hover:bg-red-400 text-white text-sm py-1 px-2 rounded-full">
+                    Delete
+                </button>
+            </form>
+        @endcan
     </td>
 </tr>

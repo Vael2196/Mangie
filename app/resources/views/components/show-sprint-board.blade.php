@@ -128,26 +128,28 @@
         </a>
 
 
-        <form
-            method="POST"
-            action="{{ route('boards.destroy', $board->id) }}"
-            onsubmit="return confirm('Are you sure you want to delete this board?')"
-        >
-            @csrf
-            @method('delete')
-
-            <button
-                type="submit"
-                title="Delete sprint"
-                class="flex h-8 w-8 items-center justify-center
-                       rounded-lg text-gray-400 transition
-                       hover:bg-red-50 hover:text-red-600
-                       dark:hover:bg-red-950/30 dark:hover:text-red-400"
+        @can('delete', $board)
+            <form
+                method="POST"
+                action="{{ route('boards.destroy', $board->id) }}"
+                onsubmit="return confirm('Are you sure you want to delete this board?')"
             >
-                <span class="material-symbols-rounded text-[19px]">
-                    delete
-                </span>
-            </button>
-        </form>
+                @csrf
+                @method('delete')
+
+                <button
+                    type="submit"
+                    title="Delete sprint"
+                    class="flex h-8 w-8 items-center justify-center
+                           rounded-lg text-gray-400 transition
+                           hover:bg-red-50 hover:text-red-600
+                           dark:hover:bg-red-950/30 dark:hover:text-red-400"
+                >
+                    <span class="material-symbols-rounded text-[19px]">
+                        delete
+                    </span>
+                </button>
+            </form>
+        @endcan
     </div>
 </div>
