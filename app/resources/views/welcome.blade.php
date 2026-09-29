@@ -6,6 +6,9 @@
 
     <title>Mangie — Agile Project Management</title>
 
+    <link rel="icon" href="{{ asset('favicon.ico') }}" sizes="any">
+    <link rel="icon" href="{{ asset('favicon.svg') }}" type="image/svg+xml">
+
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link
         href="https://fonts.bunny.net/css?family=figtree:400,500,600,700,800&display=swap"

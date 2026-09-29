@@ -10,7 +10,12 @@ test('profile page is displayed', function () {
         ->actingAs($user)
         ->get('/profile');
 
-    $response->assertOk();
+    $response
+        ->assertOk()
+        ->assertSee('favicon.svg', false)
+        ->assertSee('data-password-settings', false)
+        ->assertSee('data-toggle-password-settings', false)
+        ->assertSee('id="password-update-panel"', false);
 });
 
 test('profile information can be updated', function () {
