@@ -31,11 +31,9 @@ FROM php:8.5-cli-bookworm AS vendor
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         git \
-        libcurl4-openssl-dev \
         libfreetype6-dev \
         libicu-dev \
         libjpeg62-turbo-dev \
-        libxml2-dev \
         libonig-dev \
         libpng-dev \
         libzip-dev \
@@ -43,8 +41,6 @@ RUN apt-get update \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j"$(nproc)" \
         bcmath \
-        curl \
-        dom \
         exif \
         gd \
         intl \
@@ -82,19 +78,15 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         curl \
         default-mysql-client \
-        libcurl4-openssl-dev \
         libfreetype6-dev \
         libicu-dev \
         libjpeg62-turbo-dev \
-        libxml2-dev \
         libonig-dev \
         libpng-dev \
         libzip-dev \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j"$(nproc)" \
         bcmath \
-        curl \
-        dom \
         exif \
         gd \
         intl \
