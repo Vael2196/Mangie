@@ -33,6 +33,10 @@ body.task-dragging {
     cursor: grabbing;
 }
 
+body.task-dragging [data-empty-drop-marker]:not(.hidden) {
+    pointer-events: auto;
+}
+
 .board-surface {
     background-color: var(--board-background-color, #eef2ff);
     background-image:

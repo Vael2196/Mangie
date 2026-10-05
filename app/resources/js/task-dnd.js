@@ -9,6 +9,9 @@ const TASK_SELECTOR =
     '[data-task-id]';
 
 
+let activeDragItem = null;
+
+
 function csrfToken() {
     return document
         .querySelector(
@@ -265,6 +268,44 @@ export function initSortable(list) {
     list.dataset.sortableReady = '1';
 
 
+    const emptyMarker =
+        list.querySelector(
+            ':scope > [data-empty-drop-marker]'
+        );
+
+
+    if (emptyMarker) {
+
+        emptyMarker.addEventListener(
+            'dragover',
+            event => {
+
+                if (
+                    !activeDragItem
+                    || activeDragItem.parentElement === list
+                    || taskElements(list).length > 0
+                ) {
+                    return;
+                }
+
+
+                event.preventDefault();
+
+
+                // Sortable's nearest-empty detection treats the visible
+                // marker as content. Move the active item into the list so
+                // Sortable can finish the drop normally.
+                insertAtPosition(
+                    list,
+                    activeDragItem,
+                    1
+                );
+            }
+        );
+
+    }
+
+
     new Sortable(list, {
 
         group: {
@@ -301,6 +342,8 @@ export function initSortable(list) {
 
         onStart(event) {
 
+            activeDragItem = event.item;
+
             event.item.dataset.wasDragged =
                 '1';
 
@@ -311,6 +354,8 @@ export function initSortable(list) {
 
 
         async onEnd(event) {
+
+            activeDragItem = null;
 
             document.body.classList.remove(
                 'task-dragging'

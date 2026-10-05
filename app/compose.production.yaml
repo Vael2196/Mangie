@@ -1,0 +1,93 @@
+name: mangie
+
+x-laravel-service: &laravel-service
+  image: mangie-app:${MANGIE_IMAGE_TAG:-latest}
+  build:
+    context: .
+    dockerfile: Dockerfile
+    args:
+      VITE_APP_NAME: ${APP_NAME:-Mangie}
+      VITE_REVERB_APP_KEY: ${REVERB_APP_KEY:?Set REVERB_APP_KEY in .env.production}
+      VITE_REVERB_HOST: ${REVERB_HOST:-mangie.vaell.dev}
+      VITE_REVERB_PORT: ${REVERB_PORT:-443}
+      VITE_REVERB_SCHEME: ${REVERB_SCHEME:-https}
+  env_file:
+    - .env.production
+  restart: unless-stopped
+  init: true
+  volumes:
+    - mangie_storage:/var/www/html/storage
+  networks:
+    - projects_backend
+
+services:
+  app:
+    <<: *laravel-service
+    environment:
+      CONTAINER_ROLE: web
+      RUN_MIGRATIONS: "true"
+    ports:
+      - "127.0.0.1:${MANGIE_HTTP_PORT:-8081}:80"
+    healthcheck:
+      test:
+        - CMD
+        - curl
+        - --fail
+        - --silent
+        - --show-error
+        - http://127.0.0.1/up
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 45s
+
+  queue:
+    <<: *laravel-service
+    environment:
+      CONTAINER_ROLE: queue
+      RUN_MIGRATIONS: "false"
+    command:
+      - php
+      - artisan
+      - queue:work
+      - --sleep=3
+      - --tries=3
+      - --timeout=90
+      - --max-time=3600
+    stop_grace_period: 1m
+
+  scheduler:
+    <<: *laravel-service
+    environment:
+      CONTAINER_ROLE: scheduler
+      RUN_MIGRATIONS: "false"
+    command:
+      - php
+      - artisan
+      - schedule:work
+
+  reverb:
+    <<: *laravel-service
+    environment:
+      CONTAINER_ROLE: reverb
+      RUN_MIGRATIONS: "false"
+    command:
+      - php
+      - artisan
+      - reverb:start
+      - --host=0.0.0.0
+      - --port=8080
+    ports:
+      - "127.0.0.1:${MANGIE_REVERB_PORT:-8082}:8080"
+    ulimits:
+      nofile:
+        soft: 10000
+        hard: 10000
+
+volumes:
+  mangie_storage:
+
+networks:
+  projects_backend:
+    external: true
+    name: projects_backend

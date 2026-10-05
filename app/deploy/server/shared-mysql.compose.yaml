@@ -1,0 +1,36 @@
+name: shared-services
+
+services:
+  mysql:
+    image: mysql:8.4
+    container_name: shared-mysql
+    env_file:
+      - .env
+    restart: unless-stopped
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    volumes:
+      - shared_mysql_data:/var/lib/mysql
+      - ./conf.d:/etc/mysql/conf.d:ro
+    networks:
+      projects_backend:
+        aliases:
+          - shared-mysql
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - mysqladmin ping --silent -uroot -p"$$MYSQL_ROOT_PASSWORD"
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+
+volumes:
+  shared_mysql_data:
+    name: shared_mysql_data
+
+networks:
+  projects_backend:
+    external: true
+    name: projects_backend
