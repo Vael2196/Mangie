@@ -34,7 +34,6 @@ RUN apt-get update \
         libfreetype6-dev \
         libicu-dev \
         libjpeg62-turbo-dev \
-        libonig-dev \
         libpng-dev \
         libzip-dev \
         unzip \
@@ -44,10 +43,10 @@ RUN apt-get update \
         exif \
         gd \
         intl \
-        mbstring \
         pcntl \
         pdo_mysql \
         zip \
+    && php -r 'foreach (["curl", "dom", "mbstring"] as $extension) { if (!extension_loaded($extension)) { fwrite(STDERR, "Missing PHP extension: {$extension}\\n"); exit(1); } }' \
     && rm -rf /var/lib/apt/lists/*
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
@@ -81,7 +80,6 @@ RUN apt-get update \
         libfreetype6-dev \
         libicu-dev \
         libjpeg62-turbo-dev \
-        libonig-dev \
         libpng-dev \
         libzip-dev \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
@@ -90,11 +88,10 @@ RUN apt-get update \
         exif \
         gd \
         intl \
-        mbstring \
-        opcache \
         pcntl \
         pdo_mysql \
         zip \
+    && php -r 'foreach (["curl", "dom", "mbstring", "Zend OPcache"] as $extension) { if (!extension_loaded($extension)) { fwrite(STDERR, "Missing PHP extension: {$extension}\\n"); exit(1); } }' \
     && a2enmod headers rewrite \
     && rm -rf /var/lib/apt/lists/*
 
