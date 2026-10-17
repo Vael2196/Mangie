@@ -8,15 +8,44 @@ if [[ "${EUID}" -eq 0 ]]; then
 fi
 
 APP_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+REPO_DIR="$(cd "${APP_DIR}/.." && pwd)"
+DEPLOY_BRANCH="${MANGIE_DEPLOY_BRANCH:-master}"
+LOCK_FILE="${MANGIE_DEPLOY_LOCK_FILE:-/tmp/mangie-deploy-${UID}.lock}"
+
+exec 9>"${LOCK_FILE}"
+
+if ! flock --nonblock 9; then
+    echo "Another Mangie deployment is already running; nothing to do."
+    exit 0
+fi
+
+if docker info >/dev/null 2>&1; then
+    DOCKER=(docker)
+else
+    DOCKER=(sudo -n docker)
+fi
+
 COMPOSE=(
-    sudo docker compose
+    "${DOCKER[@]}" compose
     --env-file "${APP_DIR}/.env.production"
     --file "${APP_DIR}/compose.production.yaml"
 )
 
-cd "${APP_DIR}"
+current_branch="$(
+    git -C "${REPO_DIR}" symbolic-ref --quiet --short HEAD
+)"
 
-git pull --ff-only
+if [[ "${current_branch}" != "${DEPLOY_BRANCH}" ]]; then
+    echo "Expected branch ${DEPLOY_BRANCH}, found ${current_branch}." >&2
+    exit 1
+fi
+
+git -C "${REPO_DIR}" pull \
+    --ff-only \
+    origin \
+    "${DEPLOY_BRANCH}"
+
+cd "${APP_DIR}"
 
 "${COMPOSE[@]}" build --pull
 

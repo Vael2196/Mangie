@@ -1,0 +1,14 @@
+[Unit]
+Description=Fetch and deploy Mangie updates from GitHub
+Wants=network-online.target
+After=network-online.target docker.service
+
+[Service]
+Type=oneshot
+User=@@DEPLOY_USER@@
+WorkingDirectory=@@REPO_DIR@@
+ExecStart=@@APP_DIR@@/deploy/bin/auto-deploy.sh
+
+Nice=10
+IOSchedulingClass=best-effort
+IOSchedulingPriority=7

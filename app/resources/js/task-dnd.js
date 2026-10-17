@@ -268,15 +268,17 @@ export function initSortable(list) {
     list.dataset.sortableReady = '1';
 
 
-    const emptyMarker =
-        list.querySelector(
-            ':scope > [data-empty-drop-marker]'
+    const hasEmptyMarker =
+        Boolean(
+            list.querySelector(
+                ':scope > [data-empty-drop-marker]'
+            )
         );
 
 
-    if (emptyMarker) {
+    if (hasEmptyMarker) {
 
-        emptyMarker.addEventListener(
+        list.addEventListener(
             'dragover',
             event => {
 
@@ -292,15 +294,17 @@ export function initSortable(list) {
                 event.preventDefault();
 
 
-                // Sortable's nearest-empty detection treats the visible
-                // marker as content. Move the active item into the list so
-                // Sortable can finish the drop normally.
+                // Listen on the sortable container in capture phase. In
+                // list view the marker is a table row whose child cell has
+                // pointer events disabled, so the row itself is not a
+                // dependable drag target in every browser.
                 insertAtPosition(
                     list,
                     activeDragItem,
                     1
                 );
-            }
+            },
+            true
         );
 
     }
