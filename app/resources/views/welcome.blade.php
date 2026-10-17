@@ -211,7 +211,10 @@
                     </p>
                 </div>
 
-                <div class="relative">
+                <div
+                    class="landing-preview-stage relative"
+                    data-landing-tilt
+                >
 
                     <div
                         class="absolute inset-8 rounded-3xl
@@ -219,7 +222,7 @@
                     ></div>
 
                     <div
-                        class="relative overflow-hidden rounded-2xl
+                        class="landing-preview-card relative overflow-hidden rounded-2xl
                                border border-white/60
                                bg-white shadow-2xl
                                dark:border-gray-700 dark:bg-gray-800"
@@ -236,7 +239,6 @@
                                 <span class="h-3 w-3 rounded-full bg-yellow-400"></span>
                                 <span class="h-3 w-3 rounded-full bg-green-400"></span>
                             </div>
-<!-- Next time Imma just take a screenshot instead. This dogshit was genuenly infuriating to make -->
                             <span class="text-sm font-semibold text-gray-600 dark:text-gray-300">
                                 Product Sprint
                             </span>
@@ -407,6 +409,12 @@
                             </div>
 
                         </div>
+
+                        <div
+                            class="landing-preview-shine pointer-events-none
+                                   absolute inset-0"
+                            aria-hidden="true"
+                        ></div>
                     </div>
                 </div>
             </div>
@@ -459,9 +467,6 @@
         </section>
 
 
-        {{-- =====================================================
-            TODO: Gotta change the icons for this shit
-        ====================================================== --}}
         <section class="bg-gray-50 py-24 dark:bg-gray-950">
             <div class="mx-auto max-w-7xl px-6 lg:px-8">
 
@@ -678,11 +683,25 @@
             <div class="mx-auto max-w-7xl px-6 lg:px-8">
 
                 <div
-                    class="relative overflow-hidden rounded-3xl
-                           bg-gradient-to-r from-indigo-700 to-blue-600
+                    class="landing-shader-card relative overflow-hidden rounded-3xl
                            px-8 py-14 shadow-xl
                            sm:px-14 lg:flex lg:items-center lg:justify-between"
+                    data-landing-shader
                 >
+                    <canvas
+                        class="landing-shader-canvas pointer-events-none
+                               absolute inset-0"
+                        data-landing-shader-canvas
+                        aria-hidden="true"
+                    ></canvas>
+
+                    <div
+                        class="pointer-events-none absolute inset-0
+                               bg-gradient-to-r from-indigo-950/35 via-transparent
+                               to-blue-950/20"
+                        aria-hidden="true"
+                    ></div>
+
                     <div
                         class="absolute -right-24 -top-24 h-72 w-72
                                rounded-full bg-white/10"

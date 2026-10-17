@@ -9,6 +9,7 @@ import './avatar-cropper';
 import './board-appearance';
 import './board-pan';
 import './sprint-start';
+import './landing-effects';
 
 import Alpine from 'alpinejs';
 window.Alpine = Alpine

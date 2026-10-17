@@ -1,1 +1,4 @@
 node_modules
+
+# Local deployment runbook (contains server-specific operational notes).
+/app/docs/deployment-lightsail.md
