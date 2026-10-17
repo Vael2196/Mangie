@@ -697,8 +697,8 @@
 
                     <div
                         class="pointer-events-none absolute inset-0
-                               bg-gradient-to-r from-indigo-950/35 via-transparent
-                               to-blue-950/20"
+                               bg-gradient-to-r from-indigo-950/20 via-transparent
+                               to-blue-900/10"
                         aria-hidden="true"
                     ></div>
 

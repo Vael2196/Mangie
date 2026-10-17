@@ -109,8 +109,8 @@ body.board-panning {
 
 .landing-preview-stage:hover .landing-preview-card {
     box-shadow:
-        0 34px 70px -28px rgba(112, 108, 219, 0.56),
-        0 20px 38px -24px rgba(101, 131, 201, 0.42);
+        0 34px 70px -28px rgb(49 46 129 / 0.56),
+        0 20px 38px -24px rgb(15 23 42 / 0.42);
 }
 
 .landing-preview-shine {
@@ -130,7 +130,7 @@ body.board-panning {
 }
 
 .landing-shader-card {
-    background: linear-gradient(120deg, #544bd0, #564fe2 48%, #2563eb);
+    background: linear-gradient(120deg, #4f46e5, #6366f1 48%, #3b82f6);
     isolation: isolate;
 }
 

@@ -111,22 +111,22 @@ const fragmentShaderSource = `
             + sin(point.y * 3.0 - time) * 0.8
         );
 
-        vec3 deepIndigo = vec3(0.118, 0.098, 0.365);
-        vec3 indigo = vec3(0.263, 0.220, 0.792);
-        vec3 blue = vec3(0.145, 0.388, 0.922);
-        vec3 lilac = vec3(0.506, 0.549, 0.973);
+        vec3 deepIndigo = vec3(0.263, 0.220, 0.792);
+        vec3 indigo = vec3(0.388, 0.400, 0.945);
+        vec3 blue = vec3(0.231, 0.510, 0.965);
+        vec3 lilac = vec3(0.780, 0.824, 0.996);
 
         vec3 colour = mix(deepIndigo, indigo, indigoGlow);
         colour = mix(colour, blue, blueGlow * 0.88);
         colour = mix(colour, lilac, lilacGlow * 0.52);
-        colour += wave * 0.055;
+        colour += wave * 0.075;
 
         float edge = 1.0 - smoothstep(
             0.18,
             1.05,
             length(point * vec2(0.62, 0.92))
         );
-        colour *= 0.80 + edge * 0.20;
+        colour *= 0.88 + edge * 0.12;
 
         gl_FragColor = vec4(colour, 1.0);
     }
