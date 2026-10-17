@@ -8,7 +8,7 @@
 
     <div
         data-empty-drop-marker
-        class="pointer-events-none flex min-h-[58px]
+        class="flex min-h-[58px]
                w-full items-center justify-center
                rounded-xl border-2 border-dashed
                border-gray-200 px-3 text-xs

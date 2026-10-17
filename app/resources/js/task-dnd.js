@@ -9,7 +9,7 @@ const TASK_SELECTOR =
     '[data-task-id]';
 
 
-let activeDragItem = null;
+let activeDragState = null;
 
 
 function csrfToken() {
@@ -259,6 +259,216 @@ function restoreOriginalPosition(
 }
 
 
+function restoreDragState(
+    state,
+    currentList = null
+) {
+    insertAtPosition(
+        state.source,
+        state.item,
+        state.oldPosition
+    );
+
+    refreshEmptyMarker(
+        state.source
+    );
+
+    if (currentList) {
+        refreshEmptyMarker(
+            currentList
+        );
+    }
+}
+
+
+function emptyDropIsAvailable(list) {
+    return Boolean(
+        activeDragState
+        && activeDragState.source !== list
+        && taskElements(list).length === 0
+    );
+}
+
+
+function finishExplicitDrop(
+    item,
+    state
+) {
+    if (activeDragState === state) {
+        activeDragState = null;
+    }
+
+    if (!activeDragState) {
+        document.body.classList.remove(
+            'task-dragging'
+        );
+    }
+
+    setTimeout(() => {
+        delete item.dataset.wasDragged;
+        delete item.dataset.explicitDropPending;
+    }, 100);
+}
+
+
+async function dropIntoEmptyList(
+    list,
+    marker,
+    event
+) {
+    if (!emptyDropIsAvailable(list)) {
+        return;
+    }
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    marker.classList.remove(
+        'task-empty-drop-active'
+    );
+
+    const state = activeDragState;
+    const item = state.item;
+    const taskId = Number(
+        item.dataset.taskId
+    );
+    const targetColumnId = Number(
+        list.dataset.columnId
+    );
+
+    // Sortable still emits `onEnd` after a native drop. Mark this move so
+    // only this explicit placeholder handler sends the request.
+    item.dataset.explicitDropPending =
+        '1';
+
+    if (!taskId || !targetColumnId) {
+        restoreDragState(state, list);
+        finishExplicitDrop(
+            item,
+            state
+        );
+
+        return;
+    }
+
+    insertAtPosition(
+        list,
+        item,
+        1
+    );
+
+    refreshEmptyMarker(
+        state.source
+    );
+
+    try {
+        const data = await sendMove(
+            taskId,
+            targetColumnId,
+            1
+        );
+
+        item.dataset.columnId =
+            data.target_column_id;
+
+        updateCounts(data);
+
+        await window.MangieRealtime
+            ?.applyMutationResponse?.(data);
+    } catch (error) {
+        console.error(
+            'Task move failed:',
+            error
+        );
+
+        restoreDragState(
+            state,
+            list
+        );
+    } finally {
+        finishExplicitDrop(
+            item,
+            state
+        );
+    }
+}
+
+
+function initEmptyDropTarget(
+    list,
+    marker
+) {
+    marker.addEventListener(
+        'dragenter',
+        event => {
+            if (!emptyDropIsAvailable(list)) {
+                return;
+            }
+
+            event.preventDefault();
+            event.stopPropagation();
+
+            marker.classList.add(
+                'task-empty-drop-active'
+            );
+        },
+        true
+    );
+
+    marker.addEventListener(
+        'dragover',
+        event => {
+            if (!emptyDropIsAvailable(list)) {
+                return;
+            }
+
+            event.preventDefault();
+            event.stopPropagation();
+
+            if (event.dataTransfer) {
+                event.dataTransfer.dropEffect =
+                    'move';
+            }
+
+            marker.classList.add(
+                'task-empty-drop-active'
+            );
+        },
+        true
+    );
+
+    marker.addEventListener(
+        'dragleave',
+        event => {
+            if (
+                event.relatedTarget
+                && marker.contains(
+                    event.relatedTarget
+                )
+            ) {
+                return;
+            }
+
+            marker.classList.remove(
+                'task-empty-drop-active'
+            );
+        }
+    );
+
+    marker.addEventListener(
+        'drop',
+        event => {
+            void dropIntoEmptyList(
+                list,
+                marker,
+                event
+            );
+        },
+        true
+    );
+}
+
+
 export function initSortable(list) {
 
     if (list.dataset.sortableReady) {
@@ -268,45 +478,16 @@ export function initSortable(list) {
     list.dataset.sortableReady = '1';
 
 
-    const hasEmptyMarker =
-        Boolean(
-            list.querySelector(
-                ':scope > [data-empty-drop-marker]'
-            )
+    const emptyMarker =
+        list.querySelector(
+            ':scope > [data-empty-drop-marker]'
         );
 
-
-    if (hasEmptyMarker) {
-
-        list.addEventListener(
-            'dragover',
-            event => {
-
-                if (
-                    !activeDragItem
-                    || activeDragItem.parentElement === list
-                    || taskElements(list).length > 0
-                ) {
-                    return;
-                }
-
-
-                event.preventDefault();
-
-
-                // Listen on the sortable container in capture phase. In
-                // list view the marker is a table row whose child cell has
-                // pointer events disabled, so the row itself is not a
-                // dependable drag target in every browser.
-                insertAtPosition(
-                    list,
-                    activeDragItem,
-                    1
-                );
-            },
-            true
+    if (emptyMarker) {
+        initEmptyDropTarget(
+            list,
+            emptyMarker
         );
-
     }
 
 
@@ -346,7 +527,16 @@ export function initSortable(list) {
 
         onStart(event) {
 
-            activeDragItem = event.item;
+            activeDragState = {
+                item: event.item,
+                source: event.from,
+                oldPosition:
+                    (
+                        event.oldDraggableIndex
+                        ?? event.oldIndex
+                        ?? 0
+                    ) + 1,
+            };
 
             event.item.dataset.wasDragged =
                 '1';
@@ -359,7 +549,26 @@ export function initSortable(list) {
 
         async onEnd(event) {
 
-            activeDragItem = null;
+            if (
+                event.item.dataset
+                    .explicitDropPending
+                === '1'
+            ) {
+                if (
+                    activeDragState?.item
+                    === event.item
+                ) {
+                    activeDragState = null;
+                }
+
+                document.body.classList.remove(
+                    'task-dragging'
+                );
+
+                return;
+            }
+
+            activeDragState = null;
 
             document.body.classList.remove(
                 'task-dragging'

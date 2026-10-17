@@ -28,6 +28,16 @@ return [
         'key' => env('RESEND_KEY'),
     ],
 
+    'turnstile' => [
+        'enabled' => env(
+            'TURNSTILE_ENABLED',
+            env('APP_ENV') === 'production'
+        ),
+        'site_key' => env('TURNSTILE_SITE_KEY'),
+        'secret_key' => env('TURNSTILE_SECRET_KEY'),
+        'hostname' => env('TURNSTILE_HOSTNAME'),
+    ],
+
     'slack' => [
         'notifications' => [
             'bot_user_oauth_token' => env('SLACK_BOT_USER_OAUTH_TOKEN'),

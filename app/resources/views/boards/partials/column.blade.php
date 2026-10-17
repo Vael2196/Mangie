@@ -14,7 +14,7 @@
         <div
             data-empty-drop-marker
             class="{{ $column->tasks->isEmpty() ? '' : 'hidden' }}
-                   pointer-events-none flex min-h-[58px] items-center justify-center
+                   flex min-h-[58px] items-center justify-center
                    rounded-xl border-2 border-dashed border-gray-200 px-3
                    text-xs text-gray-400 dark:border-gray-700 dark:text-gray-500"
         >

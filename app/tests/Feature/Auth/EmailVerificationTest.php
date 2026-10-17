@@ -13,6 +13,16 @@ test('email verification screen can be rendered', function () {
     $response->assertStatus(200);
 });
 
+test('unverified users cannot access the application', function () {
+    $user = User::factory()->unverified()->create();
+
+    $this->actingAs($user)
+        ->get('/dashboard')
+        ->assertRedirect(
+            route('verification.notice', absolute: false)
+        );
+});
+
 test('email can be verified', function () {
     $user = User::factory()->unverified()->create();
 

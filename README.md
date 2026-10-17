@@ -30,6 +30,7 @@ The application lives in [`app/`](app/).
 - Task assignees, priorities, story points, time logs, dates and sections
 - Checklists with individually completable items
 - Shared boards, participant avatars and user profile photos
+- Verified-email accounts protected by Cloudflare Turnstile registration checks
 - Per-user filtering and sorting preferences
 - Responsive list and card views with light and dark themes
 
@@ -111,6 +112,11 @@ Production container definitions are included in
 [`app/compose.production.yaml`](app/compose.production.yaml). Copy
 `app/.env.production.example` to `app/.env.production`, provide real secrets,
 and never commit the resulting environment file.
+
+Registration requires two external production settings:
+
+Turnstile is disabled by default in `.env.example`, so local development and
+automated tests do not depend on an external challenge service.
 
 The server-specific deployment runbook is intentionally kept outside Git so
 that operational details remain local to the deployment environment.

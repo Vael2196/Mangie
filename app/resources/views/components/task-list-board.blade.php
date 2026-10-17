@@ -8,7 +8,7 @@
         <tr data-empty-drop-marker>
             <td
                 colspan="2"
-                class="pointer-events-none h-[58px]
+                class="h-[58px]
                        border-2 border-dashed
                        border-gray-200 px-3 text-center
                        text-xs text-gray-400

@@ -7,6 +7,7 @@ use App\Http\Requests\ProfileUpdateRequest;
 use App\Models\Board;
 use App\Models\User;
 use App\Support\Realtime\RealtimePayload;
+use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -44,7 +45,9 @@ class ProfileController extends Controller
             'email' => $validated['email'],
         ]);
 
-        if ($user->isDirty('email')) {
+        $emailChanged = $user->isDirty('email');
+
+        if ($emailChanged) {
             $user->email_verified_at = null;
         }
 
@@ -72,6 +75,10 @@ class ProfileController extends Controller
             && $oldAvatarPath !== $user->avatar_path
         ) {
             Storage::disk('public')->delete($oldAvatarPath);
+        }
+
+        if ($emailChanged) {
+            $user->sendEmailVerificationNotification();
         }
 
         $boards = Board::query()
@@ -145,11 +152,13 @@ class ProfileController extends Controller
     {
         $password = bcrypt('admin123');
 
-        User::create([
+        $user = User::create([
             'email' => $request->email,
             'name' => $request->name,
             'password' => $password,
         ]);
+
+        event(new Registered($user));
 
         return Redirect::route('profile.add-user')->with('status', 'user-added');
     }
@@ -172,10 +181,21 @@ class ProfileController extends Controller
         Log::info('User Data',$request->all());
 
         // Update the user details
+        $emailChanged = $user->email
+            !== $request->email;
+
         $user->name = $request->name;
         $user->email = $request->email;
 
+        if ($emailChanged) {
+            $user->email_verified_at = null;
+        }
+
         $user->save();
+
+        if ($emailChanged) {
+            $user->sendEmailVerificationNotification();
+        }
 
 
         return Redirect::route('profile.add-user')->with('status', 'user-updated');

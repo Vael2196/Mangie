@@ -37,6 +37,19 @@ body.task-dragging [data-empty-drop-marker]:not(.hidden) {
     pointer-events: auto;
 }
 
+[data-empty-drop-marker].task-empty-drop-active {
+    @apply border-indigo-400 bg-indigo-50 text-indigo-700;
+}
+
+tr[data-empty-drop-marker].task-empty-drop-active > td {
+    @apply border-indigo-400 bg-indigo-50 text-indigo-700;
+}
+
+.dark [data-empty-drop-marker].task-empty-drop-active,
+.dark tr[data-empty-drop-marker].task-empty-drop-active > td {
+    @apply border-indigo-500 bg-indigo-950/60 text-indigo-200;
+}
+
 .board-surface {
     background-color: var(--board-background-color, #eef2ff);
     background-image:

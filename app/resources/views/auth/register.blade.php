@@ -1,4 +1,12 @@
 <x-guest-layout>
+    @if(config('services.turnstile.enabled'))
+        <script
+            src="https://challenges.cloudflare.com/turnstile/v0/api.js"
+            async
+            defer
+        ></script>
+    @endif
+
     <div class="mb-7">
         <h1
             class="text-2xl font-bold tracking-tight
@@ -50,6 +58,23 @@
 
             <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
         </div>
+
+        @if(config('services.turnstile.enabled'))
+            <div class="mt-5">
+                <div
+                    class="cf-turnstile"
+                    data-sitekey="{{ config('services.turnstile.site_key') }}"
+                    data-action="register"
+                    data-theme="auto"
+                    data-size="flexible"
+                ></div>
+
+                <x-input-error
+                    :messages="$errors->get('cf-turnstile-response')"
+                    class="mt-2"
+                />
+            </div>
+        @endif
 
         <div class="flex items-center justify-end mt-4">
             <a class="underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800" href="{{ route('login') }}">
