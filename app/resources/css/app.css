@@ -21,6 +21,18 @@
         ring-offset-2;
 }
 
+.column-sortable-ghost {
+    opacity: 0.35;
+    outline: 2px dashed #818cf8;
+    outline-offset: 3px;
+}
+
+[data-read-only="true"] input,
+[data-read-only="true"] textarea {
+    cursor: default;
+    opacity: 1;
+}
+
 .task-sortable-chosen {
     @apply shadow-lg;
 }

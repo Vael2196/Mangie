@@ -5,6 +5,9 @@
     <!-- Meta tag for CSRF token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <div
+    data-board-id="{{ $board->id }}"
+    data-board-version="{{ $board->version }}"
+    data-can-edit="{{ auth()->user()->can('update', $board) ? 'true' : 'false' }}"
     data-task-sync-context="board"
     data-realtime-board-ids='@json([$board->id])'
     data-realtime-project-id="{{ $projectId }}"
@@ -57,12 +60,12 @@
 
                     <div class="flex flex-wrap items-center justify-end gap-3">
 
-                        @if ($board->completed == 0)
+                        @if (auth()->user()->can('update', $board))
                             <x-sprint-start-details :board="$board" :daysLeft="$daysLeft"/>
                         @endif
 
 
-                        @if ($board->completed == 0 && $board->status == 1)
+                        @if (auth()->user()->can('update', $board) && $board->status == 1)
                             <form method="POST" action="{{ route('boards.complete', $board->id) }}" onsubmit="return confirm('Are you sure you want to complete the sprint early?')">
                                 @csrf
                                 <button type="submit" class="inline-flex h-10 items-center gap-2 rounded-xl border border-gray-300 bg-white px-3.5 text-sm font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50 focus:outline-none focus:ring-4 focus:ring-indigo-100 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700 dark:focus:ring-indigo-950">
@@ -81,7 +84,7 @@
                             </form>
                         @endif
 
-                        @if ($board->completed == 0)
+                        @if (auth()->user()->can('update', $board))
                             <div class="relative">
                                 <button
                                     type="button"
@@ -204,36 +207,10 @@
                 <div class="mt-3 flex flex-wrap items-center gap-3">
                     <div class="flex flex-wrap items-center gap-3">
 
-                        {{-- User search --}}
-                        <div class="relative">
-                            <input
-                                type="text"
-                                id="user-input"
-                                class="w-64 rounded-xl border border-gray-300
-                                    bg-white px-3.5 py-2.5 text-sm
-                                    text-gray-900 shadow-sm
-                                    placeholder:text-gray-400
-                                    focus:border-indigo-500 focus:ring-indigo-500
-                                    dark:border-gray-700 dark:bg-gray-900
-                                    dark:text-white dark:placeholder:text-gray-500"
-                                placeholder="Add a participant..."
-                                autocomplete="off"
-                            >
-
-                            <ul
-                                id="user-dropdown"
-                                class="absolute left-0 top-full z-50 mt-2 hidden
-                                    max-h-56 w-72 overflow-y-auto
-                                    rounded-xl border border-gray-200
-                                    bg-white p-1.5 shadow-xl
-                                    dark:border-gray-700 dark:bg-gray-800"
-                            ></ul>
-
-                            <p
-                                id="user-error"
-                                class="mt-1.5 hidden text-sm text-red-600 dark:text-red-400"
-                            ></p>
-                        </div>
+                        <a href="{{ route('boards.members', $board) }}" class="inline-flex items-center gap-2 rounded-xl border border-gray-300 bg-white px-3 py-2.5 text-sm font-semibold text-gray-700 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200">
+                            <span class="material-symbols-rounded text-[20px]">group</span>
+                            Participants &amp; invitations
+                        </a>
 
 
                         {{-- Existing members --}}
@@ -303,12 +280,13 @@
                     @include('boards.partials.column', [
                         'column' => $column,
                         'board' => $board,
-                        'editable' => $board->completed == 0,
+                        'editable' => auth()->user()->can('update', $board),
                         'criteriaActive' => $taskCriteria['active'],
                     ])
                 @endforeach
 
                 <!-- Option to add new columns -->
+                @can('update', $board)
                 <div
                     id="add-column-section"
                     class="w-72 shrink-0"
@@ -403,7 +381,9 @@
                         ></p>
                     </div>
                 </div>
+                @endcan
             </div>
+            <p data-column-order-status class="mt-2 hidden text-sm text-red-600" role="status"></p>
             {{-- Context Menu --}}
             <div class="hidden absolute z-30" id="task-context-menu">
                 <div class="2xl:flex 2xl:items-start">
@@ -583,6 +563,7 @@
         </div>
     </div>
 
+    @can('update', $board)
     <script>
         // Show sprint details view when clicking on the activate sprint button
         // document.getElementById('activateSprint').addEventListener('click', function () {
@@ -636,351 +617,6 @@
 
         // })
 
-        document.addEventListener('DOMContentLoaded', () => {
-            const userInput = document.getElementById('user-input');
-            const userDropdown = document.getElementById('user-dropdown');
-            const userList = document.getElementById('user-list');
-            const userError = document.getElementById('user-error');
-
-            if (!userInput || !userDropdown || !userList) {
-                return;
-            }
-
-            const existingUserIds = new Set(
-                [...userList.querySelectorAll('[data-user-id]')]
-                    .map(element => Number(element.dataset.userId))
-            );
-
-            let availableUsers = [];
-            let selectedUser = null;
-            let searchTimeout = null;
-
-
-            function showError(message) {
-                userError.textContent = message;
-                userError.classList.remove('hidden');
-            }
-
-
-            function clearError() {
-                userError.textContent = '';
-                userError.classList.add('hidden');
-            }
-
-
-            function hideDropdown() {
-                userDropdown.classList.add('hidden');
-            }
-
-
-            function renderUsers(users) {
-                userDropdown.innerHTML = '';
-
-                if (!users.length) {
-                    const emptyItem = document.createElement('li');
-
-                    emptyItem.className =
-                        'px-3 py-2 text-sm text-gray-500 dark:text-gray-400';
-
-                    emptyItem.textContent = 'No users found';
-
-                    userDropdown.appendChild(emptyItem);
-                    userDropdown.classList.remove('hidden');
-
-                    return;
-                }
-
-                users.forEach(user => {
-                    const alreadyAdded = existingUserIds.has(Number(user.id));
-
-                    const item = document.createElement('li');
-
-                    item.className =
-                        'flex items-center justify-between rounded-lg px-3 py-2 ' +
-                        'text-sm transition ' +
-                        (alreadyAdded
-                            ? 'cursor-default text-gray-400 dark:text-gray-500'
-                            : 'cursor-pointer text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 ' +
-                            'dark:text-gray-200 dark:hover:bg-indigo-950/50 dark:hover:text-indigo-300'
-                        );
-
-                    const identity = document.createElement('span');
-                    identity.className = 'flex min-w-0 items-center gap-2.5';
-
-                    if (window.MangieAvatars) {
-                        identity.appendChild(
-                            window.MangieAvatars.create(
-                                user,
-                                'h-7 w-7 text-[10px]'
-                            )
-                        );
-                    }
-
-                    const name = document.createElement('span');
-                    name.className = 'truncate';
-                    name.textContent = user.name;
-
-                    identity.appendChild(name);
-                    item.appendChild(identity);
-
-                    if (alreadyAdded) {
-                        const status = document.createElement('span');
-
-                        status.className =
-                            'text-xs font-medium text-gray-400';
-
-                        status.textContent = 'Added';
-
-                        item.appendChild(status);
-                    } else {
-                        item.addEventListener('click', async event => {
-                            event.stopPropagation();
-
-                            selectedUser = user;
-                            userInput.value = user.name;
-
-                            clearError();
-                            hideDropdown();
-
-                            await addUser(user);
-                        });
-                    }
-
-                    userDropdown.appendChild(item);
-                });
-
-                userDropdown.classList.remove('hidden');
-            }
-
-
-            async function fetchUsers(query = '') {
-                try {
-                    const response = await fetch(
-                        '{{ route('users.search') }}',
-                        {
-                            method: 'POST',
-
-                            headers: {
-                                'X-CSRF-TOKEN':
-                                    document.querySelector(
-                                        'meta[name="csrf-token"]'
-                                    ).content,
-
-                                'Content-Type': 'application/json',
-                                'Accept': 'application/json'
-                            },
-
-                            body: JSON.stringify({
-                                query: query
-                            })
-                        }
-                    );
-
-                    if (!response.ok) {
-                        throw new Error(
-                            `User search failed with status ${response.status}`
-                        );
-                    }
-
-                    const data = await response.json();
-
-                    availableUsers = data.success
-                        ? data.users
-                        : [];
-
-                    renderUsers(availableUsers);
-
-                } catch (error) {
-                    console.error('User search failed:', error);
-
-                    hideDropdown();
-                    showError('Could not load users.');
-                }
-            }
-
-
-            async function addUser(user) {
-                clearError();
-
-                try {
-                    const response = await fetch(
-                        '{{ route('boards.addUser', ['board' => $board->id]) }}',
-                        {
-                            method: 'POST',
-
-                            headers: {
-                                'X-CSRF-TOKEN':
-                                    document.querySelector(
-                                        'meta[name="csrf-token"]'
-                                    ).content,
-
-                                'Content-Type': 'application/json',
-                                'Accept': 'application/json'
-                            },
-
-                            body: JSON.stringify({
-                                user_id: user.id
-                            })
-                        }
-                    );
-
-                    const data = await response.json();
-
-                    if (!response.ok || !data.success) {
-                        showError(
-                            data.message ?? 'Could not add this participant.'
-                        );
-
-                        return;
-                    }
-
-
-                    existingUserIds.add(Number(user.id));
-
-
-                    const newIcon = document.createElement('li');
-
-                    newIcon.dataset.userId = user.id;
-                    newIcon.title = user.name;
-
-                    newIcon.className = 'flex';
-
-                    if (window.MangieAvatars) {
-                        const avatar = window.MangieAvatars.create(
-                            data.user,
-                            'h-9 w-9 text-xs ring-2 ring-white dark:ring-gray-900'
-                        );
-
-                        newIcon.appendChild(avatar);
-                    }
-
-                    userList.appendChild(newIcon);
-
-                    userInput.value = '';
-                    selectedUser = null;
-
-                    hideDropdown();
-
-                } catch (error) {
-                    console.error('Adding participant failed:', error);
-
-                    showError('Could not add this participant.');
-                }
-            }
-
-
-            userInput.addEventListener('focus', () => {
-                fetchUsers(userInput.value.trim());
-            });
-
-
-            userInput.addEventListener('input', () => {
-                selectedUser = null;
-                clearError();
-
-                clearTimeout(searchTimeout);
-
-                searchTimeout = setTimeout(() => {
-                    fetchUsers(userInput.value.trim());
-                }, 200);
-            });
-
-
-            userInput.addEventListener('keydown', async event => {
-                if (event.key !== 'Enter') {
-                    return;
-                }
-
-                event.preventDefault();
-
-                const typedName = userInput.value.trim();
-
-                if (!typedName) {
-                    showError('Please choose a user.');
-
-                    return;
-                }
-
-
-                let user =
-                    selectedUser &&
-                    selectedUser.name.toLowerCase() === typedName.toLowerCase()
-                        ? selectedUser
-                        : availableUsers.find(
-                            candidate =>
-                                candidate.name.toLowerCase() ===
-                                typedName.toLowerCase()
-                        );
-
-
-                /*
-                * If the list hasn't caught up with the typing yet,
-                * search once more before treating the value as invalid.
-                */
-                if (!user) {
-                    try {
-                        const response = await fetch(
-                            '{{ route('users.search') }}',
-                            {
-                                method: 'POST',
-
-                                headers: {
-                                    'X-CSRF-TOKEN':
-                                        document.querySelector(
-                                            'meta[name="csrf-token"]'
-                                        ).content,
-
-                                    'Content-Type': 'application/json',
-                                    'Accept': 'application/json'
-                                },
-
-                                body: JSON.stringify({
-                                    query: typedName
-                                })
-                            }
-                        );
-
-                        const data = await response.json();
-
-                        user = data.users?.find(
-                            candidate =>
-                                candidate.name.toLowerCase() ===
-                                typedName.toLowerCase()
-                        );
-
-                    } catch (error) {
-                        console.error(error);
-                    }
-                }
-
-
-                if (!user) {
-                    showError('Please select a valid user from the list.');
-
-                    return;
-                }
-
-
-                if (existingUserIds.has(Number(user.id))) {
-                    showError('This user is already on the board.');
-
-                    return;
-                }
-
-
-                await addUser(user);
-            });
-
-
-            document.addEventListener('click', event => {
-                if (
-                    event.target !== userInput &&
-                    !userDropdown.contains(event.target)
-                ) {
-                    hideDropdown();
-                }
-            });
-        });
 
 
         document.addEventListener('DOMContentLoaded', function () {
@@ -2110,5 +1746,6 @@
 
         });
     </script>
+    @endcan
 
 </x-app-layout>

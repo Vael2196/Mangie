@@ -133,12 +133,16 @@
 
             {{-- Product backlog ------------------------------------------------- --}}
             {{-- Card view --}}
+            @unless($canViewBacklog)
+                <p class="mb-4 rounded-xl border border-gray-200 p-4 text-sm text-gray-500 dark:border-gray-700">Your sprint boards are below. The product backlog is private; ask its admin for an invitation if you need access.</p>
+            @endunless
             <div id="task-list" class="dark:bg-gray-500">
                 <x-task-board
                     data-task-dropzone="true"
                     data-task-list
-                    data-column-id="{{ $backlogDropColumn->id }}"
+                    data-column-id="{{ $backlogDropColumn?->id ?? 0 }}"
                     data-board-id="{{ $backlog->id }}"
+                    data-can-write="{{ $canEditBacklog ? 'true' : 'false' }}"
                     data-reorder="false"
                 >
                     @foreach ($backlog->columns as $column)
@@ -192,7 +196,7 @@
 
             {{-- Link to Form --}}
             <div class="w-full text-start">
-                <div id="create-task-link" class="block">
+                <div id="create-task-link" class="{{ $canEditBacklog ? 'block' : 'hidden' }}">
                     <div
                         class = 'px-4 py-2 leading-5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:cursor-pointer focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out rounded flex space-x-3'>
                         <div class = "text-center"><i class="fa-solid fa-plus"></i></div>
@@ -255,7 +259,7 @@
                                     :activeSprints="$activeSprints"
                                     data-task-dropzone="true"
                                     data-task-list
-                                    data-column-id="{{ $sprintDropColumn->id }}"
+                                    data-column-id="{{ $sprintDropColumn?->id ?? 0 }}"
                                     data-board-id="{{ $board->id }}"
                                     data-reorder="false"
                                 >
@@ -465,7 +469,7 @@
                         },
                         body: JSON.stringify({
                             title: taskTitle,
-                            column_id: {{ $backlog->columns->first()->id }}
+                            column_id: {{ $backlog->columns->first()?->id ?? 0 }}
                         })
                     })
                     .then(response => response.json())

@@ -4,6 +4,7 @@
 ])
 
 @php
+    $editable = $editable && auth()->user()->can('update', $column->board);
     $palette = [
         'gray' => [
             'column' =>
@@ -106,6 +107,12 @@
         class="relative mb-3 flex min-w-0
             items-center gap-2 px-1 py-1"
     >
+        @if($editable)
+            <button type="button" data-column-drag-handle class="shrink-0 cursor-grab rounded-lg p-1 text-gray-400 hover:bg-black/5 active:cursor-grabbing dark:hover:bg-white/10"
+                aria-label="Move column {{ $column->name }}" title="Drag to reorder, or focus and press Left/Right">
+                <span class="material-symbols-rounded text-[19px]">drag_indicator</span>
+            </button>
+        @endif
 
         <div
             class="min-w-0 flex-1 overflow-hidden"

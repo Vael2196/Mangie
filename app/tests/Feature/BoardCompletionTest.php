@@ -19,7 +19,7 @@ it('returns unfinished tasks to the actual backlog column', function () {
         'project_id' => $project->id,
         'user_id' => $owner->id,
     ]);
-    $backlog->users()->attach($owner);
+    $backlog->users()->syncWithoutDetaching([$owner->id]);
 
     $throwaway = Column::create([
         'name' => 'Throwaway',
@@ -42,7 +42,7 @@ it('returns unfinished tasks to the actual backlog column', function () {
         'user_id' => $owner->id,
         'status' => true,
     ]);
-    $sprint->users()->attach($owner);
+    $sprint->users()->syncWithoutDetaching([$owner->id]);
 
     $todo = Column::create([
         'name' => 'TO DO',

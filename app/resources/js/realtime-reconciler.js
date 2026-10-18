@@ -8,6 +8,7 @@ import {
 } from './task-dnd';
 import { enhanceRemoteColumn } from './remote-column-ui';
 import { updateUserAvatars } from './user-avatar';
+import { applyColumnOrder } from './column-dnd';
 
 const seenEvents = new Set();
 
@@ -151,6 +152,7 @@ async function fetchTaskElement(task, list) {
 }
 
 function applyCounts(meta = {}) {
+    Object.entries(meta.column_counts ?? {}).forEach(([id, count]) => setColumnCount(id, count));
     if (meta.source_column_id && meta.source_column_count !== undefined) {
         setColumnCount(meta.source_column_id, meta.source_column_count);
     }
@@ -218,6 +220,9 @@ async function upsertColumn(payload, event) {
     }
 
     const column = payload.entity;
+    if (Number(column.board_id) !== Number(root()?.dataset.boardId)) {
+        return;
+    }
     const existing = document.getElementById(`column-${column.id}`);
 
     if (
@@ -239,12 +244,13 @@ async function upsertColumn(payload, event) {
             ?.after(fresh);
     } else {
         const addColumn = document.getElementById('add-column-section');
+        const columnContainer = addColumn?.parentElement ?? document.getElementById('columns-container');
         const sibling = Array.from(
-            addColumn.parentElement.querySelectorAll(':scope > [data-column-id]')
+            columnContainer.querySelectorAll(':scope > [data-column-id]')
         ).find(element => (
             Number(element.dataset.columnPosition) > Number(column.position)
         ));
-        addColumn.parentElement.insertBefore(fresh, sibling ?? addColumn);
+        columnContainer.insertBefore(fresh, sibling ?? addColumn);
     }
 
     fresh.querySelectorAll('[data-task-list]').forEach(initSortable);
@@ -401,6 +407,13 @@ export async function applyMutation(event, payload) {
     if (payload.event_id) {
         seenEvents.add(payload.event_id);
     }
+
+    if (event === 'columns.reordered') {
+        applyColumnOrder(payload);
+        return;
+    }
+
+    applyCounts(payload.meta);
 
     if (event === 'user.profile-updated') {
         updateUserAvatars(payload.entity);

@@ -10,6 +10,8 @@ import './board-appearance';
 import './board-pan';
 import './sprint-start';
 import './landing-effects';
+import './board-members';
+import './column-dnd';
 
 import Alpine from 'alpinejs';
 window.Alpine = Alpine

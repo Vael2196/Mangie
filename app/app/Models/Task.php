@@ -8,6 +8,14 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class Task extends Model
 {
     use HasFactory;
+    protected $attributes = ['version' => 1];
+
+    public function getCoverImageUrlAttribute(): ?string
+    {
+        return $this->cover_image_path
+            ? route('tasks.cover', ['task' => $this->id, 'v' => $this->version])
+            : null;
+    }
 
     protected $fillable = [
         'title',

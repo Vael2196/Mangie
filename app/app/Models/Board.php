@@ -10,6 +10,23 @@ use Illuminate\Support\Facades\Storage;
 class Board extends Model
 {
     use HasFactory;
+    protected $attributes = ['version' => 1];
+
+    protected static function booted(): void
+    {
+        static::creating(function (Board $board) {
+            if (!User::whereKey($board->user_id)->whereNotNull('email_verified_at')->lockForUpdate()->first()) {
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    'board' => 'A board must be created by a verified user.',
+                ]);
+            }
+        });
+        static::created(function (Board $board) {
+            $board->users()->syncWithoutDetaching([
+                $board->user_id => ['role' => 'admin'],
+            ]);
+        });
+    }
 
     protected $fillable = [
         'name',
@@ -58,7 +75,19 @@ class Board extends Model
     {
         return $this
             ->belongsToMany(User::class)
+            ->withPivot('role')
             ->withTimestamps();
+    }
+
+    public function roleFor(User $user): ?string
+    {
+        // The historical creator ID does not grant permanent access.
+        return $this->users()->whereKey($user->id)->value('board_user.role');
+    }
+
+    public function invitations()
+    {
+        return $this->hasMany(BoardInvitation::class);
     }
 
     public function labels()
@@ -71,17 +100,7 @@ class Board extends Model
         Builder $query,
         User $user
     ): Builder {
-        return $query->where(
-            function (Builder $query) use ($user) {
-                $query
-                    ->where('user_id', $user->id)
-                    ->orWhereHas(
-                        'users',
-                        fn (Builder $members) =>
-                            $members->whereKey($user->id)
-                    );
-            }
-        );
+        return $query->whereHas('users', fn (Builder $members) => $members->whereKey($user->id));
     }
 
     public function getBackgroundImageUrlAttribute(): ?string

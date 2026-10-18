@@ -4,6 +4,9 @@ use App\Http\Controllers\BacklogController;
 use App\Http\Controllers\BoardController;
 use App\Http\Controllers\BoardAppearanceController;
 use App\Http\Controllers\BoardMemberController;
+use App\Http\Controllers\BoardInvitationController;
+use App\Http\Controllers\TaskCoverController;
+use App\Http\Controllers\RealtimeEntityController;
 use App\Http\Controllers\BoardLabelController;
 use App\Http\Controllers\ColumnController;
 use App\Http\Controllers\ProfileController;
@@ -16,6 +19,10 @@ use App\Http\Controllers\TaskMoveController;
 use Illuminate\Support\Facades\Route;
 
 Route::view('/', 'welcome');
+Route::get('/board-invitations/{token}', [BoardInvitationController::class, 'show'])
+    ->middleware('throttle:30,1')->name('board-invitations.show');
+Route::post('/board-invitations/{token}/accept', [BoardInvitationController::class, 'accept'])
+    ->middleware(['auth', 'verified', 'throttle:20,1'])->name('board-invitations.accept');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get(
@@ -36,22 +43,22 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get(
         '/adduser',
         [ProfileController::class, 'showAddUsers']
-    )->name('profile.add-user');
+    )->middleware('can:manageUsers')->name('profile.add-user');
 
     Route::post(
         '/adduser',
         [ProfileController::class, 'addUser']
-    )->name('profile.users.add');
+    )->middleware('can:manageUsers')->name('profile.users.add');
 
     Route::patch(
         '/adduser',
         [ProfileController::class, 'updateUser']
-    )->name('profile.user_update');
+    )->middleware('can:manageUsers')->name('profile.user_update');
 
     Route::delete(
         '/removeuser/{id}',
         [ProfileController::class, 'removeUser']
-    )->name('profile.user_remove');
+    )->middleware('can:manageUsers')->name('profile.user_remove');
 
     Route::get(
         '/dashboard',
@@ -133,6 +140,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
         [ColumnController::class, 'store']
     )->name('columns.store');
 
+    Route::patch('/boards/{board}/columns/order', [ColumnController::class, 'reorder'])
+        ->name('boards.columns.order');
+    Route::get('/realtime/entities/{type}/{id}', [RealtimeEntityController::class, 'show'])
+        ->name('realtime.entities');
+    Route::get('/realtime/summary', [RealtimeEntityController::class, 'summary'])->name('realtime.summary');
+    Route::get('/tasks/{task}/cover', [TaskCoverController::class, 'show'])->name('tasks.cover');
+    Route::post('/tasks/{task}/cover', [TaskCoverController::class, 'store'])->name('tasks.cover.store');
+    Route::delete('/tasks/{task}/cover', [TaskCoverController::class, 'destroy'])->name('tasks.cover.destroy');
+
     Route::patch(
         '/columns/{column}/name',
         [ColumnController::class, 'updateName']
@@ -213,20 +229,27 @@ Route::middleware(['auth', 'verified'])->group(function () {
         [BacklogController::class, 'show']
     )->name('backlog.show');
 
-    Route::post(
-        '/search-users',
-        [BoardMemberController::class, 'search']
-    )->name('users.search');
+    Route::get('/boards/{board}/members', [BoardMemberController::class, 'index'])->name('boards.members');
+    Route::get('/boards/{board}/member-suggestions', [BoardMemberController::class, 'search'])
+        ->middleware('throttle:30,1')->name('users.search');
 
     Route::post(
         '/boards/{board}/add-user',
         [BoardMemberController::class, 'store']
-    )->name('boards.addUser');
+    )->middleware('throttle:10,1')->name('boards.addUser');
+
+    Route::post('/boards/{board}/share-links', [BoardMemberController::class, 'share'])
+        ->middleware('throttle:10,1')->name('boards.share-links');
+    Route::delete('/boards/{board}/invitations/{invitation}', [BoardMemberController::class, 'revoke'])
+        ->name('boards.invitations.revoke');
+    Route::patch('/boards/{board}/members/{user}', [BoardMemberController::class, 'update'])->name('boards.members.update');
+    Route::delete('/boards/{board}/members/{user}', [BoardMemberController::class, 'destroy'])->name('boards.members.destroy');
+    Route::post('/boards/{board}/leave', [BoardMemberController::class, 'leave'])->name('boards.leave');
 
     Route::delete(
         '/projects/{project}/users/{user}',
         [ProjectController::class, 'removeUser']
-    )->name('projects.users.remove');
+    )->middleware('can:manageUsers')->name('projects.users.remove');
 });
 
 require __DIR__.'/auth.php';

@@ -53,7 +53,7 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function boards()
     {
-        return $this->belongsToMany(Board::class, 'board_user')->withTimestamps();
+        return $this->belongsToMany(Board::class, 'board_user')->withPivot('role')->withTimestamps();
     }
 
     public function labelLibraries()

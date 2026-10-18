@@ -174,6 +174,11 @@ class TaskController extends Controller
         Gate::authorize('update', $task->column->board);
         Gate::authorize('update', $targetColumn->board);
 
+        if (!empty($validated['assignee']) && !$targetColumn->board->users()
+            ->whereKey($validated['assignee'])->exists()) {
+            throw ValidationException::withMessages(['assignee' => 'Choose a participant of this board.']);
+        }
+
         $labelIds = null;
 
         if (array_key_exists('label_ids', $validated)) {
@@ -337,6 +342,9 @@ class TaskController extends Controller
             'mangie.product_backlog_board_id',
             1
         );
+
+        $backlog = \App\Models\Board::find($backlogBoardId);
+        if (!$backlog || !Gate::allows('view', $backlog)) { return 0; }
 
         return Task::query()
             ->whereHas(

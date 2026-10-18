@@ -13,7 +13,7 @@
             :activeSprints="$activeSprints"
             data-task-dropzone="true"
             data-task-list
-            data-column-id="{{ $dropColumn->id }}"
+            data-column-id="{{ $dropColumn?->id ?? 0 }}"
             data-board-id="{{ $board->id }}"
             data-reorder="false"
         >

@@ -81,6 +81,7 @@ function clearAutosave(form) {
 }
 
 function scheduleAutosave(form, delay = 350) {
+    if (form.dataset.readOnly === 'true' || form.dataset.coverSaving === '1') return;
     clearAutosave(form);
 
     const timer = window.setTimeout(() => {
@@ -166,6 +167,8 @@ function closeModal() {
 
 async function requestClose() {
     const form = detailForm();
+
+    if (form?.dataset.coverSaving === '1') return;
 
     if (!form) {
         closeModal();
@@ -254,7 +257,7 @@ export async function refreshOpenTask(taskId) {
         return;
     }
 
-    if (form.dataset.localMutation === '1') {
+    if (form.dataset.localMutation === '1' || form.dataset.coverSaving === '1') {
         return;
     }
 
@@ -272,6 +275,8 @@ export async function refreshOpenTask(taskId) {
 }
 
 async function saveTask(form, { quiet = false } = {}) {
+    if (form?.dataset.readOnly === 'true') return true;
+    if (form?.dataset.coverSaving === '1') return false;
     if (!form?.isConnected) {
         return false;
     }
@@ -660,6 +665,45 @@ async function deleteLabelLibrary(form, libraryId) {
     }
 }
 
+async function changeTaskCover(form, image = null) {
+    if (form.dataset.readOnly === 'true' || form.dataset.coverSaving === '1') return;
+    if (form.dataset.saving === '1') {
+        showTaskError(form, 'Please wait for your current edits to finish saving, then try the photo again.');
+        return;
+    }
+    updateDirtyState(form);
+    if (form.dataset.dirty === '1' && !await saveTask(form, { quiet: true })) return;
+    form.dataset.coverSaving = '1';
+    const upload = form.querySelector('[data-task-cover-upload]');
+    const remove = form.querySelector('[data-task-cover-remove]');
+    if (upload) upload.disabled = true;
+    if (remove) remove.disabled = true;
+    try {
+        const body = image ? new FormData() : { expected_version: Number(form.dataset.taskVersion) };
+        if (image) {
+            body.append('image', image);
+            body.append('expected_version', form.dataset.taskVersion);
+        }
+        const data = await jsonRequest(`/tasks/${form.dataset.taskId}/cover`, { method: image ? 'POST' : 'DELETE', body });
+        form.dataset.taskVersion = data.payload.entity.version;
+        const url = data.payload.entity.cover_image_url;
+        form.querySelector('[data-task-cover-preview]').classList.toggle('hidden', !url);
+        const preview = form.querySelector('[data-task-cover-image]');
+        if (url) preview.src = url; else preview.removeAttribute('src');
+        remove?.classList.toggle('hidden', !url);
+        await applyMutationResponse(data);
+    } catch (error) { showTaskError(form, error.message); }
+    finally {
+        delete form.dataset.coverSaving;
+        if (upload) { upload.disabled = false; upload.value = ''; }
+        if (remove) remove.disabled = false;
+        if (form.isConnected) {
+            updateDirtyState(form);
+            if (form.dataset.dirty === '1') scheduleAutosave(form);
+        }
+    }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     modal()?.querySelector('[data-task-modal-backdrop]')
         ?.addEventListener('click', () => requestClose({ backdrop: true }));
@@ -723,6 +767,12 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        if (event.target.matches('[data-task-cover-upload]')) {
+            const file = event.target.files?.[0];
+            if (file) void changeTaskCover(form, file);
+            return;
+        }
+
         const checklist = event.target.closest('[data-task-checklist]');
         if (checklist) {
             updateChecklistProgress(checklist);
@@ -745,6 +795,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (event.target.closest('[data-close-task-modal]')) {
             requestClose();
+            return;
+        }
+
+        if (form?.dataset.readOnly === 'true' && event.target.closest('[data-task-detail]')) return;
+        if (event.target.closest('[data-task-cover-remove]') && form) {
+            void changeTaskCover(form);
             return;
         }
 
@@ -900,6 +956,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const task = event.target.closest('[data-task-id]');
         if (
             task
+            && !event.target.closest('[data-task-detail]')
             && task.dataset.wasDragged !== '1'
             && !event.ctrlKey
             && !event.target.closest('button, a, input, textarea, select, label')

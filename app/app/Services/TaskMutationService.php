@@ -169,6 +169,11 @@ class TaskMutationService
             $position = (int) $task->position;
             $version = (int) $task->version + 1;
 
+            if ($task->cover_image_path) {
+                $path = $task->cover_image_path;
+                DB::afterCommit(fn () => \Illuminate\Support\Facades\Storage::disk('local')->delete($path));
+            }
+
             $task->delete();
 
             Task::query()

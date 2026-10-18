@@ -35,6 +35,7 @@ class BacklogController extends Controller
         );
 
         $backlog = Board::query()
+            ->accessibleTo($request->user())
             ->with([
                 'columns' => function ($query) {
                     $query
@@ -75,9 +76,18 @@ class BacklogController extends Controller
                 'columns.tasks.boardLabels',
                 'columns.tasks.checklists.items',
             ])
-            ->findOrFail($backlogId);
+            ->find($backlogId);
 
-        Gate::authorize('view', $backlog);
+        $canViewBacklog = $backlog !== null;
+        $canEditBacklog = $backlog && Gate::allows('update', $backlog);
+        // The planning screen still works for invited sprint participants;
+        // it must not load the private global backlog's tasks or labels.
+        if (!$backlog) {
+            $backlog = new Board(['name' => 'Product Backlog']);
+            $backlog->id = $backlogId;
+            $backlog->setRelation('columns', collect());
+            $backlog->setRelation('labels', collect());
+        }
 
         $backlogIssueCount = $backlog->columns
             ->sum('tasks_count');
@@ -94,32 +104,17 @@ class BacklogController extends Controller
                 'columns.tasks.boardLabels',
                 'columns.tasks.checklists.items',
             ])
-            ->where(function ($query) use (
-                $user,
-                $backlogId
-            ) {
-                $query
-                    ->whereKey($backlogId)
-                    ->orWhere(function ($query) use ($user) {
-                        $query
-                            ->where('user_id', $user->id)
-                            ->orWhereHas(
-                                'users',
-                                fn ($members) =>
-                                    $members->whereKey($user->id)
-                            );
-                    });
-            })
+            ->accessibleTo($user)
             ->orderBy('created_at')
             ->get();
 
         $inactive_boards = $boards->filter(
             fn (Board $board) =>
-                (int) $board->id === $backlogId
+                Gate::allows('update', $board) && ((int) $board->id === $backlogId
                 || (
                     !$board->completed
                     && !$board->status
-                )
+                ))
         );
 
         $activeSprints = $boards->contains(
@@ -142,7 +137,7 @@ class BacklogController extends Controller
             ? ''
             : ($backlog->labels->firstWhere('id', $label)?->name ?? '');
         $taskCriteria = $criteria;
-        $projectId = (int) $backlog->project_id;
+        $projectId = (int) ($backlog->project_id ?? $boards->first()?->project_id ?? 1);
 
         return view($viewName, compact(
             'backlog',
@@ -153,7 +148,9 @@ class BacklogController extends Controller
             'user',
             'cookies',
             'taskCriteria',
-            'projectId'
+            'projectId',
+            'canViewBacklog',
+            'canEditBacklog'
         ));
     }
 }

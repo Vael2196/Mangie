@@ -21,6 +21,9 @@
         class="border-b border-gray-200 py-3 pl-5 pr-3 text-sm font-medium
                dark:border-gray-700"
     >
+        @if($task->cover_image_url)
+            <img src="{{ $task->cover_image_url }}" alt="Task cover" class="mr-2 inline-block h-9 w-12 rounded-md object-cover" loading="lazy" draggable="false">
+        @endif
         {{ $task->title }}
     </td>
 

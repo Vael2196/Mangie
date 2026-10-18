@@ -17,7 +17,7 @@ function criteriaBoard(
         'project_id' => $project->id,
         'user_id' => $owner->id,
     ]);
-    $board->users()->attach($owner);
+    $board->users()->syncWithoutDetaching([$owner->id]);
 
     $column = Column::create([
         'name' => $name === 'Product Backlog' ? 'Backlog' : 'TO DO',

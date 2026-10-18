@@ -61,11 +61,17 @@ class ProfileController extends Controller
         }
 
         try {
-            $user->save();
+            if ($emailChanged) {
+                app(\App\Services\BoardMembershipService::class)->guardAccountChange($user, fn () => $user->save());
+            } else {
+                $user->save();
+            }
         } catch (\Throwable $exception) {
             if ($newAvatarPath) {
                 Storage::disk('public')->delete($newAvatarPath);
             }
+
+            $user->refresh();
 
             throw $exception;
         }
@@ -107,6 +113,8 @@ class ProfileController extends Controller
 
         $user = $request->user();
 
+        app(\App\Services\BoardMembershipService::class)->deleteAccount($user);
+
         if ($user->avatar_path) {
             Storage::disk('public')->delete(
                 $user->avatar_path
@@ -114,8 +122,6 @@ class ProfileController extends Controller
         }
 
         Auth::logout();
-
-        $user->delete();
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();
@@ -191,7 +197,11 @@ class ProfileController extends Controller
             $user->email_verified_at = null;
         }
 
-        $user->save();
+        if ($emailChanged) {
+            app(\App\Services\BoardMembershipService::class)->guardAccountChange($user, fn () => $user->save());
+        } else {
+            $user->save();
+        }
 
         if ($emailChanged) {
             $user->sendEmailVerificationNotification();
@@ -206,7 +216,7 @@ class ProfileController extends Controller
      */
     public function removeUser($id): RedirectResponse
     {
-        User::where('id', $id)->firstOrFail()->delete();
+        app(\App\Services\BoardMembershipService::class)->deleteAccount(User::findOrFail($id));
 
         return Redirect::route('profile.add-user')->with('status', 'user-removed');
     }

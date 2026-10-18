@@ -21,6 +21,7 @@ final class TaskRealtimeData
 
         return [
             'id' => (int) $task->id,
+            'cover_image_url' => $task->cover_image_url,
             'title' => $task->title,
             'description' => $task->description,
             'column_id' => (int) $task->column_id,

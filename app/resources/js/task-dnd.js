@@ -283,6 +283,8 @@ function restoreDragState(
 
 function emptyDropIsAvailable(list) {
     return Boolean(
+        list.dataset.canWrite !== 'false'
+        &&
         activeDragState
         && activeDragState.source !== list
         && taskElements(list).length === 0
@@ -470,6 +472,11 @@ function initEmptyDropTarget(
 
 
 export function initSortable(list) {
+
+    if (list.dataset.canWrite === 'false' || !Number(list.dataset.columnId)) {
+        refreshEmptyMarker(list);
+        return;
+    }
 
     if (list.dataset.sortableReady) {
         return;

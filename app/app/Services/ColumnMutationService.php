@@ -5,6 +5,8 @@ namespace App\Services;
 use App\Models\Board;
 use App\Models\Column;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 class ColumnMutationService
@@ -73,60 +75,73 @@ class ColumnMutationService
     public function copy(Column $column): Column
     {
         $column->load([
-            'tasks' => fn ($query) =>
-                $query->orderBy('position'),
+            'tasks' => fn ($query) => $query->orderBy('position'),
             'tasks.users',
         ]);
 
-        return DB::transaction(function () use ($column) {
-            Board::query()
-                ->whereKey($column->board_id)
-                ->lockForUpdate()
-                ->firstOrFail();
+        $copiedCoverPaths = [];
+        try {
+            return DB::transaction(function () use ($column, &$copiedCoverPaths) {
+                Board::query()
+                    ->whereKey($column->board_id)
+                    ->lockForUpdate()
+                    ->firstOrFail();
 
-            Column::query()
-                ->where('board_id', $column->board_id)
-                ->where('position', '>', $column->position)
-                ->increment('position');
+                Column::query()
+                    ->where('board_id', $column->board_id)
+                    ->where('position', '>', $column->position)
+                    ->increment('position');
 
-            $newColumn = $column->replicate([
-                'id',
-                'position',
-                'version',
-                'created_at',
-                'updated_at',
-            ]);
-
-            $newColumn->name = $column->name . ' copy';
-            $newColumn->position = $column->position + 1;
-            $newColumn->version = 1;
-            $newColumn->save();
-
-            foreach ($column->tasks as $task) {
-                $newTask = $task->replicate([
+                $newColumn = $column->replicate([
                     'id',
-                    'column_id',
                     'position',
                     'version',
                     'created_at',
                     'updated_at',
                 ]);
 
-                $newTask->column_id = $newColumn->id;
-                $newTask->position = $task->position;
-                $newTask->completed_at = null;
-                $newTask->version = 1;
-                $newTask->save();
+                $newColumn->name = $column->name.' copy';
+                $newColumn->position = $column->position + 1;
+                $newColumn->version = 1;
+                $newColumn->save();
 
-                $newTask->users()->sync(
-                    $task->users->pluck('id')->all()
-                );
-            }
+                foreach ($column->tasks as $task) {
+                    $newTask = $task->replicate([
+                        'id',
+                        'column_id',
+                        'position',
+                        'version',
+                        'created_at',
+                        'updated_at',
+                    ]);
 
-            return $newColumn
-                ->refresh()
-                ->load('tasks.users', 'board');
-        }, 3);
+                    $newTask->column_id = $newColumn->id;
+                    $newTask->position = $task->position;
+                    $newTask->completed_at = null;
+                    if ($task->cover_image_path) {
+                        $path = 'task-covers/'.Str::uuid().'.'.pathinfo($task->cover_image_path, PATHINFO_EXTENSION);
+                        if (! Storage::disk('local')->copy($task->cover_image_path, $path)) {
+                            throw new \RuntimeException('The task cover could not be copied.');
+                        }
+                        $newTask->cover_image_path = $path;
+                        $copiedCoverPaths[] = $path;
+                    }
+                    $newTask->version = 1;
+                    $newTask->save();
+
+                    $newTask->users()->sync(
+                        $task->users->pluck('id')->all()
+                    );
+                }
+
+                return $newColumn
+                    ->refresh()
+                    ->load('tasks.users', 'board');
+            });
+        } catch (\Throwable $exception) {
+            Storage::disk('local')->delete($copiedCoverPaths);
+            throw $exception;
+        }
     }
 
     public function delete(Column $column): void
@@ -139,8 +154,7 @@ class ColumnMutationService
 
             if ($column->tasks()->exists()) {
                 throw ValidationException::withMessages([
-                    'column' =>
-                        'This column cannot be deleted because it contains tasks.',
+                    'column' => 'This column cannot be deleted because it contains tasks.',
                 ]);
             }
 

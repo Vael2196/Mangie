@@ -1,11 +1,18 @@
+@php
+    $canEditTask = auth()->user()->can('update', $parent_board);
+@endphp
 <form
     data-task-detail
+    data-read-only="{{ $canEditTask ? 'false' : 'true' }}"
     data-task-id="{{ $task->id }}"
     data-task-version="{{ $task->version ?? 1 }}"
     class="relative z-10 w-full max-w-5xl overflow-hidden rounded-3xl
            border border-gray-200 bg-white shadow-2xl
            dark:border-gray-700 dark:bg-gray-900"
 >
+    <div data-task-cover-preview class="{{ $task->cover_image_url ? '' : 'hidden' }} bg-gray-100 dark:bg-gray-800">
+        <img data-task-cover-image @if($task->cover_image_url) src="{{ $task->cover_image_url }}" @endif alt="Task cover" class="max-h-72 w-full object-contain" draggable="false">
+    </div>
     <div
         class="flex items-start gap-4 border-b border-gray-200 px-5 py-5
                sm:px-7 dark:border-gray-800"
@@ -24,6 +31,7 @@
             </p>
             <input
                 data-task-field="title"
+                @readonly(!$canEditTask)
                 type="text"
                 value="{{ $task->title }}"
                 placeholder="Task title"
@@ -50,12 +58,26 @@
         </button>
     </div>
 
-    <div class="max-h-[calc(100vh-11rem)] overflow-y-auto" data-task-detail-scroll>
+    @unless($canEditTask)
+        <p class="px-7 pt-4 text-sm text-gray-500">View-only task details</p>
+    @endunless
+    <fieldset @disabled(!$canEditTask) class="min-w-0 max-h-[calc(100vh-11rem)] overflow-y-auto" data-task-detail-scroll>
         <div
             class="grid grid-cols-1 gap-6 p-5 sm:p-7
                    lg:grid-cols-[minmax(0,1.6fr)_minmax(280px,0.8fr)]"
         >
             <div class="space-y-6">
+                @if($canEditTask)
+                    <section class="flex flex-wrap items-center gap-3">
+                        <label class="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-gray-200 px-3 py-2 text-sm font-semibold text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800">
+                            <span class="material-symbols-rounded text-[19px]">add_photo_alternate</span>
+                            {{ $task->cover_image_url ? 'Replace cover photo' : 'Add cover photo' }}
+                            <input type="file" data-task-cover-upload accept="image/jpeg,image/png,image/webp" class="sr-only">
+                        </label>
+                        <button type="button" data-task-cover-remove class="{{ $task->cover_image_url ? '' : 'hidden' }} rounded-xl px-3 py-2 text-sm font-semibold text-red-600 hover:bg-red-50 dark:hover:bg-red-950">Remove cover</button>
+                        <span class="text-xs text-gray-400">JPG, PNG or WebP · up to 8 MB</span>
+                    </section>
+                @endif
                 <section>
                     <div class="mb-3 flex items-center gap-2">
                         <span class="material-symbols-rounded text-[20px] text-gray-400">subject</span>
@@ -342,19 +364,21 @@
                 </div>
             </aside>
         </div>
-    </div>
+    </fieldset>
 
     <div class="flex flex-wrap items-center justify-between gap-3 border-t border-gray-200 bg-gray-50/70 px-5 py-4 sm:px-7 dark:border-gray-800 dark:bg-gray-900">
         <div class="min-h-5 flex-1">
             <p data-task-success class="hidden text-sm font-medium text-emerald-600 dark:text-emerald-400">Task saved successfully.</p>
             <p data-task-error class="hidden text-sm font-medium text-red-600 dark:text-red-400"></p>
         </div>
+        @if($canEditTask)
         <button type="button" data-delete-task class="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-red-600 transition hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/40">
             <span class="material-symbols-rounded text-[18px]">delete</span>Delete
         </button>
         <button type="submit" data-save-task class="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60">
             <span class="material-symbols-rounded text-[18px]">save</span><span data-save-text>Save changes</span>
         </button>
+        @endif
     </div>
 
     <div data-label-manager class="fixed inset-0 z-[220] hidden">

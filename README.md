@@ -23,13 +23,14 @@ The application lives in [`app/`](app/).
 ## Features
 
 - Drag-and-drop task movement within a board and between backlog sprints
-- Real-time task, column and board updates with private board channels
+- Real-time task, column and board updates with private user channels and access-checked refreshes
 - Multiple active sprints, sprint goals and burndown charts
 - Board-specific backgrounds, colours and label sets
 - Reusable label libraries with custom label colours
 - Task assignees, priorities, story points, time logs, dates and sections
 - Checklists with individually completable items
 - Shared boards, participant avatars and user profile photos
+- Email invitations, revocable share links, and admin/member/observer board roles
 - Verified-email accounts protected by Cloudflare Turnstile registration checks
 - Per-user filtering and sorting preferences
 - Responsive list and card views with light and dark themes
@@ -103,6 +104,7 @@ From `app/`, run:
 
 ```bash
 php artisan test
+node --test tests/frontend/board-collaboration.test.mjs
 npm run build
 ```
 
@@ -114,6 +116,9 @@ Production container definitions are included in
 and never commit the resulting environment file.
 
 Registration requires two external production settings:
+
+- An outgoing mail provider for verification and board-invitation messages
+- Cloudflare Turnstile site and secret keys
 
 Turnstile is disabled by default in `.env.example`, so local development and
 automated tests do not depend on an external challenge service.

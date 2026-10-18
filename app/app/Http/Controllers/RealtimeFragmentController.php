@@ -113,7 +113,7 @@ class RealtimeFragmentController extends Controller
         );
 
         $board = $column->board;
-        $editable = !$board->completed;
+        $editable = Gate::allows('update', $board);
         $criteriaActive = $criteria['active'];
 
         return response()->json([

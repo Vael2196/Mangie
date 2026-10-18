@@ -19,6 +19,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        \Illuminate\Support\Facades\Gate::policy(\App\Models\Board::class, \App\Policies\BoardPolicy::class);
+        \Illuminate\Support\Facades\Gate::define('manageUsers', fn (\App\Models\User $user) =>
+            $user->hasVerifiedEmail() && (bool) $user->admin);
     }
 }

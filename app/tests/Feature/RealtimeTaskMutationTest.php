@@ -26,14 +26,14 @@ function taskMutationBoard(User $owner): array
         'project_id' => $project->id,
         'user_id' => $owner->id,
     ]);
-    $backlog->users()->attach($owner);
+    $backlog->users()->syncWithoutDetaching([$owner->id]);
 
     $board = Board::create([
         'name' => 'Sprint 1',
         'project_id' => $project->id,
         'user_id' => $owner->id,
     ]);
-    $board->users()->attach($owner);
+    $board->users()->syncWithoutDetaching([$owner->id]);
 
     $todo = Column::create([
         'name' => 'TO DO',
@@ -50,16 +50,19 @@ function taskMutationBoard(User $owner): array
 }
 
 it('retains private channels after queued event serialization', function () {
+    $owner = User::factory()->create();
+    ['board' => $board] = taskMutationBoard($owner);
     $event = new TaskCreated(
-        ['entity' => ['id' => 99]],
-        42
+        ['entity_type' => 'task', 'entity' => ['id' => 99]],
+        $board->id
     );
 
     /** @var TaskCreated $restored */
     $restored = unserialize(serialize($event));
 
     expect($restored->broadcastOn())
-        ->toHaveCount(1);
+        ->toHaveCount(1)
+        ->and((string) $restored->broadcastOn()[0])->toBe("private-users.{$owner->id}");
 });
 
 it('authorizes members and returns the shared mutation contract', function () {

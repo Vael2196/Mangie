@@ -19,7 +19,7 @@ function cardAppearanceBoard(
         ...$attributes,
     ]);
 
-    $board->users()->attach($owner);
+    $board->users()->syncWithoutDetaching([$owner->id]);
 
     return $board;
 }

@@ -49,6 +49,11 @@ cd "${APP_DIR}"
 
 "${COMPOSE[@]}" build --pull
 
+# Check the existing database with the new image before stopping the old app.
+# Override the entrypoint so this read-only check cannot run migrations.
+"${COMPOSE[@]}" run --rm --no-deps -T \
+    --entrypoint php app artisan mangie:check-board-admins
+
 was_running=false
 
 if "${COMPOSE[@]}" ps --status running --services \

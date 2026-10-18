@@ -5,6 +5,7 @@
         data-task-list
         data-column-id="{{ $column->id }}"
         data-board-id="{{ $board->id }}"
+        data-can-write="{{ auth()->user()->can('update', $board) ? 'true' : 'false' }}"
         data-reorder="{{ $criteriaActive ? 'false' : 'true' }}"
     >
         @foreach($column->tasks as $task)

@@ -7,13 +7,14 @@
             {{ $board->name }}
         </h1>
 
-        @if ($board->completed == 0)
+        @if (auth()->user()->can('update', $board))
             <x-sprint-start-details :board="$board"/>
         @endif
     </div>
 
     <div
         {{ $attributes->whereStartsWith('data-') }}
+        data-can-write="{{ auth()->user()->can('update', $board) ? 'true' : 'false' }}"
         class="m-3 grid min-h-[72px] h-full
                grid-flow-dense grid-cols-1
                items-start justify-items-center

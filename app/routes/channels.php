@@ -29,9 +29,9 @@ Broadcast::channel(
 Broadcast::channel(
     'projects.{projectId}',
     function (User $user, int $projectId) {
-        return Board::query()
-            ->where('project_id', $projectId)
-            ->accessibleTo($user)
-            ->exists();
+        return false; // project membership must not expose other boards
     }
 );
+
+Broadcast::channel('users.{userId}', fn (User $user, int $userId) =>
+    $user->hasVerifiedEmail() && (int) $user->id === $userId);

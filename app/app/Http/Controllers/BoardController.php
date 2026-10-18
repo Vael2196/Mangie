@@ -157,7 +157,7 @@ class BoardController extends Controller
             }
 
             $board->users()->syncWithoutDetaching([
-                $request->user()->id,
+                $request->user()->id => ['role' => 'admin'],
             ]);
 
             foreach (
@@ -258,6 +258,7 @@ class BoardController extends Controller
         }
 
         $activeSprints = Board::query()
+            ->accessibleTo($request->user())
             ->where('project_id', $board->project_id)
             ->where('status', true)
             ->where('completed', false)
@@ -416,6 +417,7 @@ class BoardController extends Controller
                         ->all(),
                     'backlog_board_id' => $backlogBoardId,
                     'backlog_issue_count' => \App\Models\Task::query()
+                        ->whereHas('column.board', fn ($query) => $query->accessibleTo($request->user()))
                         ->whereHas(
                             'column',
                             fn ($query) => $query->where(
@@ -457,18 +459,19 @@ class BoardController extends Controller
         );
 
         $backgroundImagePath = $board->background_image_path;
+        $coverPaths = \App\Models\Task::whereHas('column', fn ($q) => $q->where('board_id', $board->id))
+            ->whereNotNull('cover_image_path')->pluck('cover_image_path')->all();
+        // Resolve the recipients before the cascading membership delete.
+        $event = new BoardDeleted($payload, $projectId, $boardId);
 
         $board->delete();
+        Storage::disk('local')->delete($coverPaths);
 
         if ($backgroundImagePath) {
             Storage::disk('public')->delete($backgroundImagePath);
         }
 
-        broadcast(new BoardDeleted(
-            $payload,
-            $projectId,
-            $boardId
-        ))->toOthers();
+        broadcast($event)->toOthers();
 
         return redirect()
             ->route('home')

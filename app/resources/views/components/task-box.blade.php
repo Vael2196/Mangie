@@ -21,6 +21,9 @@
     ]) }}
 >
     <div class="min-w-0 flex grow flex-col">
+        @if($task->cover_image_url)
+            <img src="{{ $task->cover_image_url }}" alt="Task cover" class="mb-3 h-36 w-full rounded-lg object-cover" loading="lazy" draggable="false">
+        @endif
         <p
             data-task-title
             class="pr-2 text-sm font-semibold leading-5 text-gray-800 dark:text-gray-100"

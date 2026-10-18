@@ -16,7 +16,7 @@
         'image' => sprintf(
             'background-color: %s; background-image: linear-gradient(rgba(15, 23, 42, 0.18), rgba(15, 23, 42, 0.30)), url(%s);',
             $backgroundColor,
-            json_encode($backgroundImage)
+            json_encode($backgroundImage, JSON_UNESCAPED_SLASHES)
         ),
         'colour' => "background-color: {$backgroundColor};",
         default => '',

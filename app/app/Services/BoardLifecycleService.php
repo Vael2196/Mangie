@@ -112,7 +112,18 @@ class BoardLifecycleService
                 ->where('board_id', $backlogBoardId)
                 ->orderBy('position')
                 ->lockForUpdate()
-                ->firstOrFail();
+                ->first();
+
+            // Completing a private sprint must not move its tasks into a board
+            // that the actor cannot edit. Keep them in the completed sprint.
+            if (!$backlogColumn || !auth()->user()
+                || !\Illuminate\Support\Facades\Gate::allows('update', $backlogColumn->board)) {
+                $board->update([
+                    'completed' => true, 'status' => false, 'date_ended' => now()->toDateString(),
+                    'version' => (int) $board->version + 1,
+                ]);
+                return ['board' => $board->refresh(), 'moved_tasks' => collect()];
+            }
 
             $nextBacklogPosition = (int) Task::query()
                 ->where('column_id', $backlogColumn->id)

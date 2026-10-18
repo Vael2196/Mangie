@@ -9,7 +9,7 @@
             {{ $board->name }}
         </h1>
 
-        @if ($board->completed == 0)
+        @if (auth()->user()->can('update', $board))
             <x-sprint-start-details :board="$board"/>
         @endif
     </div>
@@ -21,6 +21,7 @@
     >
         <tbody
             {{ $attributes->whereStartsWith('data-') }}
+            data-can-write="{{ auth()->user()->can('update', $board) ? 'true' : 'false' }}"
             class="min-h-[72px]"
         >
             {{ $slot }}

@@ -257,6 +257,11 @@ class TaskMoveService
                     }
                 )->count();
 
+            $backlog = Board::find($backlogBoardId);
+            if (!$backlog || !\Illuminate\Support\Facades\Gate::allows('view', $backlog)) {
+                $backlogIssueCount = 0;
+            }
+
 
             return [
                 'task_id' =>

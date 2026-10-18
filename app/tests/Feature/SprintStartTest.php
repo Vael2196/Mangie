@@ -15,7 +15,7 @@ function sprintStartBoard(User $owner, Project $project, string $name): Board
         'user_id' => $owner->id,
     ]);
 
-    $board->users()->attach($owner);
+    $board->users()->syncWithoutDetaching([$owner->id]);
 
     return $board;
 }

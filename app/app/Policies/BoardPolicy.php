@@ -11,27 +11,7 @@ class BoardPolicy
         User $user,
         Board $board
     ): bool {
-        if (
-            (int) $board->id
-            === (int) config(
-                'mangie.product_backlog_board_id',
-                1
-            )
-        ) {
-            return true;
-        }
-
-        if (
-            (int) $board->user_id
-            === (int) $user->id
-        ) {
-            return true;
-        }
-
-        return $board
-            ->users()
-            ->whereKey($user->id)
-            ->exists();
+        return $user->hasVerifiedEmail() && $board->roleFor($user) !== null;
     }
 
 
@@ -39,8 +19,18 @@ class BoardPolicy
         User $user,
         Board $board
     ): bool {
-        return !$board->completed
-            && $this->view($user, $board);
+        return !$board->completed && $this->invite($user, $board);
+    }
+
+    public function invite(User $user, Board $board): bool
+    {
+        return $user->hasVerifiedEmail()
+            && in_array($board->roleFor($user), ['admin', 'member'], true);
+    }
+
+    public function manageMembers(User $user, Board $board): bool
+    {
+        return $user->hasVerifiedEmail() && $board->roleFor($user) === 'admin';
     }
 
     public function delete(
@@ -52,7 +42,6 @@ class BoardPolicy
                     'mangie.product_backlog_board_id',
                     1
                 )
-            && (int) $board->user_id
-                === (int) $user->id;
+            && $this->manageMembers($user, $board);
     }
 }
