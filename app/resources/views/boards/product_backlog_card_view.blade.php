@@ -12,6 +12,7 @@
 
     <div
         data-task-sync-context="backlog"
+        data-backlog-board-id="{{ $backlog->id }}"
         data-realtime-board-ids='@json($realtimeBoardIds)'
         data-realtime-project-id="{{ $projectId }}"
         data-task-criteria
@@ -131,11 +132,18 @@
                 </div>
             </div>
 
+            @if($sharedBacklogs->isNotEmpty())
+                <nav aria-label="Shared backlogs" class="mb-4 flex flex-wrap items-center gap-2 text-sm">
+                    <span class="text-gray-500 dark:text-gray-400">Shared backlogs:</span>
+                    @foreach($sharedBacklogs as $sharedBacklog)
+                        <a href="{{ route('boards.show', $sharedBacklog) }}" class="rounded-lg border border-gray-200 px-3 py-1.5 font-medium text-indigo-600 hover:bg-indigo-50 dark:border-gray-700 dark:text-indigo-300 dark:hover:bg-gray-800">{{ $sharedBacklog->name }}</a>
+                    @endforeach
+                </nav>
+            @endif
+
             {{-- Product backlog ------------------------------------------------- --}}
             {{-- Card view --}}
-            @unless($canViewBacklog)
-                <p class="mb-4 rounded-xl border border-gray-200 p-4 text-sm text-gray-500 dark:border-gray-700">Your sprint boards are below. The product backlog is private; ask its admin for an invitation if you need access.</p>
-            @endunless
+
             <div id="task-list" class="dark:bg-gray-500">
                 <x-task-board
                     data-task-dropzone="true"
@@ -216,7 +224,7 @@
                                     ->sortBy('position')
                                     ->first();
                         @endphp
-                        @if ($board->id == 1)
+                        @if ($board->isBacklog())
                             @continue
                         @endif
                         <div id="sprint-loading-board-{{ $board->id }}" class="mb-3 sprint-board-status-{{$board->status}}">

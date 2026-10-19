@@ -44,14 +44,11 @@ class BoardController extends Controller
         string $pageMode
     ): View {
         $user = $request->user();
-        $backlogId = (int) config(
-            'mangie.product_backlog_board_id',
-            1
-        );
+        $backlog = app(\App\Services\BacklogService::class)->forUser($user);
 
         $boards = Board::query()
             ->accessibleTo($user)
-            ->where('boards.id', '<>', $backlogId)
+            ->sprints()
             ->orderByDesc('created_at')
             ->get();
 
@@ -102,13 +99,7 @@ class BoardController extends Controller
             })
             ->values();
 
-        $projectId = (int) (
-            $boards->first()?->project_id
-            ?? Board::query()
-                ->whereKey($backlogId)
-                ->value('project_id')
-            ?? 1
-        );
+        $projectId = (int) $backlog->project_id;
 
         $boardFilters = [
             'showInactive' => $showInactive,
@@ -134,6 +125,8 @@ class BoardController extends Controller
                 'exists:projects,id',
             ],
         ]);
+
+        app(\App\Services\BacklogService::class)->forUser($request->user());
 
         $board = DB::transaction(function () use (
             $request,
@@ -258,6 +251,7 @@ class BoardController extends Controller
         }
 
         $activeSprints = Board::query()
+            ->sprints()
             ->accessibleTo($request->user())
             ->where('project_id', $board->project_id)
             ->where('status', true)
@@ -300,6 +294,7 @@ class BoardController extends Controller
         );
 
         Gate::authorize('update', $board);
+        abort_if($board->isBacklog(), 422, 'A product backlog has no sprint status.');
 
         $board = DB::transaction(function () use (
             $board,
@@ -402,10 +397,7 @@ class BoardController extends Controller
 
         $result = $this->lifecycle->complete($board);
         $board = $result['board'];
-        $backlogBoardId = (int) config(
-            'mangie.product_backlog_board_id',
-            1
-        );
+        $backlogBoardId = $result['moved_tasks']->first()?->column?->board_id;
 
         $event = new BoardCompleted(
             RealtimePayload::board(
@@ -415,21 +407,11 @@ class BoardController extends Controller
                     'moved_tasks' => $result['moved_tasks']
                         ->map(fn ($task) => TaskRealtimeData::from($task))
                         ->all(),
-                    'backlog_board_id' => $backlogBoardId,
-                    'backlog_issue_count' => \App\Models\Task::query()
-                        ->whereHas('column.board', fn ($query) => $query->accessibleTo($request->user()))
-                        ->whereHas(
-                            'column',
-                            fn ($query) => $query->where(
-                                'board_id',
-                                $backlogBoardId
-                            )
-                        )
-                        ->count(),
+                    ...app(\App\Services\BacklogService::class)->countsFor($request->user()),
                 ]
             ),
             (int) $board->project_id,
-            [(int) $board->id, $backlogBoardId]
+            array_values(array_filter([(int) $board->id, $backlogBoardId]))
         );
 
         broadcast($event)->toOthers();

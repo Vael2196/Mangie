@@ -34,7 +34,7 @@
             @foreach($task->boardLabels as $label)
                 <x-status-icon :name="$label->name" :color="$label->color" data-board-label-id="{{ $label->id }}" />
             @endforeach
-            @if((int) $column->board_id !== (int) config('mangie.product_backlog_board_id', 1))<x-status-icon :name="$column->name" />@endif
+            @if(!$column->board->isBacklog())<x-status-icon :name="$column->name" />@endif
             @if($task->priority)<x-status-icon :name="$task->priority" />@endif
             @if($task->due_at)<x-status-icon :name="$task->due_complete ? 'Due complete' : $task->due_at->format('M j')" />@endif
             @php($checklistItems = $task->checklists->flatMap(fn ($checklist) => $checklist->items))

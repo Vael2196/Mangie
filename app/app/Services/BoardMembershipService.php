@@ -70,19 +70,28 @@ class BoardMembershipService
         }
     }
 
-    public function guardAccountChange(User $user, callable $change): mixed
+    public function guardAccountChange(User $user, callable $change, bool $deleting = false): mixed
     {
-        return DB::transaction(function () use ($user, $change) {
+        return DB::transaction(function () use ($user, $change, $deleting) {
             User::whereKey($user->id)->lockForUpdate()->firstOrFail();
             $boards = Board::where(fn ($q) => $q->where('user_id', $user->id)
                 ->orWhereHas('users', fn ($q) => $q->whereKey($user->id)->where('board_user.role', 'admin')))
                 ->orderBy('boards.id')->lockForUpdate()->get();
             foreach ($boards as $board) {
+                if ($deleting && $this->isExclusiveBacklog($board, $user)) {
+                    continue;
+                }
                 $this->requireOtherAdmin($board, $user);
             }
 
             return $change();
         }, 3);
+    }
+
+    private function isExclusiveBacklog(Board $board, User $user): bool
+    {
+        return $board->isBacklog() && (int) $board->user_id === (int) $user->id
+            && !$board->users()->where('users.id', '<>', $user->id)->exists();
     }
 
     public function deleteAccount(User $user): void
@@ -91,6 +100,19 @@ class BoardMembershipService
             // The old creator FK cascades on account deletion. Transfer that
             // historical reference rather than deleting other people's boards.
             foreach (Board::where('user_id', $user->id)->get() as $board) {
+                if ($this->isExclusiveBacklog($board, $user)) {
+                    $coverPaths = \App\Models\Task::whereHas('column', fn ($q) => $q->where('board_id', $board->id))
+                        ->whereNotNull('cover_image_path')->pluck('cover_image_path')->all();
+                    $backgroundPath = $board->background_image_path;
+                    $board->delete();
+                    DB::afterCommit(function () use ($coverPaths, $backgroundPath) {
+                        \Illuminate\Support\Facades\Storage::disk('local')->delete($coverPaths);
+                        if ($backgroundPath) {
+                            \Illuminate\Support\Facades\Storage::disk('public')->delete($backgroundPath);
+                        }
+                    });
+                    continue;
+                }
                 $successor = $board->users()->wherePivot('role', 'admin')
                     ->whereNotNull('email_verified_at')->where('users.id', '<>', $user->id)->first();
                 if (! $successor) {
@@ -106,6 +128,6 @@ class BoardMembershipService
                 Auth::logout();
             }
             $user->delete();
-        });
+        }, deleting: true);
     }
 }

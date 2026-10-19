@@ -255,31 +255,7 @@ class TaskMoveService
                 )->count();
 
 
-            $backlogBoardId =
-                (int) config(
-                    'mangie.product_backlog_board_id',
-                    1
-                );
-
-
-            $backlogIssueCount =
-                Task::whereHas(
-                    'column',
-                    function ($query) use (
-                        $backlogBoardId
-                    ) {
-                        $query->where(
-                            'board_id',
-                            $backlogBoardId
-                        );
-                    }
-                )->count();
-
-            $backlog = Board::find($backlogBoardId);
-            if (!$backlog || !\Illuminate\Support\Facades\Gate::allows('view', $backlog)) {
-                $backlogIssueCount = 0;
-            }
-
+            $backlogCounts = app(BacklogService::class)->countsFor(auth()->user());
 
             return [
                 'task_id' =>
@@ -309,8 +285,7 @@ class TaskMoveService
                 'target_column_count' =>
                     $targetCount,
 
-                'backlog_issue_count' =>
-                    $backlogIssueCount,
+                ...$backlogCounts,
 
                 'updated_at' =>
                     $finalTask

@@ -35,6 +35,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'last_active_at',
         'invisible',
         'notification_frequency',
+        'backlog_board_id',
     ];
 
     protected $appends = [
@@ -53,6 +54,7 @@ class User extends Authenticatable implements MustVerifyEmail
             'password' => 'hashed',
             'last_active_at' => 'datetime',
             'invisible' => 'boolean',
+            'backlog_board_id' => 'integer',
         ];
     }
 

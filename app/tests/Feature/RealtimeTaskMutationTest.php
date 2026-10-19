@@ -16,13 +16,10 @@ function taskMutationBoard(User $owner): array
 {
     $project = Project::create(['name' => 'Realtime Project']);
 
-    /*
-     * Board ID 1 is intentionally the shared Product Backlog. Create it
-     * before the sprint so this fixture exercises normal board membership
-     * authorization instead of the backlog exception in BoardPolicy.
-     */
+    // Keep the existing shared backlog separate from the sprint under test.
     $backlog = Board::create([
         'name' => 'Product Backlog',
+        'is_backlog' => true,
         'project_id' => $project->id,
         'user_id' => $owner->id,
     ]);

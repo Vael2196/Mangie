@@ -114,6 +114,7 @@ class BootstrapMangie extends Command
 
             $backlog = new Board([
                 'name' => 'Product Backlog',
+                'is_backlog' => true,
                 'project_id' => $project->id,
                 'user_id' => $user->id,
             ]);
@@ -124,6 +125,7 @@ class BootstrapMangie extends Command
             );
 
             $backlog->save();
+            $user->forceFill(['backlog_board_id' => $backlog->id])->save();
             $backlog->users()->syncWithoutDetaching([$user->id => ['role' => 'admin']]);
 
             Column::create([

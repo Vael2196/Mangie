@@ -16,6 +16,7 @@ it('returns unfinished tasks to the actual backlog column', function () {
 
     $backlog = Board::create([
         'name' => 'Product Backlog',
+        'is_backlog' => true,
         'project_id' => $project->id,
         'user_id' => $owner->id,
     ]);

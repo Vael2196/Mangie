@@ -44,7 +44,7 @@
                 </div>
             @endif
 
-            @if((int) $column->board_id !== (int) config('mangie.product_backlog_board_id', 1))
+            @if(!$column->board->isBacklog())
                 <x-status-icon name="{{ $column->name }}" />
             @endif
 

@@ -10,6 +10,7 @@ final class BoardRealtimeData
     {
         return [
             'id' => (int) $board->id,
+            'is_backlog' => $board->isBacklog(),
             'project_id' => (int) $board->project_id,
             'owner_id' => (int) $board->user_id,
             'name' => $board->name,

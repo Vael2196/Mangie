@@ -29,10 +29,8 @@ class BacklogController extends Controller
         $sortBy = $criteria['sortField'];
         $sortDirection = $criteria['sortDirection'];
 
-        $backlogId = (int) config(
-            'mangie.product_backlog_board_id',
-            1
-        );
+        abort_unless(in_array($view, ['card', 'list'], true), 404);
+        $backlogId = app(\App\Services\BacklogService::class)->forUser($request->user())->id;
 
         $backlog = Board::query()
             ->accessibleTo($request->user())
@@ -76,19 +74,9 @@ class BacklogController extends Controller
                 'columns.tasks.boardLabels',
                 'columns.tasks.checklists.items',
             ])
-            ->find($backlogId);
+            ->findOrFail($backlogId);
 
-        $canViewBacklog = $backlog !== null;
         $canEditBacklog = $backlog && Gate::allows('update', $backlog);
-        // The planning screen still works for invited sprint participants;
-        // it must not load the private global backlog's tasks or labels.
-        if (!$backlog) {
-            $backlog = new Board(['name' => 'Product Backlog']);
-            $backlog->id = $backlogId;
-            $backlog->setRelation('columns', collect());
-            $backlog->setRelation('labels', collect());
-        }
-
         $backlogIssueCount = $backlog->columns
             ->sum('tasks_count');
 
@@ -105,6 +93,8 @@ class BacklogController extends Controller
                 'columns.tasks.checklists.items',
             ])
             ->accessibleTo($user)
+            ->where(fn ($q) => $q->where('boards.id', $backlogId)
+                ->orWhere(fn ($sprints) => $sprints->sprints()))
             ->orderBy('created_at')
             ->get();
 
@@ -137,6 +127,8 @@ class BacklogController extends Controller
             ? ''
             : ($backlog->labels->firstWhere('id', $label)?->name ?? '');
         $taskCriteria = $criteria;
+        $sharedBacklogs = Board::accessibleTo($user)->backlogs()
+            ->where('boards.id', '<>', $backlogId)->orderBy('name')->get(['boards.id', 'boards.name']);
         $projectId = (int) ($backlog->project_id ?? $boards->first()?->project_id ?? 1);
 
         return view($viewName, compact(
@@ -149,7 +141,7 @@ class BacklogController extends Controller
             'cookies',
             'taskCriteria',
             'projectId',
-            'canViewBacklog',
+            'sharedBacklogs',
             'canEditBacklog'
         ));
     }

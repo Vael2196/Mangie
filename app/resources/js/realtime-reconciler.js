@@ -21,6 +21,7 @@ function context() {
 }
 
 function matchesBoardListFilters(board) {
+    if (board.is_backlog) return false;
     const syncRoot = root();
 
     if (!syncRoot || context() !== 'boards') {
@@ -165,7 +166,8 @@ function applyCounts(meta = {}) {
         setColumnCount(meta.column_id, meta.column_count);
     }
 
-    if (meta.backlog_issue_count !== undefined) {
+    if (meta.backlog_issue_count !== undefined
+        && Number(meta.backlog_board_id) === Number(root()?.dataset.backlogBoardId)) {
         setIssueCount(meta.backlog_issue_count);
     }
 }
@@ -287,9 +289,7 @@ async function applyBoardMutation(event, payload) {
             await upsertTask({ entity: task, meta: {} });
         }
 
-        if (payload.meta.backlog_issue_count !== undefined) {
-            setIssueCount(payload.meta.backlog_issue_count);
-        }
+        applyCounts(payload.meta);
     }
 
     if (context() === 'board') {
@@ -356,6 +356,9 @@ async function applyBoardMutation(event, payload) {
         updateBoardListEmptyState();
         return;
     }
+
+    // Backlog updates must never insert a backlog as a sprint preview.
+    if (payload.entity.is_backlog) return;
 
     const wrapper = document.getElementById(
         `sprint-loading-board-${payload.entity.id}`

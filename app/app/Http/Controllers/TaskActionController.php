@@ -53,9 +53,7 @@ class TaskActionController extends Controller
         $data = $request->validate(['expected_version' => ['required', 'integer', 'min:1']]);
         $copy = $actions->copy($task, $data['expected_version']);
         $meta = ['column_id' => (int) $copy->column_id, 'column_count' => $copy->column->tasks()->count()];
-        if ((int) $copy->column->board_id === (int) config('mangie.product_backlog_board_id', 1)) {
-            $meta['backlog_issue_count'] = Task::whereHas('column', fn ($q) => $q->where('board_id', $copy->column->board_id))->count();
-        }
+        $meta = [...$meta, ...app(\App\Services\BacklogService::class)->countsFor($request->user())];
         $event = new TaskCreated(RealtimePayload::task($copy, $request->user(), $meta), (int) $copy->column->board_id);
         broadcast($event)->toOthers();
 

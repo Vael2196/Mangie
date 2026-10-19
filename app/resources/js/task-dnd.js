@@ -154,9 +154,10 @@ function updateCounts(data) {
     );
 
 
-    setIssueCount(
-        data.backlog_issue_count
-    );
+    const backlogId = document.querySelector('[data-backlog-board-id]')?.dataset.backlogBoardId;
+    if (data.backlog_issue_count !== undefined && Number(data.backlog_board_id) === Number(backlogId)) {
+        setIssueCount(data.backlog_issue_count);
+    }
 }
 
 

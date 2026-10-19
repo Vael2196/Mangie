@@ -30,6 +30,7 @@ class Board extends Model
 
     protected $fillable = [
         'name',
+        'is_backlog',
         'project_id',
         'user_id',
         'completed',
@@ -49,6 +50,7 @@ class Board extends Model
     {
         return [
             'completed' => 'boolean',
+            'is_backlog' => 'boolean',
             'status' => 'boolean',
             'start_date' => 'date',
             'end_date' => 'date',
@@ -101,6 +103,21 @@ class Board extends Model
         User $user
     ): Builder {
         return $query->whereHas('users', fn (Builder $members) => $members->whereKey($user->id));
+    }
+
+    public function isBacklog(): bool
+    {
+        return (bool) $this->is_backlog;
+    }
+
+    public function scopeBacklogs(Builder $query): Builder
+    {
+        return $query->where('is_backlog', true);
+    }
+
+    public function scopeSprints(Builder $query): Builder
+    {
+        return $query->where('is_backlog', false);
     }
 
     public function getBackgroundImageUrlAttribute(): ?string

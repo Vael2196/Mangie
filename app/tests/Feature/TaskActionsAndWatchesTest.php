@@ -173,6 +173,7 @@ it('queues instant watches after the mutation commits and renders the email', fu
 
 it('keeps manually completed tasks in the sprint and returns unchecked DONE tasks', function () {
     ['owner' => $owner, 'board' => $backlog, 'column' => $backlogColumn] = taskActionFixture();
+    $backlog->update(['is_backlog' => true]);
     $sprint = Board::create(['name' => 'Completion test', 'project_id' => $backlog->project_id, 'user_id' => $owner->id]);
     $todo = $sprint->columns()->create(['name' => 'TO DO', 'position' => 1]);
     $done = $sprint->columns()->create(['name' => 'DONE', 'position' => 2]);
@@ -185,5 +186,6 @@ it('keeps manually completed tasks in the sprint and returns unchecked DONE task
 it('checks deletion versions and updates the backlog count after a copy', function () {
     ['owner' => $owner, 'task' => $task] = taskActionFixture();
     $this->actingAs($owner)->deleteJson("/tasks/{$task->id}", ['expected_version' => 2])->assertConflict();
+    $task->column->board->update(['is_backlog' => true]);
     $this->postJson("/tasks/{$task->id}/copy", ['expected_version' => 1])->assertCreated()->assertJsonPath('payload.meta.backlog_issue_count', 2);
 });

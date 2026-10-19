@@ -14,6 +14,7 @@ function criteriaBoard(
 ): array {
     $board = Board::create([
         'name' => $name,
+        'is_backlog' => $name === 'Product Backlog',
         'project_id' => $project->id,
         'user_id' => $owner->id,
     ]);

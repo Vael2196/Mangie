@@ -61,7 +61,7 @@ class TaskController extends Controller
                 [
                     'column_id' => (int) $column->id,
                     'column_count' => $column->tasks()->count(),
-                    'backlog_issue_count' => $this->backlogIssueCount(),
+                    ...app(\App\Services\BacklogService::class)->countsFor($request->user()),
                 ]
             ),
             (int) $column->board_id
@@ -338,7 +338,7 @@ class TaskController extends Controller
                     'board_id' => $boardId,
                     'column_id' => $result['column_id'],
                     'column_count' => $result['column_count'],
-                    'backlog_issue_count' => $this->backlogIssueCount(),
+                    ...app(\App\Services\BacklogService::class)->countsFor($request->user()),
                 ]
             ),
             $boardId
@@ -347,26 +347,5 @@ class TaskController extends Controller
         broadcast($event)->toOthers();
 
         return response()->json($event->response());
-    }
-
-    private function backlogIssueCount(): int
-    {
-        $backlogBoardId = (int) config(
-            'mangie.product_backlog_board_id',
-            1
-        );
-
-        $backlog = \App\Models\Board::find($backlogBoardId);
-        if (!$backlog || !Gate::allows('view', $backlog)) { return 0; }
-
-        return Task::query()
-            ->whereHas(
-                'column',
-                fn ($query) => $query->where(
-                    'board_id',
-                    $backlogBoardId
-                )
-            )
-            ->count();
     }
 }

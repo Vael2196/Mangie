@@ -43,14 +43,16 @@
                             class="text-xs font-semibold uppercase tracking-wider
                                 text-indigo-600 dark:text-indigo-400"
                         >
-                            Sprint goal
+                            {{ $board->isBacklog() ? 'Product backlog' : 'Sprint goal' }}
                         </p>
 
                         <p
                             class="mt-2 max-w-3xl text-sm leading-6
                                 text-gray-600 dark:text-gray-300"
                         >
-                            @if ($board->status == 1 || $board->completed == 1)
+                            @if ($board->isBacklog())
+                                Plan your work here, then move tasks into a sprint when they are ready.
+                            @elseif ($board->status == 1 || $board->completed == 1)
                                 {{ $board->sprint_goal }}
                             @else
                                 No sprint goal has been set yet.
@@ -60,12 +62,12 @@
 
                     <div class="flex flex-wrap items-center justify-end gap-3">
 
-                        @if (auth()->user()->can('update', $board))
+                        @if (!$board->isBacklog() && auth()->user()->can('update', $board))
                             <x-sprint-start-details :board="$board" :daysLeft="$daysLeft"/>
                         @endif
 
 
-                        @if (auth()->user()->can('update', $board) && $board->status == 1)
+                        @if (!$board->isBacklog() && auth()->user()->can('update', $board) && $board->status == 1)
                             <form method="POST" action="{{ route('boards.complete', $board->id) }}" onsubmit="return confirm('Are you sure you want to complete the sprint early?')">
                                 @csrf
                                 <button type="submit" class="inline-flex h-10 items-center gap-2 rounded-xl border border-gray-300 bg-white px-3.5 text-sm font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50 focus:outline-none focus:ring-4 focus:ring-indigo-100 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700 dark:focus:ring-indigo-950">
@@ -75,7 +77,7 @@
                             </form>
                         @endif
 
-                        @if ($board->completed == 1)
+                        @if (!$board->isBacklog() && $board->completed == 1)
                             <form method="GET" action="{{ route('boards.burndownChart', $board->id) }}">
                                 <button type="submit" class="inline-flex h-10 items-center gap-2 rounded-xl border border-gray-300 bg-white px-3.5 text-sm font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700">
                                     <span class="material-symbols-rounded text-[18px]">monitoring</span>

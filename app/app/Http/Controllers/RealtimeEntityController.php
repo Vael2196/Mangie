@@ -22,10 +22,7 @@ class RealtimeEntityController extends Controller
     {
         $meta = ['column_counts' => Column::whereHas('board', fn ($q) => $q->accessibleTo($request->user()))
             ->withCount('tasks')->get()->mapWithKeys(fn ($column) => [$column->id => $column->tasks_count])->all()];
-        $backlog = Board::find(config('mangie.product_backlog_board_id', 1));
-        if ($backlog && Gate::allows('view', $backlog)) {
-            $meta['backlog_issue_count'] = Task::whereHas('column', fn ($q) => $q->where('board_id', $backlog->id))->count();
-        }
+        $meta = [...$meta, ...app(\App\Services\BacklogService::class)->countsFor($request->user())];
 
         return $meta;
     }

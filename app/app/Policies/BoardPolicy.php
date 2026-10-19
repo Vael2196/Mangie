@@ -42,11 +42,6 @@ class BoardPolicy
         User $user,
         Board $board
     ): bool {
-        return (int) $board->id
-                !== (int) config(
-                    'mangie.product_backlog_board_id',
-                    1
-                )
-            && $this->manageMembers($user, $board);
+        return !$board->isBacklog() && $this->manageMembers($user, $board);
     }
 }

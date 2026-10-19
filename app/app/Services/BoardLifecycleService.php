@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use App\Models\Board;
-use App\Models\Column;
 use App\Models\Task;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -13,7 +12,7 @@ class BoardLifecycleService
 {
     public function endIfExpired(Board $board): Board
     {
-        if (!$this->isExpired($board)) {
+        if ($board->isBacklog() || !$this->isExpired($board)) {
             return $board->refresh();
         }
 
@@ -50,6 +49,10 @@ class BoardLifecycleService
                 ->whereKey($board->id)
                 ->lockForUpdate()
                 ->firstOrFail();
+
+            if ($board->isBacklog()) {
+                throw ValidationException::withMessages(['board' => 'A product backlog cannot be started as a sprint.']);
+            }
 
             if ($board->completed) {
                 throw ValidationException::withMessages([
@@ -97,22 +100,11 @@ class BoardLifecycleService
                 ];
             }
 
-            $backlogBoardId = (int) config(
-                'mangie.product_backlog_board_id',
-                1
-            );
-
-            if ((int) $board->id === $backlogBoardId) {
-                throw ValidationException::withMessages([
-                    'board' => 'The product backlog cannot be completed as a sprint.',
-                ]);
+            if ($board->isBacklog()) {
+                throw ValidationException::withMessages(['board' => 'A product backlog cannot be completed as a sprint.']);
             }
-
-            $backlogColumn = Column::query()
-                ->where('board_id', $backlogBoardId)
-                ->orderBy('position')
-                ->lockForUpdate()
-                ->first();
+            $backlog = app(BacklogService::class)->forSprint($board);
+            $backlogColumn = $backlog?->columns()->orderBy('position')->lockForUpdate()->first();
 
             // Completing a private sprint must not move its tasks into a board
             // that the actor cannot edit. Keep them in the completed sprint.
