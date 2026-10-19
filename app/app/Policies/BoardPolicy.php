@@ -28,6 +28,11 @@ class BoardPolicy
             && in_array($board->roleFor($user), ['admin', 'member'], true);
     }
 
+    public function viewPresence(User $user, Board $board): bool
+    {
+        return $this->invite($user, $board);
+    }
+
     public function manageMembers(User $user, Board $board): bool
     {
         return $user->hasVerifiedEmail() && $board->roleFor($user) === 'admin';

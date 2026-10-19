@@ -11,12 +11,12 @@
 >
     <div
         @class([
-            'flex min-h-20 items-center justify-between gap-6 px-6 lg:px-8',
+            'flex min-h-20 items-center justify-between gap-3 pl-20 pr-4 lg:gap-6 lg:px-8',
             'pl-20 lg:pl-20' => request()->routeIs('boards.show'),
         ])
     >
 
-        <div>
+        <div class="min-w-0">
             <p
                 class="text-xs font-semibold uppercase tracking-[0.16em]
                        text-indigo-600 dark:text-indigo-400"
@@ -25,7 +25,7 @@
             </p>
 
             <h1
-                class="mt-1 text-2xl font-bold tracking-tight
+                class="mt-1 break-words text-xl font-bold tracking-tight
                        text-gray-900 sm:text-3xl dark:text-white"
             >
                 {{ $title }}
@@ -48,7 +48,7 @@
                            dark:text-gray-200 dark:hover:border-indigo-800
                            dark:hover:bg-indigo-950/50"
                 >
-                    <x-user-avatar :user="$user" size="md" />
+                    <x-user-avatar :user="$user" size="md" :show-presence="true" />
 
                     <span class="hidden sm:block">
                         {{ $user->name }}
@@ -78,7 +78,7 @@
                                dark:border-gray-700"
                     >
                         <div class="flex items-center gap-3">
-                            <x-user-avatar :user="$user" size="lg" />
+                            <x-user-avatar :user="$user" size="lg" :show-presence="true" />
 
                             <div class="min-w-0">
                                 <p
@@ -94,11 +94,16 @@
                                 >
                                     {{ $user->email }}
                                 </p>
+                                @php($selfPresence = app(\App\Services\PresenceService::class)->forUser($user, true))
+                                <p data-self-presence data-presence-status="{{ $selfPresence['status'] }}" class="mt-1 text-xs text-gray-500">{{ $selfPresence['label'] }}</p>
                             </div>
                         </div>
                     </div>
 
                     <div class="p-2">
+                        <a href="{{ route('settings.edit') }}" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700">
+                            <span class="material-symbols-rounded text-[20px] text-gray-400">settings</span> Settings
+                        </a>
                         <a
                             href="{{ route('profile.edit') }}"
                             class="flex items-center gap-3 rounded-lg

@@ -125,19 +125,14 @@ class BoardLifecycleService
                 return ['board' => $board->refresh(), 'moved_tasks' => collect()];
             }
 
-            $nextBacklogPosition = (int) Task::query()
-                ->where('column_id', $backlogColumn->id)
-                ->max('position');
-
             $tasksToReturn = Task::query()
                 ->whereHas(
                     'column',
                     function ($query) use ($board) {
-                        $query
-                            ->where('board_id', $board->id)
-                            ->whereRaw('UPPER(TRIM(name)) <> ?', ['DONE']);
+                        $query->where('board_id', $board->id);
                     }
                 )
+                ->whereNull('completed_at')
                 ->orderBy('column_id')
                 ->orderBy('position')
                 ->orderBy('id')
@@ -145,14 +140,7 @@ class BoardLifecycleService
                 ->get();
 
             foreach ($tasksToReturn as $task) {
-                $nextBacklogPosition++;
-
-                $task->update([
-                    'column_id' => $backlogColumn->id,
-                    'position' => $nextBacklogPosition,
-                    'completed_at' => null,
-                    'version' => (int) $task->version + 1,
-                ]);
+                app(TaskMoveService::class)->move($task, $backlogColumn, PHP_INT_MAX);
             }
 
             $board->update([

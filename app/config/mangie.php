@@ -17,6 +17,12 @@ return [
         ['name' => 'Database', 'color' => '#f97316'],
     ],
 
+    'task_colors' => [
+        'gray' => '#f1f5f9', 'blue' => '#dbeafe', 'green' => '#dcfce7',
+        'yellow' => '#fef9c3', 'orange' => '#ffedd5', 'red' => '#fee2e2',
+        'purple' => '#f3e8ff', 'pink' => '#fce7f3',
+    ],
+
     'label_colors' => [
         '#ef4444',
         '#f97316',

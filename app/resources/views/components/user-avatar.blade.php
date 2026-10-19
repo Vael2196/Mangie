@@ -2,6 +2,7 @@
     'user',
     'size' => 'md',
     'ring' => false,
+    'showPresence' => false,
 ])
 
 @php
@@ -21,6 +22,7 @@
         ->map(fn ($part) => mb_strtoupper(mb_substr($part, 0, 1)))
         ->implode('');
 
+    $presence = $showPresence ? app(\App\Services\PresenceService::class)->forUser($user, auth()->id() === $user->id) : null;
     $initials = $initials !== '' ? $initials : 'U';
 @endphp
 
@@ -29,9 +31,14 @@
         'relative inline-flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-indigo-100 font-bold text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300',
         $sizeClasses[$size] ?? $sizeClasses['md'],
         'ring-2 ring-white dark:ring-gray-900' => $ring,
+        'presence-offline' => $presence && $presence['status'] === 'offline',
     ]) }}
     data-user-avatar-id="{{ $user->id }}"
     data-user-avatar-name="{{ $user->name }}"
+    @if($presence)
+        data-presence-status="{{ $presence['status'] }}"
+        title="{{ $user->name }} · {{ $presence['label'] }}"
+    @endif
 >
     <img
         data-user-avatar-image

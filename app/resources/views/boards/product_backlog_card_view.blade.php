@@ -24,11 +24,11 @@
         <x-top-bar title="Product Backlog" :user="$user"/>
         <div
             class="mx-auto max-w-[1600px]
-                px-6 py-8 lg:px-8"
+                px-3 py-5 sm:px-6 sm:py-8 lg:px-8"
             id="entirePage"
         >
 
-            <div class='flex justify-between mb-2'>
+            <div class='mb-4 flex flex-wrap items-start justify-between gap-3'>
                 <h1
                     class="text-lg font-semibold
                         text-gray-900 dark:text-white"
@@ -39,7 +39,7 @@
                     </span>
                 </h1>
                 {{-- Add list to card view dropdown switch here --}}
-                <div class="flex space-x-5">
+                <div class="flex min-w-0 flex-wrap items-center gap-2 sm:gap-3">
 
                     {{-- Change view switch --}}
                     <div
@@ -161,39 +161,6 @@
 
             {{-- ------------------------------------------------------------------ --}}
 
-            {{-- Context Menu --}}
-            <div class="hidden absolute z-30" id="task-context-menu">
-                <div class="2xl:flex 2xl:items-start">
-                    {{-- "Move To" Button --}}
-                    <div
-                        class='bg-white border px-4 py-2 items-center leading-5 dark:bg-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-500 hover:cursor-pointer focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out rounded flex space-x-3'>
-                        <div class = "text-center"
-                            onmouseover="document.getElementById('contextBoardMenu').classList.toggle('hidden')">Move To
-                        </div>
-                        <div class="text-center"><i class="fa-solid fa-angle-right"></i></div>
-                    </div>
-
-                    {{-- Context sub menu (Buttons for each sprint to move to) --}}
-                    <div class="hidden shadow-lg" id="contextBoardMenu">
-                        @foreach ($inactive_boards as $board)
-                            @php
-                                $targetColumn =
-                                    $board->columns
-                                        ->firstWhere('name', 'TO DO')
-                                    ?? $board->columns
-                                        ->sortBy('position')
-                                        ->first();
-                            @endphp
-                            @continue(!$targetColumn)
-                            <div class='bg-white border px-4 py-2 text-start leading-5 dark:bg-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-500 hover:cursor-pointer focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out flex space-x-3'
-                                data-target-column-id="{{ $targetColumn->id }}">
-                                <h1>{{ $board->name }}</h1>
-                            </div>
-                        @endforeach
-                    </div>
-                </div>
-            </div>
-
             {{-- Link to Form --}}
             <div class="w-full text-start">
                 <div id="create-task-link" class="{{ $canEditBacklog ? 'block' : 'hidden' }}">
@@ -311,7 +278,6 @@
             // entirePage.classList.remove('invisible');
 
             // Variables
-            var selectedTaskItems = [];
             const createTaskButton = document.getElementById('create-task-link');
             const inputTaskField = document.getElementById('input-task-field');
             const taskColumn = document.getElementById('task-list').lastElementChild.lastElementChild; // Hack
@@ -322,15 +288,6 @@
             const createSprint = document.getElementById('create-sprint'); // Box created when clicking on create sprint button
             const createSprintButtons = document.querySelectorAll('[data-create-sprint-button]');
             const createSprintInput = document.getElementById('create-sprint-input'); // Input for name of sprint
-
-            // Task Items
-            const taskMenus = document.querySelectorAll(`[id*="task-list-menu"]`); // Three dots
-            const taskItems = document.querySelectorAll(`[id*="task-list-item"]`); // Rows of the table -- change to be more general name
-
-            // Context Menu
-            const taskContextMenu = document.getElementById(`task-context-menu`); // Context menu
-            const contextSubMenu = document.getElementById(`contextBoardMenu`); // Context sub menu box
-            const contextSubMenuChildren = contextSubMenu.children; // Context sub menu buttons
 
             // Create task when clicking button ------------------------------------------
             createTaskButton.addEventListener('click', e => {
@@ -355,97 +312,6 @@
             createSprintInput.addEventListener('focusout', e => {
                 createSprint.classList.add('hidden');
             });
-
-            // Context Menu ---------------------------------------------------------------
-            // Reset context menu on right click anywhere outside
-            document.addEventListener('contextmenu', e => {
-                taskContextMenu.classList.add('hidden');
-                contextSubMenu.classList.add('hidden');
-
-                // Clear temp arr
-                selectedTaskItems = [];
-            });
-
-            // Reset context menu on left click anywhere outside
-            document.addEventListener('click', e => {
-                taskContextMenu.classList.add('hidden');
-                contextSubMenu.classList.add('hidden');
-
-                // Clear temp arr
-                selectedTaskItems = [];
-            });
-
-            // Function to check if task is part of an active sprint
-            function checkStatus(task){
-                // Get closest sprint board element
-                let parentElm = task.closest("div[class*='sprint-board-status-'],div[class^='sprint-board-status-']");
-
-                // If no parent element, then it is not part of a sprint
-                if (!parentElm){return false;}
-
-                // Get status of sprint board
-                let status = Array.from(parentElm.classList).filter(cls => cls.includes("sprint-board-status-"))[0];
-                status = Number(status.replace('sprint-board-status-', ''));
-
-                // If status is 1, then it is part of an active sprint
-                if (status == 1){
-                    return true;
-                }
-                return false;
-            }
-
-            // Context Menu ---------------------------------------------------------------
-            // MAKE INTO ONE LOOP
-            // Show context menu when clicking three dots
-            for (let taskMenu of taskMenus) {
-                if (checkStatus(taskMenu)){continue;}
-                taskMenu.addEventListener('click', e => {
-                    e.stopPropagation();
-
-                    const rect = taskMenu.getBoundingClientRect();
-                    taskContextMenu.style.left = (window.scrollX + rect.left) + 'px';
-                    taskContextMenu.style.top = (window.scrollY + rect.top + rect.height) + 'px';
-                    taskContextMenu.classList.remove('hidden');
-
-                    // Set task as selected item
-                    selectedTaskItems = [Number(taskMenu.parentElement.parentElement.id.replace(
-                        'task-list-item-', ''))];
-                });
-            }
-
-            // Right clicking functionality
-            for (let task of taskItems) {
-                if (checkStatus(task)){continue;}
-                task.addEventListener('contextmenu', e => {
-                    e.stopPropagation();
-                    // Show context menu when right-clicking
-                    if (!e.ctrlKey) {
-                        taskContextMenu.style.left = (e.pageX) + 'px';
-                        taskContextMenu.style.top = (e.pageY + 2) + 'px';
-                        taskContextMenu.classList.remove('hidden');
-
-                        // Set task as selected item
-                        if (selectedTaskItems.length <= 1) {
-                            selectedTaskItems = [Number(task.id.replace('task-list-item-', ''))];
-                        }
-                        return false;
-                    };
-
-                    // Add task to temp array when ctrl right clicking
-                    selectedTaskItems.push(Number(task.id.replace('task-list-item-', '')));
-                    return false;
-                }, false);
-            }
-
-            // Call moveTasks function when clicking on sub menu button
-            for (let child of contextSubMenuChildren) {
-                let targetColumnId = Number(child.dataset.targetColumnId);
-                child.addEventListener('click', e => {
-                    moveTasks(targetColumnId);
-                });
-            }
-
-            // ----------------------------------------------------------------------------
 
             // Add new task to the product backlog
             inputTaskField.addEventListener('keypress', function(e) {
@@ -504,66 +370,6 @@
                     .catch(error => console.error('Error:', error));
             });
 
-
-            // Bulk move tasks from backlog to sprint board
-            function moveTasks(targetColumnId) {
-                fetch('{{ route('tasks.bulk-move') }}', {
-                        method: 'PATCH',
-                        headers: {
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute(
-                                'content'),
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            task_ids: selectedTaskItems,
-                            target_column_id: targetColumnId
-                        })
-                    })
-                    .then(response => {
-                        responseClone = response.clone();
-                        return response.json();
-                    })
-                    .then(async data => {
-                        if (data.success) {
-                            // // Get product backlog if endpoint is 1
-                            // let endPointBoard;
-                            // if(board_id == 1){
-                            //     endPointBoard = taskColumn;
-                            // } else {
-                            //     // Get sprint loading board if endpoint is anything else
-                            //     // This is such a hack I dont even know what is happening
-                            //     let sprintList = document.getElementById('sprint-loading-board-list');
-                            //     let loadingBoardPTag = document.getElementById(`sprint-loading-p-tag-${board_id}`);
-                            //     if (sprintList.contains(loadingBoardPTag)){
-                            //         loadingBoardPTag.classList.add('hidden');
-                            //     }
-                            //     let endPointBoard = document.getElementById(`sprint-loading-table-${board_id}`);
-                            // }
-                            // // Insert task into the task list of the first column
-                            // for(let task of data.tasks){
-                            //     // Find task by ids
-                            //     let taskItem = document.getElementById(`task-list-item-${task.id}`);
-                            //     endPointBoard.appendChild(taskItem);
-                            // }
-
-                            // Reset Selected task items
-                            selectedTaskItems = [];
-
-                            await window.MangieRealtime.applyMutationResponse(data);
-
-                        } else {
-                            console.error('Error moving tasks:', data.message);
-                        }
-
-                        // print response for debugging
-                    }, function(rejectionReason) {
-                        console.log('Error parsing JSON from response:', rejectionReason, responseClone);
-                        responseClone.text()
-                            .then(function(bodyText) {
-                                console.log('Received the following instead of valid JSON:', bodyText);
-                            });
-                    });
-            }
 
             // Function to handle the creation of a new board
             createSprintInput.addEventListener('keypress', e => {

@@ -59,6 +59,8 @@ class TaskCoverController extends Controller
             $oldPath = $task->cover_image_path;
             $task->forceFill(['cover_image_path' => $path, 'version' => (int) $task->version + 1])->save();
 
+            app(\App\Services\TaskWatchService::class)->record($task);
+
             return [$task->refresh()->load('column.board', 'users'), $oldPath];
         }, 3);
         if ($oldPath) {

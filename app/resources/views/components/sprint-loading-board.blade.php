@@ -1,11 +1,11 @@
 <div
     id="sprint-loading-table-{{ $board->id }}"
-    class="min-w-full overflow-x-auto rounded border
+    class="min-w-0 w-full rounded border
            bg-gray-100 p-3 hover:bg-gray-200
            dark:bg-gray-700 dark:hover:bg-gray-800"
 >
-    <div class="mb-2 flex justify-between">
-        <h1 class="text-xl font-semibold dark:text-white">
+    <div class="mb-2 flex flex-wrap items-center justify-between gap-3">
+        <h1 class="min-w-0 break-words text-xl font-semibold dark:text-white">
             {{ $board->name }}
         </h1>
 
@@ -15,7 +15,7 @@
     </div>
 
     <table
-        class="table-fixed min-w-full overflow-x-auto
+        class="table-fixed min-w-0 w-full
                rounded border bg-white
                dark:bg-gray-900"
     >
@@ -28,7 +28,7 @@
 
             <tr data-empty-drop-marker>
                 <td
-                    colspan="2"
+                    colspan="3"
                     class="h-[58px]
                            border-2 border-dashed
                            border-gray-200 px-3 text-center

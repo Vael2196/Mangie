@@ -28,6 +28,7 @@ class TaskMoveController extends Controller
                 'integer',
                 'exists:columns,id',
             ],
+            'expected_version' => ['sometimes', 'integer', 'min:1'],
             'target_position' => [
                 'required',
                 'integer',
@@ -47,7 +48,8 @@ class TaskMoveController extends Controller
         $result = $this->taskMover->move(
             $task,
             $targetColumn,
-            $validated['target_position']
+            $validated['target_position'],
+            $validated['expected_version'] ?? null
         );
 
         $event = $this->eventFor(

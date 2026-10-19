@@ -500,6 +500,9 @@ export function initSortable(list) {
 
     new Sortable(list, {
 
+        filter: 'button, a, input, textarea, select, label, summary',
+        preventOnFilter: false,
+
         group: {
             name: 'mangie-tasks',
             pull: true,

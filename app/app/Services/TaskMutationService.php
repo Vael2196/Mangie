@@ -41,7 +41,7 @@ class TaskMutationService
         Task $task,
         Column $targetColumn,
         array $attributes,
-        ?int $assigneeId,
+        ?array $assigneeIds,
         ?int $expectedVersion = null,
         ?array $labelIds = null,
         ?array $sections = null,
@@ -51,7 +51,7 @@ class TaskMutationService
             $task,
             $targetColumn,
             $attributes,
-            $assigneeId,
+            $assigneeIds,
             $expectedVersion,
             $labelIds,
             $sections,
@@ -80,7 +80,9 @@ class TaskMutationService
                 $moveResult = $this->taskMover->move(
                     $task,
                     $targetColumn,
-                    PHP_INT_MAX
+                    PHP_INT_MAX,
+                    null,
+                    false
                 );
             }
 
@@ -91,11 +93,9 @@ class TaskMutationService
                 'version' => (int) $task->version + 1,
             ]);
 
-            $task->users()->sync(
-                $assigneeId
-                    ? [$assigneeId]
-                    : []
-            );
+            if ($assigneeIds !== null) {
+                $task->users()->sync($assigneeIds);
+            }
 
             if ($labelIds !== null) {
                 $task->boardLabels()->sync($labelIds);
@@ -142,6 +142,8 @@ class TaskMutationService
                 }
             }
 
+            app(TaskWatchService::class)->record($task);
+
             return [
                 'task' => $task
                     ->refresh()
@@ -157,13 +159,17 @@ class TaskMutationService
         }, 3);
     }
 
-    public function delete(Task $task): array
+    public function delete(Task $task, ?int $expectedVersion = null): array
     {
-        return DB::transaction(function () use ($task) {
+        return DB::transaction(function () use ($task, $expectedVersion) {
             $task = Task::query()
                 ->whereKey($task->id)
                 ->lockForUpdate()
                 ->firstOrFail();
+
+            if ($expectedVersion !== null && (int) $task->version !== $expectedVersion) {
+                throw new ConflictHttpException('This task changed elsewhere. Reopen it before deleting it.');
+            }
 
             $columnId = (int) $task->column_id;
             $position = (int) $task->position;

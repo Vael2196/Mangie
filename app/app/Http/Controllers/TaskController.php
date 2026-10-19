@@ -98,6 +98,9 @@ class TaskController extends Controller
                 'integer',
                 'exists:users,id',
             ],
+            'assignee_ids' => ['sometimes', 'array', 'max:100'],
+            'assignee_ids.*' => ['integer', 'distinct', 'exists:users,id'],
+            'completed' => ['sometimes', 'boolean'],
             'labels' => [
                 'nullable',
                 'string',
@@ -174,9 +177,14 @@ class TaskController extends Controller
         Gate::authorize('update', $task->column->board);
         Gate::authorize('update', $targetColumn->board);
 
-        if (!empty($validated['assignee']) && !$targetColumn->board->users()
-            ->whereKey($validated['assignee'])->exists()) {
-            throw ValidationException::withMessages(['assignee' => 'Choose a participant of this board.']);
+        $assigneeIds = array_key_exists('assignee_ids', $validated)
+            ? array_map('intval', $validated['assignee_ids'])
+            : (array_key_exists('assignee', $validated)
+                ? array_filter([(int) ($validated['assignee'] ?? 0)]) : null);
+        if ($assigneeIds !== null && $targetColumn->board->users()
+            ->whereIn('users.id', $assigneeIds)->whereIn('board_user.role', ['admin', 'member'])
+            ->whereNotNull('users.email_verified_at')->count() !== count($assigneeIds)) {
+            throw ValidationException::withMessages(['assignee_ids' => 'Choose verified editors of this board.']);
         }
 
         $labelIds = null;
@@ -239,11 +247,15 @@ class TaskController extends Controller
             }
         }
 
+        if (array_key_exists('completed', $validated)) {
+            $attributes['completed_at'] = $validated['completed'] ? ($task->completed_at ?? now()) : null;
+        }
+
         $result = $this->tasks->update(
             $task,
             $targetColumn,
             $attributes,
-            $validated['assignee'] ?? null,
+            $assigneeIds,
             $validated['expected_version'] ?? null,
             $labelIds,
             $validated['sections'] ?? null,
@@ -313,7 +325,8 @@ class TaskController extends Controller
         Gate::authorize('update', $task->column->board);
 
         $boardId = (int) $task->column->board_id;
-        $result = $this->tasks->delete($task);
+        $data = $request->validate(['expected_version' => ['sometimes', 'integer', 'min:1']]);
+        $result = $this->tasks->delete($task, $data['expected_version'] ?? null);
 
         $event = new TaskDeleted(
             RealtimePayload::deleted(

@@ -1,9 +1,9 @@
 <div
-    class="min-w-full overflow-x-auto rounded border
+    class="min-w-0 w-full rounded border
            bg-gray-100 p-3 dark:bg-gray-700"
 >
-    <div class="mb-2 flex justify-between">
-        <h1 class="text-xl font-semibold">
+    <div class="mb-2 flex flex-wrap items-center justify-between gap-3">
+        <h1 class="min-w-0 break-words text-xl font-semibold">
             {{ $board->name }}
         </h1>
 
@@ -15,7 +15,7 @@
     <div
         {{ $attributes->whereStartsWith('data-') }}
         data-can-write="{{ auth()->user()->can('update', $board) ? 'true' : 'false' }}"
-        class="m-3 grid min-h-[72px] h-full
+        class="grid gap-3 min-h-[72px] h-full
                grid-flow-dense grid-cols-1
                items-start justify-items-center
                rounded bg-slate-100

@@ -10,25 +10,18 @@
            border border-gray-200 bg-white shadow-2xl
            dark:border-gray-700 dark:bg-gray-900"
 >
-    <div data-task-cover-preview class="{{ $task->cover_image_url ? '' : 'hidden' }} bg-gray-100 dark:bg-gray-800">
+    <div data-task-cover-preview class="{{ $task->cover_image_url ? '' : 'hidden' }} task-cover-surface">
         <img data-task-cover-image @if($task->cover_image_url) src="{{ $task->cover_image_url }}" @endif alt="Task cover" class="max-h-72 w-full object-contain" draggable="false">
     </div>
     <div
         class="flex items-start gap-4 border-b border-gray-200 px-5 py-5
                sm:px-7 dark:border-gray-800"
     >
-        <div
-            class="mt-1 flex h-10 w-10 shrink-0 items-center justify-center
-                   rounded-xl bg-indigo-50 text-indigo-600
-                   dark:bg-indigo-950/60 dark:text-indigo-400"
-        >
-            <span class="material-symbols-rounded">task_alt</span>
-        </div>
+        <input type="checkbox" data-task-field="completed" @checked($task->completed_at) @disabled(!$canEditTask)
+            class="mt-3 h-6 w-6 shrink-0 cursor-pointer rounded-full border-2 border-gray-300 text-emerald-600 focus:ring-emerald-500 disabled:cursor-default dark:border-gray-600"
+            aria-label="Mark task complete">
 
         <div class="min-w-0 flex-1">
-            <p class="mb-1 text-xs font-semibold uppercase tracking-wider text-gray-400">
-                Task #{{ $task->id }}
-            </p>
             <input
                 data-task-field="title"
                 @readonly(!$canEditTask)
@@ -291,21 +284,21 @@
                             </div>
                         </div>
 
-                        <div data-task-dropdown>
-                            <p class="text-xs font-semibold text-gray-500 dark:text-gray-400">Assignee</p>
-                            <input type="hidden" data-task-field="assignee" value="{{ $task->users->first()?->id }}">
-                            <button type="button" data-task-dropdown-trigger class="mt-1.5 flex w-full items-center justify-between rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-left text-sm text-gray-800 shadow-sm transition hover:border-indigo-300 dark:border-gray-700 dark:bg-gray-900 dark:text-white">
-                                <span data-task-dropdown-value>{{ $task->users->first()?->name ?? 'No one' }}</span>
-                                <span class="material-symbols-rounded text-[18px] text-gray-400">expand_more</span>
-                            </button>
-                            <div data-task-dropdown-menu class="fixed z-[210] hidden max-h-64 overflow-y-auto rounded-xl border border-gray-200 bg-white p-1.5 shadow-2xl dark:border-gray-700 dark:bg-gray-900">
-                                <button type="button" data-task-dropdown-option data-value="" data-label="No one" class="block w-full rounded-lg px-3 py-2 text-left text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 dark:text-gray-200 dark:hover:bg-indigo-950/50">No one</button>
-                                @foreach ($users as $assignee)
-                                    <button type="button" data-task-dropdown-option data-value="{{ $assignee->id }}" data-label="{{ $assignee->name }}" class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 dark:text-gray-200 dark:hover:bg-indigo-950/50">
-                                        <x-user-avatar :user="$assignee" size="xs" /> {{ $assignee->name }}
-                                    </button>
-                                @endforeach
-                            </div>
+                        <div data-task-assignee-picker>
+                            <p class="text-xs font-semibold text-gray-500 dark:text-gray-400">Assignees</p>
+                            <details class="mt-1.5 rounded-xl border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900">
+                                <summary class="cursor-pointer px-3 py-2.5 text-sm" data-assignee-summary>{{ $task->users->isEmpty() ? 'No one assigned' : $task->users->pluck('name')->join(', ') }}</summary>
+                                <div class="max-h-56 space-y-1 overflow-y-auto border-t border-gray-100 p-2 dark:border-gray-800">
+                                    @foreach($users as $assignee)
+                                        @continue(!$assignee->hasVerifiedEmail() || !in_array($assignee->pivot?->role, ['admin', 'member'], true))
+                                        <label class="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-800">
+                                            <input type="checkbox" data-task-assignee value="{{ $assignee->id }}" data-name="{{ $assignee->name }}" @checked($task->users->contains('id', $assignee->id)) class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+                                            <x-user-avatar :user="$assignee" size="xs" />
+                                            <span class="min-w-0 break-words">{{ $assignee->name }}</span>
+                                        </label>
+                                    @endforeach
+                                </div>
+                            </details>
                         </div>
 
                         <div data-task-label-picker data-board-id="{{ $parent_board->id }}">

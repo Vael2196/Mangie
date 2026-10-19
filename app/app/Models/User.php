@@ -32,6 +32,9 @@ class User extends Authenticatable implements MustVerifyEmail
         'password',
         'remember_token',
         'avatar_path',
+        'last_active_at',
+        'invisible',
+        'notification_frequency',
     ];
 
     protected $appends = [
@@ -48,6 +51,8 @@ class User extends Authenticatable implements MustVerifyEmail
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'last_active_at' => 'datetime',
+            'invisible' => 'boolean',
         ];
     }
 

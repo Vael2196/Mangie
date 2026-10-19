@@ -31,6 +31,7 @@ class Task extends Model
         'due_at',
         'due_complete',
         'version',
+        'color',
     ];
 
     protected function casts(): array
@@ -40,7 +41,7 @@ class Task extends Model
             'position' => 'integer',
             'story_points' => 'integer',
             'time_log' => 'integer',
-            'completed_at' => 'date',
+            'completed_at' => 'datetime',
             'start_at' => 'datetime',
             'due_at' => 'datetime',
             'due_complete' => 'boolean',

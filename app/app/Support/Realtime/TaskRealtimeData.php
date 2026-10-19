@@ -23,6 +23,7 @@ final class TaskRealtimeData
             'id' => (int) $task->id,
             'cover_image_url' => $task->cover_image_url,
             'title' => $task->title,
+            'color' => $task->color,
             'description' => $task->description,
             'column_id' => (int) $task->column_id,
             'column_name' => $task->column->name,

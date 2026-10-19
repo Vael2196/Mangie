@@ -25,6 +25,15 @@ Route::post('/board-invitations/{token}/accept', [BoardInvitationController::cla
     ->middleware(['auth', 'verified', 'throttle:20,1'])->name('board-invitations.accept');
 
 Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/settings', [\App\Http\Controllers\SettingsController::class, 'edit'])->name('settings.edit');
+    Route::patch('/settings', [\App\Http\Controllers\SettingsController::class, 'update'])->name('settings.update');
+    Route::get('/presence/me', [\App\Http\Controllers\PresenceController::class, 'self'])->name('presence.self');
+    Route::get('/boards/{board}/presence', [\App\Http\Controllers\PresenceController::class, 'board'])->name('boards.presence');
+    Route::post('/activity', [\App\Http\Controllers\PresenceController::class, 'activity'])->middleware('throttle:6,1');
+    Route::get('/tasks/{task}/actions', [\App\Http\Controllers\TaskActionController::class, 'show']);
+    Route::patch('/tasks/{task}/actions', [\App\Http\Controllers\TaskActionController::class, 'update']);
+    Route::post('/tasks/{task}/copy', [\App\Http\Controllers\TaskActionController::class, 'copy']);
+    Route::put('/tasks/{task}/watch', [\App\Http\Controllers\TaskActionController::class, 'watch']);
     Route::get(
         '/profile',
         [ProfileController::class, 'edit']

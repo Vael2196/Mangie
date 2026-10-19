@@ -61,33 +61,18 @@
         @keydown.escape.window="closeBoardNav()"
     >
 
-        @if ($usesOverlayNavigation)
-            <button
-                type="button"
-                @click="openBoardNav()"
-                @mouseenter="openBoardNav()"
-                @mouseleave="scheduleBoardNavClose()"
-                class="fixed left-4 top-4 z-[95]
-                    flex h-11 w-11 items-center justify-center
-                    rounded-xl border border-gray-200 bg-white/95
-                    text-gray-700 shadow-lg backdrop-blur transition
-                    hover:border-indigo-300 hover:bg-indigo-50
-                    hover:text-indigo-700
-                    dark:border-gray-700 dark:bg-gray-900/95
-                    dark:text-gray-200 dark:hover:border-indigo-700
-                    dark:hover:bg-indigo-950/60 dark:hover:text-indigo-300"
-                aria-label="Open navigation"
-                aria-controls="workspace-navigation"
-                :aria-expanded="boardNavOpen"
-            >
-                <span class="material-symbols-rounded text-[23px]">
-                    menu_open
-                </span>
-            </button>
-        @endif
+        <button type="button" @click="openBoardNav()" @if($usesOverlayNavigation) @mouseenter="openBoardNav()" @mouseleave="scheduleBoardNavClose()" @endif class="fixed left-4 top-4 z-[95] flex h-11 w-11 items-center justify-center rounded-xl border border-gray-200 bg-white/95 text-gray-700 shadow-lg backdrop-blur dark:border-gray-700 dark:bg-gray-900/95 dark:text-gray-200 {{ $usesOverlayNavigation ? '' : 'lg:hidden' }}" aria-label="Open navigation" aria-controls="workspace-navigation" :aria-expanded="boardNavOpen">
+            <span class="material-symbols-rounded text-[23px]">menu_open</span>
+        </button>
 
         <aside
             id="workspace-navigation"
+            @unless($usesOverlayNavigation)
+                data-mobile-navigation
+                :data-mobile-nav-open="boardNavOpen"
+                :class="boardNavOpen ? 'flex' : 'hidden'"
+                @click.outside="closeBoardNav()"
+            @endunless
             @if ($usesOverlayNavigation)
                 x-cloak
                 x-show="boardNavOpen"
@@ -103,7 +88,7 @@
             @class([
                 'flex h-screen shrink-0 flex-col border-r border-gray-200/80 bg-white/95 px-3 py-5 shadow-xl backdrop-blur dark:border-gray-800 dark:bg-gray-900/95',
                 'fixed inset-y-0 left-0 z-[100] w-64' => $usesOverlayNavigation,
-                'sticky top-0 z-40 w-20 shadow-sm lg:w-64' => !$usesOverlayNavigation,
+                'fixed inset-y-0 left-0 z-[100] w-64 lg:sticky lg:top-0 lg:z-40 lg:flex lg:shadow-sm' => !$usesOverlayNavigation,
             ])
         >
 
@@ -112,8 +97,7 @@
                     href="/"
                     @class([
                         'flex h-11 min-w-0 flex-1 items-center gap-3 rounded-xl lg:justify-start lg:px-3',
-                        'justify-start px-3' => $usesOverlayNavigation,
-                        'justify-center' => !$usesOverlayNavigation,
+                        'justify-start px-3',
                     ])
                 >
                     <span
@@ -131,15 +115,14 @@
                     <span
                         @class([
                             'text-xl font-bold tracking-tight text-gray-900 dark:text-white',
-                            'block' => $usesOverlayNavigation,
-                            'hidden lg:block' => !$usesOverlayNavigation,
+                            'block',
                         ])
                     >
                         Mangie
                     </span>
                 </a>
 
-                @if ($usesOverlayNavigation)
+                <div class="{{ $usesOverlayNavigation ? '' : 'lg:hidden' }}">
                     <button
                         type="button"
                         @click="closeBoardNav()"
@@ -153,7 +136,7 @@
                             close
                         </span>
                     </button>
-                @endif
+                </div>
             </div>
 
             <nav class="flex flex-1 flex-col gap-2">
@@ -162,7 +145,7 @@
                     :link="route('home')"
                     icon="home"
                     :active="request()->routeIs('home')"
-                    :expanded="$usesOverlayNavigation"
+                    :expanded="true"
                 />
 
                 <x-side-bar-link
@@ -170,7 +153,7 @@
                     :link="route('backlog.show', 'list')"
                     icon="inventory_2"
                     :active="request()->routeIs('backlog.show')"
-                    :expanded="$usesOverlayNavigation"
+                    :expanded="true"
                 />
 
                 <x-side-bar-link
@@ -178,15 +161,14 @@
                     :link="route('dashboard')"
                     icon="view_kanban"
                     :active="request()->routeIs('dashboard')"
-                    :expanded="$usesOverlayNavigation"
+                    :expanded="true"
                 />
             </nav>
 
             <div
                 @class([
                     'border-t border-gray-200 pt-5 text-xs leading-5 text-gray-400 dark:border-gray-800 dark:text-gray-500',
-                    'block' => $usesOverlayNavigation,
-                    'hidden lg:block' => !$usesOverlayNavigation,
+                    'block',
                 ])
             >
                 <p class="font-medium text-gray-500 dark:text-gray-400">

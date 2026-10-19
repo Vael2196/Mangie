@@ -3,6 +3,8 @@ import './echo';
 import './task-dnd';
 import './task-criteria';
 import './task-ui';
+import './task-actions';
+import './presence';
 import './realtime';
 import './user-avatar';
 import './avatar-cropper';

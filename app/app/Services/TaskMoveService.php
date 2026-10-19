@@ -15,17 +15,27 @@ class TaskMoveService
     public function move(
         Task $task,
         Column $targetColumn,
-        int $targetPosition
+        int $targetPosition,
+        ?int $expectedVersion = null,
+        bool $recordWatch = true
     ): array {
         return DB::transaction(function () use (
             $task,
             $targetColumn,
-            $targetPosition
+            $targetPosition,
+            $expectedVersion,
+            $recordWatch
         ) {
             $task = Task::query()
                 ->whereKey($task->id)
                 ->lockForUpdate()
                 ->firstOrFail();
+
+            if ($expectedVersion !== null && (int) $task->version !== $expectedVersion) {
+                throw new \Symfony\Component\HttpKernel\Exception\ConflictHttpException(
+                    'This task changed elsewhere. Reopen the menu and try again.'
+                );
+            }
 
             $sourceColumnId = (int) $task->column_id;
             $targetColumnId = (int) $targetColumn->id;
@@ -189,9 +199,10 @@ class TaskMoveService
                         strcasecmp(
                             trim($targetColumn->name),
                             'DONE'
-                        ) === 0
-                            ? now()
-                            : null,
+                        ) === 0 && $sourceColumnId !== $targetColumnId
+                            ? ($task->completed_at ?? now())
+                            : (strcasecmp(trim($sourceColumn->name), 'DONE') === 0
+                                && $sourceColumnId !== $targetColumnId ? null : $task->completed_at),
                     'version' => (int) $task->version + 1,
                 ]);
 
@@ -215,6 +226,9 @@ class TaskMoveService
                 $task->updateQuietly([
                     'labels' => $targetLabels->first()?->name,
                 ]);
+                $eligible = $targetBoard->users()->whereIn('board_user.role', ['admin', 'member'])
+                    ->whereNotNull('users.email_verified_at')->pluck('users.id')->all();
+                $task->users()->sync($task->users()->whereIn('users.id', $eligible)->pluck('users.id')->all());
             }
 
 
@@ -222,6 +236,10 @@ class TaskMoveService
                 ->with('column.board', 'users', 'boardLabels')
                 ->findOrFail($task->id);
 
+
+            if ($recordWatch && $sourceColumnId !== $targetColumnId) {
+                app(TaskWatchService::class)->record($finalTask);
+            }
 
             $sourceCount =
                 Task::where(

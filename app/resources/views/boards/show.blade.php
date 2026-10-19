@@ -214,7 +214,7 @@
 
 
                         {{-- Existing members --}}
-                        <ul id="user-list" class="flex -space-x-2">
+                        <ul id="user-list" class="flex flex-wrap -space-x-2" @can('viewPresence', $board) data-presence-board="{{ $board->id }}" @endcan>
                             @foreach($board->users as $boardUser)
                                 <li
                                     class="flex"
@@ -223,6 +223,7 @@
                                 >
                                     <x-user-avatar
                                         :user="$boardUser"
+                                        :show-presence="auth()->user()->can('viewPresence', $board)"
                                         size="md"
                                         ring
                                     />
@@ -384,29 +385,6 @@
                 @endcan
             </div>
             <p data-column-order-status class="mt-2 hidden text-sm text-red-600" role="status"></p>
-            {{-- Context Menu --}}
-            <div class="hidden absolute z-30" id="task-context-menu">
-                <div class="2xl:flex 2xl:items-start">
-                    {{-- "Move To" Button --}}
-                    <div
-                        class='bg-white border px-4 py-2 items-center leading-5 dark:bg-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-500 hover:cursor-pointer focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out rounded flex space-x-3'>
-                        <div class = "text-center"
-                            onmouseover="document.getElementById('contextBoardMenu').classList.toggle('hidden')">Move To
-                        </div>
-                        <div class="text-center"><i class="fa-solid fa-angle-right"></i></div>
-                    </div>
-
-                    {{-- Context sub menu (Buttons for each sprint to move to) --}}
-                    <div class="hidden shadow-lg" id="contextBoardMenu">
-                        @foreach ($board->columns as $column)
-                            <div class='bg-white border px-4 py-2 text-start leading-5 dark:bg-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-500 hover:cursor-pointer focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out flex space-x-3'
-                                id="context-board-menu-{{ $column->id }}">
-                                <h1>{{ $column->name }}</h1>
-                            </div>
-                        @endforeach
-                    </div>
-                </div>
-            </div>
             <div
                 id="delete-column-modal"
                 class="fixed inset-0 z-[120] hidden"
@@ -621,13 +599,6 @@
 
         document.addEventListener('DOMContentLoaded', function () {
             const columnsContainer = document.getElementById('columns-container');
-            const taskItems = document.querySelectorAll(`[id*="task-list-item"]`);
-
-            var selectedTaskItems = [];
-            const taskContextMenu = document.getElementById(`task-context-menu`);
-            const contextSubMenu = document.getElementById(`contextBoardMenu`);
-            const contextSubMenuChildren = contextSubMenu.children;
-
             const addColumnBtn = document.getElementById('add-column-btn');
 
             const columnEditor = document.getElementById('new-column-editor');
@@ -1655,94 +1626,6 @@
 
             });
 
-            // Context Menu ---------------------------------------------------------------
-            // Reset context menu on right click anywhere outside
-            document.addEventListener('contextmenu', e => {
-                taskContextMenu.classList.add('hidden');
-                contextSubMenu.classList.add('hidden');
-
-                // Clear temp arr
-                selectedTaskItems = [];
-            });
-
-            // Reset context menu on left click anywhere outside
-            document.addEventListener('click', e => {
-                taskContextMenu.classList.add('hidden');
-                contextSubMenu.classList.add('hidden');
-
-                // Clear temp arr
-                selectedTaskItems = [];
-            });
-
-            // Right clicking functionality
-            for (let task of taskItems) {
-                task.addEventListener('contextmenu', e => {
-                    e.stopPropagation();
-                    // Show context menu when right-clicking
-                    if (!e.ctrlKey) {
-                        taskContextMenu.style.left = (e.pageX) + 'px';
-                        taskContextMenu.style.top = (e.pageY + 2) + 'px';
-                        taskContextMenu.classList.remove('hidden');
-
-                        // Set task as selected item
-                        if (selectedTaskItems.length <= 1) {
-                            selectedTaskItems = [Number(task.id.replace('task-list-item-', ''))];
-                        }
-                        return false;
-                    };
-
-                    // Add task to temp array when ctrl right clicking
-                    selectedTaskItems.push(Number(task.id.replace('task-list-item-', '')));
-                    return false;
-                }, false);
-            }
-
-            // Call moveTasks function when clicking on sub menu button
-            for (let child of contextSubMenuChildren) {
-                let subMenuId = Number(child.id.replace('context-board-menu-', ""));
-                child.addEventListener('click', e => {
-                    moveTasks(subMenuId);
-                });
-            }
-
-            // Bulk move tasks from backlog to sprint board
-            function moveTasks(column_id) {
-                fetch('{{ route('tasks.bulk-move') }}', {
-                    method: 'PATCH',
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute(
-                            'content'),
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        task_ids: selectedTaskItems,
-                        target_column_id: column_id
-                    })
-                })
-                .then(response => {
-                    responseClone = response.clone();
-                    return response.json();
-                })
-                .then(async data => {
-                    if (data.success) {
-                        // Reset Selected task items
-                        selectedTaskItems = [];
-
-                        await window.MangieRealtime.applyMutationResponse(data);
-
-                    } else {
-                        console.error('Error moving tasks:', data.message);
-                    }
-
-                    // print response for debugging
-                }, function(rejectionReason) {
-                    console.log('Error parsing JSON from response:', rejectionReason, responseClone);
-                    responseClone.text()
-                        .then(function(bodyText) {
-                            console.log('Received the following instead of valid JSON:', bodyText);
-                        });
-                });
-            }
 
         });
     </script>

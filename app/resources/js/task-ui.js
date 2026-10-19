@@ -1,4 +1,5 @@
 import { jsonRequest } from './http';
+import { tintTaskCover } from './task-cover-colors';
 import { applyMutationResponse } from './realtime-reconciler';
 
 const modal = () => document.getElementById('task-modal');
@@ -43,9 +44,8 @@ function taskPayload(form) {
         column_id: Number(field(form, 'column_id').value),
         title: field(form, 'title').value.trim(),
         description: field(form, 'description').value.trim() || null,
-        assignee: field(form, 'assignee').value
-            ? Number(field(form, 'assignee').value)
-            : null,
+        assignee_ids: [...form.querySelectorAll('[data-task-assignee]:checked')].map(input => Number(input.value)),
+        completed: field(form, 'completed').checked,
         label_ids: selectedLabelIds(form),
         priority: field(form, 'priority').value || null,
         storyPoint: Number(field(form, 'storyPoint').value || 0),
@@ -231,6 +231,7 @@ function initializeTaskDetail(form) {
 
     form.querySelectorAll('[data-task-checklist]').forEach(updateChecklistProgress);
     updateEmptyStates(form);
+    tintTaskCover(form.querySelector('[data-task-cover-image]'));
     rememberCleanState(form);
 }
 
@@ -387,6 +388,7 @@ async function deleteTask(form) {
     try {
         const data = await jsonRequest(`/tasks/${form.dataset.taskId}`, {
             method: 'DELETE',
+            body: { expected_version: Number(form.dataset.taskVersion) },
         });
         await applyMutationResponse(data);
         closeModal();
@@ -689,7 +691,7 @@ async function changeTaskCover(form, image = null) {
         const url = data.payload.entity.cover_image_url;
         form.querySelector('[data-task-cover-preview]').classList.toggle('hidden', !url);
         const preview = form.querySelector('[data-task-cover-image]');
-        if (url) preview.src = url; else preview.removeAttribute('src');
+        if (url) { preview.src = url; tintTaskCover(preview); } else preview.removeAttribute('src');
         remove?.classList.toggle('hidden', !url);
         await applyMutationResponse(data);
     } catch (error) { showTaskError(form, error.message); }
@@ -705,6 +707,10 @@ async function changeTaskCover(form, image = null) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+    const linkedTask = new URLSearchParams(window.location.search).get('task');
+    if (/^\d+$/.test(linkedTask ?? '')) {
+        void openTask(linkedTask).catch(() => {});
+    }
     modal()?.querySelector('[data-task-modal-backdrop]')
         ?.addEventListener('click', () => requestClose({ backdrop: true }));
 
@@ -715,6 +721,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (event.key !== 'Escape' || modal()?.classList.contains('hidden')) {
             return;
         }
+
+        const assignees = detailForm()?.querySelector('[data-task-assignee-picker] details[open]');
+        if (assignees) { assignees.removeAttribute('open'); return; }
 
         const manager = detailForm()?.querySelector('[data-label-manager]:not(.hidden)');
 
@@ -773,6 +782,11 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        if (event.target.matches('[data-task-assignee]')) {
+            const names = [...form.querySelectorAll('[data-task-assignee]:checked')].map(input => input.dataset.name);
+            form.querySelector('[data-assignee-summary]').textContent = names.join(', ') || 'No one assigned';
+        }
+
         const checklist = event.target.closest('[data-task-checklist]');
         if (checklist) {
             updateChecklistProgress(checklist);
@@ -784,10 +798,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.addEventListener('click', event => {
         const form = detailForm();
+        if (!event.target.closest('[data-task-assignee-picker]')) {
+            form?.querySelector('[data-task-assignee-picker] details[open]')?.removeAttribute('open');
+        }
 
         if (
             event.target.closest('[data-task-modal-shell]')
             && !event.target.closest('[data-task-detail]')
+            && !event.target.closest('[data-task-action-menu]')
         ) {
             requestClose({ backdrop: true });
             return;
@@ -957,6 +975,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (
             task
             && !event.target.closest('[data-task-detail]')
+            && !event.target.closest('[data-task-action-menu]')
             && task.dataset.wasDragged !== '1'
             && !event.ctrlKey
             && !event.target.closest('button, a, input, textarea, select, label')
