@@ -61,7 +61,7 @@
         @keydown.escape.window="closeBoardNav()"
     >
 
-        <button type="button" @click="openBoardNav()" @if($usesOverlayNavigation) @mouseenter="openBoardNav()" @mouseleave="scheduleBoardNavClose()" @endif class="fixed left-4 top-4 z-[95] flex h-11 w-11 items-center justify-center rounded-xl border border-gray-200 bg-white/95 text-gray-700 shadow-lg backdrop-blur dark:border-gray-700 dark:bg-gray-900/95 dark:text-gray-200 {{ $usesOverlayNavigation ? '' : 'lg:hidden' }}" aria-label="Open navigation" aria-controls="workspace-navigation" :aria-expanded="boardNavOpen">
+        <button type="button" @click.stop="openBoardNav()" @if($usesOverlayNavigation) @mouseenter="openBoardNav()" @mouseleave="scheduleBoardNavClose()" @endif class="fixed left-4 top-4 z-[95] flex h-11 w-11 items-center justify-center rounded-xl border border-gray-200 bg-white/95 text-gray-700 shadow-lg backdrop-blur dark:border-gray-700 dark:bg-gray-900/95 dark:text-gray-200 {{ $usesOverlayNavigation ? '' : 'lg:hidden' }}" aria-label="Open navigation" aria-controls="workspace-navigation" :aria-expanded="boardNavOpen">
             <span class="material-symbols-rounded text-[23px]">menu_open</span>
         </button>
 
