@@ -4,7 +4,9 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title>Mangie — Agile Project Management</title>
+    <title>Mangie | Agile Project Management and Scrum Boards</title>
+    <meta name="description" content="Plan projects together in Mangie, an agile project management app with Scrum boards, product backlogs, sprint planning and live task updates.">
+    <link rel="canonical" href="https://mangie.vaell.dev/">
 
     <link rel="icon" href="{{ asset('favicon.ico') }}" sizes="any">
     <link rel="icon" href="{{ asset('favicon.svg') }}" type="image/svg+xml">
@@ -799,10 +801,11 @@
             </div>
 
             <p class="text-sm text-gray-500 dark:text-gray-400">
-                A project made by
-                <span class="font-medium text-gray-700 dark:text-gray-300">
-                    Vadim Filyakin (yep, still me)
-                </span>
+                A project by
+                <a href="https://vaell.dev/projects/mangie/"
+                   class="font-medium text-gray-700 underline underline-offset-4 dark:text-gray-300">
+                    Vadim Filyakin
+                </a>
             </p>
 
             <p class="text-sm text-gray-400 dark:text-gray-500">
